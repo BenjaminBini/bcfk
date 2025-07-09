@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-900 text-white;
+  }
+}
+
+@layer components {
+  /* Custom scrollbar for dark theme */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-gray-800;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-gray-600 rounded-full;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500;
+  }
+  
+  /* Enhanced button styles for dark theme */
+  .btn-dark {
+    @apply bg-gray-700 hover:bg-gray-600 text-white border border-gray-600;
+  }
+  
+  /* Enhanced form controls for dark theme */
+  .form-dark {
+    @apply bg-gray-800 border-gray-600 text-white placeholder-gray-400;
+  }
+  
+  /* Enhanced cards for dark theme */
+  .card-dark {
+    @apply bg-gray-800 border-gray-700;
+  }
+}
+
+.htmx-indicator {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.htmx-request .htmx-indicator {
+  opacity: 1;
+}
+
+.htmx-request.htmx-indicator {
+  opacity: 1;
+}
+
+/* Toast notifications for dark theme */
+.toast-dark {
+  @apply bg-gray-800 text-white border border-gray-600;
+}
