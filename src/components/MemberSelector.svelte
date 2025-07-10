@@ -2,56 +2,70 @@
   import { createEventDispatcher } from 'svelte';
   import Icon from './Icon.svelte';
   
-  export let show = false;
-  export let members = [];
-  export let assignments = [];
-  export let selectedDay = null;
-  export let selectedSlot = null;
-  export let absentMembers = [];
-  export let specificAssignments = [];
+  /**
+   * @typedef {Object} Props
+   * @property {boolean} [show]
+   * @property {any} [members]
+   * @property {any} [assignments]
+   * @property {any} [selectedDay]
+   * @property {any} [selectedSlot]
+   * @property {any} [absentMembers]
+   * @property {any} [specificAssignments]
+   */
+
+  /** @type {Props} */
+  let {
+    show = false,
+    members = [],
+    assignments = [],
+    selectedDay = null,
+    selectedSlot = null,
+    absentMembers = [],
+    specificAssignments = []
+  } = $props();
 
   const dispatch = createEventDispatcher();
-  let filterText = '';
-  let selectedMembers = new Set();
-  let hoveredMember = null;
+  let filterText = $state('');
+  let selectedMembers = $state(new Set());
+  let hoveredMember = $state(null);
   
   // Get available and assigned members (including specific assignments)
-  $: currentAssignments = assignments.filter(a => a.weekday === selectedDay && a.slot_type === selectedSlot);
-  $: currentSpecificAssignments = specificAssignments.filter(a => a.weekday === selectedDay && a.slot_type === selectedSlot);
-  $: assignedMemberIds = new Set([
+  let currentAssignments = $derived(assignments.filter(a => a.weekday === selectedDay && a.slot_type === selectedSlot));
+  let currentSpecificAssignments = $derived(specificAssignments.filter(a => a.weekday === selectedDay && a.slot_type === selectedSlot));
+  let assignedMemberIds = $derived(new Set([
     ...currentAssignments.map(a => a.member_id),
     ...currentSpecificAssignments.map(a => a.member_id)
-  ]);
-  $: absentMemberIds = new Set(absentMembers.map(m => m.member_id));
+  ]));
+  let absentMemberIds = $derived(new Set(absentMembers.map(m => m.member_id)));
   
-  $: availableMembers = members.filter(m => !assignedMemberIds.has(m.id) && !absentMemberIds.has(m.id));
-  $: assignedMembers = members.filter(m => assignedMemberIds.has(m.id));
-  $: absentMembersData = members.filter(m => absentMemberIds.has(m.id));
+  let availableMembers = $derived(members.filter(m => !assignedMemberIds.has(m.id) && !absentMemberIds.has(m.id)));
+  let assignedMembers = $derived(members.filter(m => assignedMemberIds.has(m.id)));
+  let absentMembersData = $derived(members.filter(m => absentMemberIds.has(m.id)));
   
   
   // Filter members based on search
-  $: filteredAvailable = availableMembers.filter(member => {
+  let filteredAvailable = $derived(availableMembers.filter(member => {
     const searchTerm = filterText.toLowerCase();
     const firstName = (member.first_name || '').toLowerCase();
     const name = (member.name || '').toLowerCase();
     return firstName.includes(searchTerm) || name.includes(searchTerm);
-  });
+  }));
   
-  $: filteredAssigned = assignedMembers.filter(member => {
+  let filteredAssigned = $derived(assignedMembers.filter(member => {
     const searchTerm = filterText.toLowerCase();
     const firstName = (member.first_name || '').toLowerCase();
     const name = (member.name || '').toLowerCase();
     return firstName.includes(searchTerm) || name.includes(searchTerm);
-  });
+  }));
   
-  $: filteredAbsent = absentMembersData.filter(member => {
+  let filteredAbsent = $derived(absentMembersData.filter(member => {
     const searchTerm = filterText.toLowerCase();
     const firstName = (member.first_name || '').toLowerCase();
     const name = (member.name || '').toLowerCase();
     return firstName.includes(searchTerm) || name.includes(searchTerm);
-  });
+  }));
   
-  $: allFilteredMembers = (() => {
+  let allFilteredMembers = $derived((() => {
     const memberMap = new Map();
     
     // Add available members first (lowest priority)
@@ -75,7 +89,7 @@
       const nameB = (b.first_name || '').toLowerCase();
       return nameA.localeCompare(nameB);
     });
-  })();
+  })());
   
   function toggleMember(member) {
     // Safety check: don't allow selection of absent or assigned members
@@ -88,13 +102,14 @@
     } else {
       selectedMembers.add(member.id);
     }
-    selectedMembers = selectedMembers; // Trigger reactivity
+    // Trigger reactivity by reassigning
+    selectedMembers = new Set(selectedMembers);
   }
   
   function submitSelection() {
     dispatch('select', { memberIds: Array.from(selectedMembers) });
     selectedMembers.clear();
-    selectedMembers = selectedMembers;
+    selectedMembers = new Set();
   }
   
   function close() {
@@ -109,12 +124,12 @@
 </script>
 
 {#if show}
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div 
     class="fixed bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
     style="top: 0; left: 0; right: 0; bottom: 0; margin: 0;"
-    on:click={handleModalClick}
+    onclick={handleModalClick}
   >
     <!-- Modal Content -->
     <div class="bg-gradient-to-br from-slate-800/95 via-slate-900/98 to-slate-800/95 backdrop-blur-xl rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl border border-slate-700/50">
@@ -146,7 +161,7 @@
                 <!-- Clickable tag for available members -->
                 <button 
                   class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transform hover:scale-105 shadow-lg {selectedMembers.has(member.id) ? 'bg-gradient-to-r from-emerald-500 to-teal-600 shadow-emerald-500/25 hover:from-emerald-400 hover:to-teal-500 hover:shadow-emerald-500/40' : 'bg-gradient-to-r from-indigo-500 to-purple-600 shadow-indigo-500/25 hover:from-indigo-400 hover:to-purple-500 hover:shadow-indigo-500/40'}"
-                  on:click={() => toggleMember(member)}
+                  onclick={() => toggleMember(member)}
                 >
                   {member.first_name}
                 </button>
@@ -154,8 +169,8 @@
                 <!-- Disabled tag for unavailable members (assigned or absent) -->
                 <div 
                   class="relative inline-flex items-center px-3 py-1.5 text-sm font-medium text-slate-300 rounded-full cursor-not-allowed bg-gradient-to-r from-slate-600/80 to-slate-700/80 opacity-60 backdrop-blur-sm border border-slate-500/30"
-                  on:mouseenter={() => hoveredMember = {id: member.id, type: member.status}}
-                  on:mouseleave={() => hoveredMember = null}
+                  onmouseenter={() => hoveredMember = {id: member.id, type: member.status}}
+                  onmouseleave={() => hoveredMember = null}
                   title={member.status === 'assigned' ? 'Ce membre est déjà assigné à ce créneau' : 'Ce membre est absent'}
                 >
                   {member.first_name}
@@ -174,13 +189,13 @@
       
       <div class="flex justify-end space-x-3 mt-6">
         <button 
-          on:click={close} 
+          onclick={close} 
           class="px-4 py-2 text-slate-200 hover:text-white bg-gradient-to-r from-slate-700/70 to-slate-600/70 backdrop-blur-sm rounded-lg hover:from-slate-600/80 hover:to-slate-500/80 transition-all duration-300 border border-slate-500/40"
         >
           Annuler
         </button>
         <button 
-          on:click={submitSelection}
+          onclick={submitSelection}
           disabled={selectedMembers.size === 0}
           class="px-4 py-2 text-white bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 rounded-lg transition-all duration-300 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-emerald-500/50 border border-emerald-500/30"
         >

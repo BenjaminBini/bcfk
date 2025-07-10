@@ -1,13 +1,24 @@
 <script>
   import { getIcon } from '../lib/icons.js';
   
-  export let name = '';
-  export let size = 'w-4 h-4';
-  export let className = '';
-  export let ariaHidden = true;
+  /**
+   * @typedef {Object} Props
+   * @property {string} [name]
+   * @property {string} [size]
+   * @property {string} [className]
+   * @property {boolean} [ariaHidden]
+   */
+
+  /** @type {Props} */
+  let {
+    name = '',
+    size = 'w-4 h-4',
+    className = '',
+    ariaHidden = true
+  } = $props();
   
-  $: iconData = getIcon(name);
-  $: classes = `${size} ${className}`.trim();
+  let iconData = $derived(getIcon(name));
+  let classes = $derived(`${size} ${className}`.trim());
 </script>
 
 {#if iconData}

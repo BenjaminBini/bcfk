@@ -1,7 +1,13 @@
 <script>
   import Icon from './Icon.svelte';
   
-  export let text = 'Aucun membre';
+  /**
+   * @typedef {Object} Props
+   * @property {string} [text]
+   */
+
+  /** @type {Props} */
+  let { text = 'Aucun membre' } = $props();
 </script>
 
 <div class="flex relative transition-all duration-300 delay-200 group">

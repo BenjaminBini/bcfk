@@ -1,5 +1,11 @@
 <script>
-  export let text = "Chargement...";
+  /**
+   * @typedef {Object} Props
+   * @property {string} [text]
+   */
+
+  /** @type {Props} */
+  let { text = "Chargement..." } = $props();
 </script>
 
 <div class="flex items-center justify-center py-12">

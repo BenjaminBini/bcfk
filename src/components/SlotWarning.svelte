@@ -1,8 +1,14 @@
 <script>
   import WarningTag from './WarningTag.svelte';
   
-  export let shouldShowWarning = false;
-  export let warningText = '';
+  /**
+   * @typedef {Object} Props
+   * @property {boolean} [shouldShowWarning]
+   * @property {string} [warningText]
+   */
+
+  /** @type {Props} */
+  let { shouldShowWarning = false, warningText = '' } = $props();
 </script>
 
 {#if shouldShowWarning}

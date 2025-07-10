@@ -19,9 +19,9 @@
 
   const weekDays = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
 
-  let showMemberSelector = false;
-  let selectedSlot = null;
-  let selectedDay = null;
+  let showMemberSelector = $state(false);
+  let selectedSlot = $state(null);
+  let selectedDay = $state(null);
 
   function openMemberSelector(dayIndex, slotType) {
     console.log('Opening member selector:', { dayIndex, slotType });

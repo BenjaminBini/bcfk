@@ -1,6 +1,12 @@
 <script>
-  export let day;
-  export let date = null;
+  /**
+   * @typedef {Object} Props
+   * @property {any} day
+   * @property {any} [date]
+   */
+
+  /** @type {Props} */
+  let { day, date = null } = $props();
 </script>
 
 <div class="text-sm font-medium">{day}</div>

@@ -46,21 +46,6 @@
     return startDate === endDate ? startDate : `${startDate} au ${endDate}`;
   }
 
-  // Calculate absence data for all days reactively
-  $: absenceData = (slotSchedule.length > 0 && $weeklyAbsences.length > 0) ? weekDays.map((_, dayIndex) => {
-    const absentScheduled = getAbsentScheduledMembers(dayIndex, 'ouverture').concat(getAbsentScheduledMembers(dayIndex, 'fermeture'));
-    const absentOthers = getOtherAbsentMembers(dayIndex);
-    
-    // Combine all absent members and remove duplicates
-    const allAbsentMembers = [...absentScheduled, ...absentOthers];
-    const uniqueAbsentMembers = allAbsentMembers.filter((member, index, self) => 
-      self.findIndex(m => m.member_id === member.member_id) === index
-    );
-    
-    return {
-      uniqueAbsentMembers
-    };
-  }) : weekDays.map(() => ({ uniqueAbsentMembers: [] }));
 
   async function loadWeeklyAbsences() {
     const weekDates = getCurrentWeekDates();
@@ -141,18 +126,18 @@
   }
 
   // Modal state for absence confirmation
-  let showAbsenceModal = false;
+  let showAbsenceModal = $state(false);
   let selectedMemberId = null;
-  let selectedMemberName = '';
-  let selectedDayIndex = 0;
+  let selectedMemberName = $state('');
+  let selectedDayIndex = $state(0);
   
   // Modal state for member assignment
-  let showMemberSelectionModal = false;
-  let showAssignmentConfirmModal = false;
-  let selectedMemberForAssignment = null;
-  let selectedDayForAssignment = 0;
-  let selectedSlotForAssignment = '';
-  let allMembers = [];
+  let showMemberSelectionModal = $state(false);
+  let showAssignmentConfirmModal = $state(false);
+  let selectedMemberForAssignment = $state(null);
+  let selectedDayForAssignment = $state(0);
+  let selectedSlotForAssignment = $state('');
+  let allMembers = $state([]);
 
   function handleMarkAbsent(memberId, memberName, dayIndex) {
     selectedMemberId = memberId;
@@ -228,45 +213,67 @@
   // Handle member selection from modal
   function handleMemberSelected(event) {
     const { memberIds } = event.detail;
+    
     if (memberIds.length > 0) {
       // For now, take the first selected member (MemberSelector supports multi-select)
       const selectedMember = allMembers.find(m => m.id === memberIds[0]);
-      selectedMemberForAssignment = selectedMember;
-      showMemberSelectionModal = false;
-      showAssignmentConfirmModal = true;
+      
+      if (selectedMember) {
+        selectedMemberForAssignment = selectedMember;
+        showMemberSelectionModal = false;
+        showAssignmentConfirmModal = true;
+      } else {
+        console.error('Selected member not found in allMembers array');
+        showToast('Erreur: membre non trouvé', 'error');
+      }
     }
   }
   
   // Handle assignment confirmation
   async function handleAssignmentConfirmed() {
-    if (selectedMemberForAssignment) {
-      try {
-        const selectedDate = getCurrentWeekDates()[selectedDayForAssignment].toISOString().split('T')[0];
-        
-        // Create specific assignment
-        const response = await fetch('/api/specific-assignments', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            member_id: selectedMemberForAssignment.id,
-            date: selectedDate,
-            slot_type: selectedSlotForAssignment
-          })
-        });
-        
-        if (response.ok) {
-          // Reload specific assignments to reflect the change
-          await loadSpecificAssignments();
-          showToast(`${selectedMemberForAssignment.first_name} affecté(e) pour cette date`, 'success');
-        } else {
-          throw new Error('Failed to create assignment');
-        }
-      } catch (error) {
-        console.error('Error creating assignment:', error);
-        showToast('Erreur lors de l\'affectation', 'error');
+    // Store the member data before any async operations
+    const memberToAssign = selectedMemberForAssignment;
+    const dayToAssign = selectedDayForAssignment;
+    const slotToAssign = selectedSlotForAssignment;
+    
+    if (!memberToAssign) {
+      console.error('selectedMemberForAssignment is null');
+      showToast('Erreur: aucun membre sélectionné', 'error');
+      return;
+    }
+    
+    if (!memberToAssign.first_name) {
+      console.error('selectedMemberForAssignment missing first_name', memberToAssign);
+      showToast('Erreur: données du membre incomplètes', 'error');
+      return;
+    }
+    
+    try {
+      const selectedDate = getCurrentWeekDates()[dayToAssign].toISOString().split('T')[0];
+      
+      // Create specific assignment
+      const response = await fetch('/api/specific-assignments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          member_id: memberToAssign.id,
+          date: selectedDate,
+          slot_type: slotToAssign
+        })
+      });
+      
+      if (response.ok) {
+        // Reload specific assignments to reflect the change
+        await loadSpecificAssignments();
+        showToast(`${memberToAssign.first_name} affecté(e) pour cette date`, 'success');
+      } else {
+        throw new Error('Failed to create assignment');
       }
+    } catch (error) {
+      console.error('Error creating assignment:', error);
+      showToast('Erreur lors de l\'affectation', 'error');
     }
     
     // Reset modal states
@@ -311,14 +318,29 @@
   }
   
   // Compute the final slot schedule by combining recurring assignments with specific assignments
-  $: slotSchedule = [
+  let slotSchedule = $derived([
     ...$assignments,
     ...$specificAssignments.map(assignment => ({
       ...assignment,
       weekday: new Date(assignment.date).getDay() === 0 ? 6 : new Date(assignment.date).getDay() - 1, // Convert to 0-6 weekday
       is_specific_date: assignment.source === 'manual' // Only mark manual assignments as specific
     }))
-  ];
+  ]);
+  // Calculate absence data for all days reactively
+  let absenceData = $derived((slotSchedule.length > 0 && $weeklyAbsences.length > 0) ? weekDays.map((_, dayIndex) => {
+    const absentScheduled = getAbsentScheduledMembers(dayIndex, 'ouverture').concat(getAbsentScheduledMembers(dayIndex, 'fermeture'));
+    const absentOthers = getOtherAbsentMembers(dayIndex);
+    
+    // Combine all absent members and remove duplicates
+    const allAbsentMembers = [...absentScheduled, ...absentOthers];
+    const uniqueAbsentMembers = allAbsentMembers.filter((member, index, self) => 
+      self.findIndex(m => m.member_id === member.member_id) === index
+    );
+    
+    return {
+      uniqueAbsentMembers
+    };
+  }) : weekDays.map(() => ({ uniqueAbsentMembers: [] })));
 </script>
 
 <div class="py-10">
@@ -436,7 +458,7 @@
   isOpen={showAssignmentConfirmModal}
   member={selectedMemberForAssignment}
   dayIndex={selectedDayForAssignment}
-  date={selectedDayIndex >= 0 ? getCurrentWeekDates()[selectedDayIndex]?.toLocaleDateString('fr-FR') : ''}
+  date={selectedDayForAssignment >= 0 ? getCurrentWeekDates()[selectedDayForAssignment]?.toLocaleDateString('fr-FR') : ''}
   slotType={selectedSlotForAssignment}
   onConfirm={handleAssignmentConfirmed}
   onCancel={handleModalCancel}

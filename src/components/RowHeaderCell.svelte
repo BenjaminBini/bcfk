@@ -1,6 +1,5 @@
 <script>
-  export let title;
-  export let iconPath;
+  let { title, iconPath } = $props();
 </script>
 
 <div class="flex items-center -rotate-90">

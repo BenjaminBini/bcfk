@@ -1,20 +1,39 @@
 <script>
   import MemberTag from './MemberTag.svelte';
   
-  export let text = '';
-  export let tooltip = '';
-  export let showButton = false;
-  export let buttonGradient = 'from-red-500 to-red-600';
-  export let buttonHoverGradient = 'hover:from-red-400 hover:to-red-500';
-  export let buttonRing = 'focus:ring-red-500/50';
-  export let buttonIcon = 'M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z';
-  export let buttonTooltip = 'Supprimer cette affectation spécifique';
-  export let onClick = null;
-  export let memberName = '';
-  export let slotType = '';
-  export let date = '';
+  /**
+   * @typedef {Object} Props
+   * @property {string} [text]
+   * @property {string} [tooltip]
+   * @property {boolean} [showButton]
+   * @property {string} [buttonGradient]
+   * @property {string} [buttonHoverGradient]
+   * @property {string} [buttonRing]
+   * @property {string} [buttonIcon]
+   * @property {string} [buttonTooltip]
+   * @property {any} [onClick]
+   * @property {string} [memberName]
+   * @property {string} [slotType]
+   * @property {string} [date]
+   */
+
+  /** @type {Props} */
+  let {
+    text = '',
+    tooltip = '',
+    showButton = false,
+    buttonGradient = 'from-red-500 to-red-600',
+    buttonHoverGradient = 'hover:from-red-400 hover:to-red-500',
+    buttonRing = 'focus:ring-red-500/50',
+    buttonIcon = 'M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z',
+    buttonTooltip = 'Supprimer cette affectation spécifique',
+    onClick = null,
+    memberName = '',
+    slotType = '',
+    date = ''
+  } = $props();
   
-  let showConfirmModal = false;
+  let showConfirmModal = $state(false);
   
   function handleButtonClick() {
     // Small delay to let user see the slide-out button animation
@@ -55,13 +74,13 @@
     };
   }
   
-  $: displayTooltip = tooltip || "Affectation spécifique - Ce membre n'est pas habituellement assigné ce jour";
-  $: memberTagTooltip = `${displayTooltip} - ${text || 'Membre inconnu'}`;
+  let displayTooltip = $derived(tooltip || "Affectation spécifique - Ce membre n'est pas habituellement assigné ce jour");
+  let memberTagTooltip = $derived(`${displayTooltip} - ${text || 'Membre inconnu'}`);
 </script>
 
 <MemberTag 
   {text}
-  tooltip={memberTagTooltip}
+  tooltipText={memberTagTooltip}
   {showButton}
   {buttonGradient}
   {buttonHoverGradient}
@@ -75,20 +94,22 @@
   tagHoverShadowColor="group-hover:shadow-emerald-600/40"
   customClasses="items-center"
 >
-  <svg slot="icon" class="w-3 h-3 mr-1.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-    <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-  </svg>
+  {#snippet icon()}
+    <svg  class="w-3 h-3 mr-1.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+    </svg>
+  {/snippet}
 </MemberTag>
 
 {#if showConfirmModal}
   <!-- Confirmation Modal - rendered in document body via portal -->
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div 
     use:portal
     class="fixed bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999]"
     style="top: 0; left: 0; right: 0; bottom: 0; margin: 0;"
-    on:click={(e) => e.target === e.currentTarget && cancelDelete()}
+    onclick={(e) => e.target === e.currentTarget && cancelDelete()}
   >
     <div class="bg-gradient-to-br from-slate-800/95 via-slate-900/98 to-slate-800/95 backdrop-blur-xl rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl border border-slate-700/50">
       <div class="flex items-center space-x-3 mb-4">
@@ -106,13 +127,13 @@
       
       <div class="flex justify-end space-x-3">
         <button 
-          on:click={cancelDelete}
+          onclick={cancelDelete}
           class="px-4 py-2 text-slate-200 hover:text-white bg-gradient-to-r from-slate-700/70 to-slate-600/70 backdrop-blur-sm rounded-lg hover:from-slate-600/80 hover:to-slate-500/80 transition-all duration-300 border border-slate-500/40"
         >
           Annuler
         </button>
         <button 
-          on:click={confirmDelete}
+          onclick={confirmDelete}
           class="px-4 py-2 text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 rounded-lg transition-all duration-300 shadow-lg shadow-red-500/25 hover:shadow-red-500/40 focus:outline-none focus:ring-2 focus:ring-red-500/50 border border-red-500/30"
         >
           Supprimer

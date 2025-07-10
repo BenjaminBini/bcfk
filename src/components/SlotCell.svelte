@@ -2,17 +2,33 @@
   import SlotWarning from './SlotWarning.svelte';
   import SlotAssignmentsList from './SlotAssignmentsList.svelte';
   
-  export let assignments;
-  export let slotType;
-  export let dayIndex;
-  export let weeklyAbsences;
-  export let isMemberAbsent;
-  export let getAbsencePeriod;
-  export let onMarkAbsent = null; // Function to handle marking member as absent
-  export let onAddMember = null; // Function to handle adding member manually
-  export let onDeleteSpecificAssignment = null; // Function to handle deleting specific assignment
+  /**
+   * @typedef {Object} Props
+   * @property {any} assignments
+   * @property {any} slotType
+   * @property {any} dayIndex
+   * @property {any} weeklyAbsences
+   * @property {any} isMemberAbsent
+   * @property {any} getAbsencePeriod
+   * @property {any} [onMarkAbsent] - Function to handle marking member as absent
+   * @property {any} [onAddMember] - Function to handle adding member manually
+   * @property {any} [onDeleteSpecificAssignment] - Function to handle deleting specific assignment
+   */
+
+  /** @type {Props} */
+  let {
+    assignments,
+    slotType,
+    dayIndex,
+    weeklyAbsences,
+    isMemberAbsent,
+    getAbsencePeriod,
+    onMarkAbsent = null,
+    onAddMember = null,
+    onDeleteSpecificAssignment = null
+  } = $props();
   
-  $: slotAssignments = assignments
+  let slotAssignments = $derived(assignments
     .filter(a => a.weekday === dayIndex && a.slot_type === slotType)
     .sort((a, b) => {
       // Sort order: regular -> specific -> absent
@@ -28,10 +44,10 @@
       
       // Within same category, sort alphabetically
       return (a.first_name || '').localeCompare(b.first_name || '');
-    });
-  $: shouldShowWarning = slotType === 'ouverture' ? slotAssignments.length === 0 : slotAssignments.length <= 1;
-  $: warningText = slotType === 'ouverture' ? 'Aucun membre' : 
-                  (slotAssignments.length === 0 ? 'Aucun membre' : 'Membre seul');
+    }));
+  let shouldShowWarning = $derived(slotType === 'ouverture' ? slotAssignments.length === 0 : slotAssignments.length <= 1);
+  let warningText = $derived(slotType === 'ouverture' ? 'Aucun membre' : 
+                  (slotAssignments.length === 0 ? 'Aucun membre' : 'Membre seul'));
   
 </script>
 

@@ -46,7 +46,7 @@
       <Icon name={getIconName(toast.type)} size="w-5 h-5" className="flex-shrink-0" />
       <span class="flex-1">{toast.message}</span>
       <button 
-        on:click={() => removeToast(toast.id)}
+        onclick={() => removeToast(toast.id)}
         class="flex-shrink-0 ml-2 text-white hover:text-gray-200 transition-colors"
       >
         <Icon name="close" size="w-4 h-4" />

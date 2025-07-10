@@ -1,7 +1,7 @@
 <script>
   import Icon from './Icon.svelte';
   
-  export let slotType;
+  let { slotType } = $props();
   
   const slotConfig = {
     ouverture: {
@@ -14,7 +14,7 @@
     }
   };
   
-  $: config = slotConfig[slotType];
+  let config = $derived(slotConfig[slotType]);
 </script>
 
 <div class="flex items-center -rotate-90">

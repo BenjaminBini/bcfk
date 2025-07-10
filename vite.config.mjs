@@ -7,13 +7,14 @@ export default defineConfig({
     postcss: './postcss.config.js',
   },
   build: {
-    outDir: 'public/dist',
-    emptyOutDir: false,
+    outDir: 'dist',
+    emptyOutDir: true,
     sourcemap: true,
     rollupOptions: {
       input: 'src/main.js',
     },
   },
+  publicDir: 'public/assets',
   server: {
     port: 5173,
     proxy: {

@@ -1,4 +1,6 @@
 <script>
+  import { preventDefault } from 'svelte/legacy';
+
   import { onMount } from 'svelte';
   import { absences, isLoading, error, absenceActions } from '../stores/absences.js';
   import { members } from '../stores/assignments.js';
@@ -11,10 +13,10 @@
   });
 
   // Form state
-  let selectedMember = '';
-  let startDate = '';
-  let endDate = '';
-  let isSubmitting = false;
+  let selectedMember = $state('');
+  let startDate = $state('');
+  let endDate = $state('');
+  let isSubmitting = $state(false);
 
   async function handleSubmit() {
     if (!selectedMember || !startDate || !endDate) {
@@ -82,7 +84,7 @@
           <div class="bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-slate-800/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-700/50 p-6">
             <h3 class="text-lg font-medium text-transparent bg-gradient-to-r from-white to-slate-200 bg-clip-text mb-4">Ajouter une Absence</h3>
             
-            <form on:submit|preventDefault={handleSubmit} class="space-y-4">
+            <form onsubmit={preventDefault(handleSubmit)} class="space-y-4">
               <!-- Member Selection -->
               <div>
                 <label for="member" class="block text-sm font-medium text-gray-300 mb-2">
@@ -195,7 +197,7 @@
                           </td>
                           <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <button
-                              on:click={() => handleDelete(absence.id)}
+                              onclick={() => handleDelete(absence.id)}
                               class="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-500/50"
                             >
                               <span class="sr-only">Supprimer</span>

@@ -1,6 +1,12 @@
 <script>
-  export let error;
-  export let title = "Une erreur s'est produite";
+  /**
+   * @typedef {Object} Props
+   * @property {any} error
+   * @property {string} [title]
+   */
+
+  /** @type {Props} */
+  let { error, title = "Une erreur s'est produite" } = $props();
 </script>
 
 <div class="rounded-2xl bg-gradient-to-r from-red-900/80 to-red-800/80 backdrop-blur-xl p-6 border border-red-700/50 shadow-2xl shadow-red-900/25">

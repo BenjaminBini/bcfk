@@ -4,15 +4,31 @@
   import RecurrentMemberTag from './RecurrentMemberTag.svelte';
   import AddMemberButton from './AddMemberButton.svelte';
   
-  export let slotAssignments = [];
-  export let weeklyAbsences = [];
-  export let dayIndex = 0;
-  export let slotType = '';
-  export let isMemberAbsent = null;
-  export let getAbsencePeriod = null;
-  export let onMarkAbsent = null;
-  export let onDeleteSpecificAssignment = null;
-  export let onAddMember = null;
+  /**
+   * @typedef {Object} Props
+   * @property {any} [slotAssignments]
+   * @property {any} [weeklyAbsences]
+   * @property {number} [dayIndex]
+   * @property {string} [slotType]
+   * @property {any} [isMemberAbsent]
+   * @property {any} [getAbsencePeriod]
+   * @property {any} [onMarkAbsent]
+   * @property {any} [onDeleteSpecificAssignment]
+   * @property {any} [onAddMember]
+   */
+
+  /** @type {Props} */
+  let {
+    slotAssignments = [],
+    weeklyAbsences = [],
+    dayIndex = 0,
+    slotType = '',
+    isMemberAbsent = null,
+    getAbsencePeriod = null,
+    onMarkAbsent = null,
+    onDeleteSpecificAssignment = null,
+    onAddMember = null
+  } = $props();
 </script>
 
 <div class="flex flex-col flex-wrap gap-4 justify-start items-center h-full">
