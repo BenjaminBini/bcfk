@@ -20,9 +20,9 @@ class Database {
         )
       `);
 
-      // Default assignments table (weekday + slot type + members)
+      // Recurring assignments table (weekday + slot type + members)
       this.db.run(`
-        CREATE TABLE IF NOT EXISTS default_assignments (
+        CREATE TABLE IF NOT EXISTS recurring_assignments (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           weekday INTEGER NOT NULL, -- 0=Monday, 6=Sunday
           slot_type TEXT NOT NULL, -- 'ouverture' or 'fermeture'
@@ -32,17 +32,19 @@ class Database {
         )
       `);
 
-      // Concrete weekly slots table
+      // Specific date assignments table
       this.db.run(`
-        CREATE TABLE IF NOT EXISTS weekly_slots (
+        CREATE TABLE IF NOT EXISTS specific_assignments (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           date TEXT NOT NULL, -- YYYY-MM-DD format
           slot_type TEXT NOT NULL, -- 'ouverture' or 'fermeture'
           member_id INTEGER NOT NULL,
+          source TEXT NOT NULL DEFAULT 'manual', -- 'manual' or 'generated'
           FOREIGN KEY (member_id) REFERENCES members(id),
           UNIQUE(date, slot_type, member_id)
         )
       `);
+
 
       // Absences table
       this.db.run(`
@@ -71,28 +73,28 @@ class Database {
     this.db.run('INSERT INTO members (first_name, last_name) VALUES (?, ?)', [firstName, lastName || ''], callback);
   }
 
-  // Default assignments methods
-  getDefaultAssignments(callback) {
+  // Recurring assignments methods
+  getRecurringAssignments(callback) {
     this.db.all(`
-      SELECT da.*, m.first_name, m.last_name,
+      SELECT ra.*, m.first_name, m.last_name,
              (m.first_name || CASE WHEN m.last_name != "" THEN " " || m.last_name ELSE "" END) as member_name
-      FROM default_assignments da
-      JOIN members m ON da.member_id = m.id
-      ORDER BY da.weekday, da.slot_type, m.first_name, m.last_name
+      FROM recurring_assignments ra
+      JOIN members m ON ra.member_id = m.id
+      ORDER BY ra.weekday, ra.slot_type, m.first_name, m.last_name
     `, callback);
   }
 
-  setDefaultAssignment(weekday, slotType, memberIds, callback) {
+  setRecurringAssignment(weekday, slotType, memberIds, callback) {
     this.db.serialize(() => {
       // Remove existing assignments for this weekday/slot
       this.db.run(
-        'DELETE FROM default_assignments WHERE weekday = ? AND slot_type = ?',
+        'DELETE FROM recurring_assignments WHERE weekday = ? AND slot_type = ?',
         [weekday, slotType]
       );
 
       // Add new assignments
       const stmt = this.db.prepare(
-        'INSERT INTO default_assignments (weekday, slot_type, member_id) VALUES (?, ?, ?)'
+        'INSERT INTO recurring_assignments (weekday, slot_type, member_id) VALUES (?, ?, ?)'
       );
       
       memberIds.forEach(memberId => {
@@ -103,57 +105,59 @@ class Database {
     });
   }
 
-  // Weekly slots methods
-  getWeeklySlots(startDate, endDate, callback) {
+  // Specific assignments methods
+  getSpecificAssignments(startDate, endDate, callback) {
     this.db.all(`
-      SELECT ws.*, m.first_name, m.last_name,
+      SELECT sa.*, m.first_name, m.last_name,
              (m.first_name || CASE WHEN m.last_name != "" THEN " " || m.last_name ELSE "" END) as member_name
-      FROM weekly_slots ws
-      JOIN members m ON ws.member_id = m.id
-      WHERE ws.date >= ? AND ws.date <= ?
-      ORDER BY ws.date, ws.slot_type, m.first_name, m.last_name
+      FROM specific_assignments sa
+      JOIN members m ON sa.member_id = m.id
+      WHERE sa.date >= ? AND sa.date <= ?
+      ORDER BY sa.date, sa.slot_type, m.first_name, m.last_name
     `, [startDate, endDate], callback);
   }
 
-  generateWeeklySlots(startDate, callback) {
-    // Generate slots for a week based on default assignments
+
+  generateRecurringSlots(startDate, callback) {
+    // Generate specific assignments for a week based on recurring assignments
+    // ONLY create 'generated' assignments, never touch 'manual' ones
     this.db.all(`
-      SELECT da.*, m.first_name, m.last_name,
+      SELECT ra.*, m.first_name, m.last_name,
              (m.first_name || CASE WHEN m.last_name != "" THEN " " || m.last_name ELSE "" END) as member_name
-      FROM default_assignments da
-      JOIN members m ON da.member_id = m.id
-      ORDER BY da.weekday, da.slot_type
-    `, (err, defaultAssignments) => {
+      FROM recurring_assignments ra
+      JOIN members m ON ra.member_id = m.id
+      ORDER BY ra.weekday, ra.slot_type
+    `, (err, recurringAssignments) => {
       if (err) return callback(err);
 
       this.db.serialize(() => {
         this.db.run('BEGIN TRANSACTION');
         
-        // First, clear existing weekly slots for this week
+        // Only delete GENERATED assignments for this week, preserve manual ones
         const endDate = new Date(startDate);
         endDate.setDate(endDate.getDate() + 6);
         const endDateStr = endDate.toISOString().split('T')[0];
         
         this.db.run(
-          'DELETE FROM weekly_slots WHERE date >= ? AND date <= ?',
-          [startDate, endDateStr],
+          'DELETE FROM specific_assignments WHERE date >= ? AND date <= ? AND source = ?',
+          [startDate, endDateStr, 'generated'],
           (err) => {
             if (err) {
               this.db.run('ROLLBACK');
               return callback(err);
             }
             
-            // Then insert the new slots from defaults
+            // Then insert the new slots from recurring assignments
             const stmt = this.db.prepare(
-              'INSERT INTO weekly_slots (date, slot_type, member_id) VALUES (?, ?, ?)'
+              'INSERT INTO specific_assignments (date, slot_type, member_id, source) VALUES (?, ?, ?, ?)'
             );
 
-            defaultAssignments.forEach(assignment => {
+            recurringAssignments.forEach(assignment => {
               const date = new Date(startDate);
               date.setDate(date.getDate() + assignment.weekday);
               const dateStr = date.toISOString().split('T')[0];
               
-              stmt.run([dateStr, assignment.slot_type, assignment.member_id]);
+              stmt.run([dateStr, assignment.slot_type, assignment.member_id, 'generated']);
             });
 
             stmt.finalize((err) => {
@@ -169,30 +173,21 @@ class Database {
     });
   }
 
-  updateWeeklySlot(date, slotType, memberIds, callback) {
-    this.db.serialize(() => {
-      // Remove existing assignments for this date/slot
-      this.db.run(
-        'DELETE FROM weekly_slots WHERE date = ? AND slot_type = ?',
-        [date, slotType]
-      );
 
-      // Add new assignments
-      const stmt = this.db.prepare(
-        'INSERT INTO weekly_slots (date, slot_type, member_id) VALUES (?, ?, ?)'
-      );
-      
-      memberIds.forEach(memberId => {
-        stmt.run([date, slotType, memberId]);
-      });
-      
-      stmt.finalize(callback);
-    });
+  createSpecificAssignment(memberId, date, slotType, callback) {
+    this.db.run(
+      'INSERT INTO specific_assignments (date, slot_type, member_id, source) VALUES (?, ?, ?, ?)',
+      [date, slotType, memberId, 'manual'],
+      function(err) {
+        if (err) return callback(err);
+        callback(null, { id: this.lastID, member_id: memberId, date, slot_type: slotType, source: 'manual' });
+      }
+    );
   }
 
-  createAssignment(weekday, slot_type, member_id, callback) {
+  createRecurringAssignment(weekday, slot_type, member_id, callback) {
     this.db.run(
-      'INSERT INTO default_assignments (weekday, slot_type, member_id) VALUES (?, ?, ?)',
+      'INSERT INTO recurring_assignments (weekday, slot_type, member_id) VALUES (?, ?, ?)',
       [weekday, slot_type, member_id],
       function(err) {
         if (err) return callback(err);
@@ -201,8 +196,12 @@ class Database {
     );
   }
 
-  deleteAssignment(id, callback) {
-    this.db.run('DELETE FROM default_assignments WHERE id = ?', [id], callback);
+  deleteRecurringAssignment(id, callback) {
+    this.db.run('DELETE FROM recurring_assignments WHERE id = ?', [id], callback);
+  }
+
+  deleteSpecificAssignment(id, callback) {
+    this.db.run('DELETE FROM specific_assignments WHERE id = ?', [id], callback);
   }
 
   // Absences methods

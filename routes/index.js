@@ -18,8 +18,9 @@ function createRoutes(planningService, assignmentService, memberService, absence
   router.post('/api/members', assignmentController.addMember.bind(assignmentController));
   router.get('/api/members', assignmentController.getMembers.bind(assignmentController));
   router.get('/api/assignment-data', assignmentController.getAssignmentData.bind(assignmentController));
-  router.post('/api/assignments/:weekday/:slotType', assignmentController.setDefaultAssignment.bind(assignmentController));
-  router.post('/api/weekly-slots/:date/:slotType', planningController.updateWeeklySlot.bind(planningController));
+  router.get('/api/specific-assignments', planningController.getSpecificAssignments.bind(planningController));
+  router.post('/api/specific-assignments', planningController.createSpecificAssignment.bind(planningController));
+  router.delete('/api/specific-assignments/:id', planningController.deleteSpecificAssignment.bind(planningController));
   
   // New API routes for Svelte app
   router.post('/api/assignments', assignmentController.createAssignment.bind(assignmentController));

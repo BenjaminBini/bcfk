@@ -46,13 +46,11 @@ function updateSlotContent(date, slotType, members) {
   if (slot) {
     slot.innerHTML = '';
     if (members.length === 0) {
-      slot.innerHTML = '<div class="text-xs text-gray-500 italic">Aucune affectation</div>';
+      slot.innerHTML = '<div class="text-xs italic text-gray-500">Aucune affectation</div>';
     } else {
       members.forEach(member => {
         const badge = document.createElement('span');
-        badge.className = `inline-block px-2 py-1 text-xs font-semibold text-white rounded-full ${
-          slotType === 'ouverture' ? 'bg-green-500' : 'bg-red-500'
-        }`;
+        badge.className = `inline-block px-2 py-1 text-xs font-semibold text-white rounded-full";
         badge.textContent = member.display_name || member.name;
         slot.appendChild(badge);
       });

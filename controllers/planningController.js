@@ -32,17 +32,51 @@ class PlanningController {
     }
   }
 
-  // POST /api/weekly-slots/:date/:slotType
-  async updateWeeklySlot(req, res, next) {
+
+  // GET /api/specific-assignments
+  async getSpecificAssignments(req, res, next) {
     try {
-      const { date, slotType } = req.params;
-      const { memberIds } = req.body;
+      const { start_date, end_date } = req.query;
       
-      if (!Array.isArray(memberIds)) {
-        return res.status(400).json({ error: 'memberIds must be an array' });
+      if (!start_date || !end_date) {
+        return res.status(400).json({ error: 'start_date and end_date are required' });
       }
       
-      await this.planningService.updateWeeklySlot(date, slotType, memberIds);
+      const assignments = await this.planningService.getSpecificAssignments(start_date, end_date);
+      
+      res.json(assignments);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // POST /api/specific-assignments
+  async createSpecificAssignment(req, res, next) {
+    try {
+      const { member_id, date, slot_type } = req.body;
+      
+      if (!member_id || !date || !slot_type) {
+        return res.status(400).json({ error: 'member_id, date, and slot_type are required' });
+      }
+      
+      await this.planningService.createSpecificAssignment(member_id, date, slot_type);
+      
+      res.json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // DELETE /api/specific-assignments/:id
+  async deleteSpecificAssignment(req, res, next) {
+    try {
+      const { id } = req.params;
+      
+      if (!id) {
+        return res.status(400).json({ error: 'Assignment ID is required' });
+      }
+      
+      await this.planningService.deleteSpecificAssignment(id);
       
       res.json({ success: true });
     } catch (error) {

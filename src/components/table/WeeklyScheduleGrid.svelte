@@ -2,7 +2,7 @@
   <!-- Subtle animated background -->
   <div class="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-blue-500/5 "></div>
   
-  <div class="relative grid grid-cols-8 gap-px bg-slate-700/30">
+  <div class="relative grid grid-cols-planning gap-px bg-slate-700/30">
     <slot />
   </div>
 </div>

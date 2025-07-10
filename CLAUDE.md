@@ -46,13 +46,13 @@ Backend root files:
 
 **Database Schema (SQLite)**:
 - `members` - Association members (first_name, last_name)
-- `default_assignments` - Default weekly assignments by weekday (0=Monday, 6=Sunday) and slot_type ('ouverture'/'fermeture')
-- `weekly_slots` - Concrete weekly assignments for specific dates
+- `recurring_assignments` - Recurring weekly assignments by weekday (0=Monday, 6=Sunday) and slot_type ('ouverture'/'fermeture')
+- `specific_assignments` - Slot schedule for specific dates with source tracking ('manual'/'generated')
 
 **Key Concepts**:
 - **Weekdays**: 0-6 (Monday=0, Sunday=6)
 - **Slot Types**: 'ouverture' (opening) and 'fermeture' (closing)
-- **Two Assignment Types**: Default assignments (recurring) and weekly slots (specific dates)
+- **Two Assignment Types**: Recurring assignments (weekly patterns) and slot schedule (specific dates)
 
 ## State Management Patterns
 
@@ -83,7 +83,7 @@ Backend root files:
 ### Database Patterns
 - **Promise Wrappers**: All database methods return promises despite SQLite's callback nature
 - **Foreign Keys**: member_id references members.id in assignment tables
-- **Date Format**: 'YYYY-MM-DD' string format for weekly_slots.date
+- **Date Format**: 'YYYY-MM-DD' string format for specific_assignments.date
 
 ## Development Setup
 

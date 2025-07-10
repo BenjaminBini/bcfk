@@ -59,14 +59,14 @@ async function seedRealDatabase() {
   
   // Supprimer les données existantes
   await new Promise((resolve, reject) => {
-    db.db.run('DELETE FROM weekly_slots', (err) => {
+    db.db.run('DELETE FROM specific_assignments', (err) => {
       if (err) reject(err);
       else resolve();
     });
   });
   
   await new Promise((resolve, reject) => {
-    db.db.run('DELETE FROM default_assignments', (err) => {
+    db.db.run('DELETE FROM recurring_assignments', (err) => {
       if (err) reject(err);
       else resolve();
     });

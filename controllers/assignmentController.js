@@ -53,7 +53,7 @@ class AssignmentController {
         memberIds
       );
       
-      await this.assignmentService.setDefaultAssignment(
+      await this.assignmentService.setRecurringAssignment(
         parseInt(weekday), 
         slotType, 
         memberIds
@@ -97,7 +97,7 @@ class AssignmentController {
         return res.status(400).json({ error: 'weekday, slot_type, and member_id are required' });
       }
       
-      const assignment = await this.assignmentService.createAssignment(weekday, slot_type, member_id);
+      const assignment = await this.assignmentService.createRecurringAssignment(weekday, slot_type, member_id);
       res.json(assignment);
     } catch (error) {
       next(error);
@@ -113,7 +113,7 @@ class AssignmentController {
         return res.status(400).json({ error: 'Assignment ID is required' });
       }
       
-      await this.assignmentService.deleteAssignment(parseInt(id));
+      await this.assignmentService.deleteRecurringAssignment(parseInt(id));
       res.json({ success: true });
     } catch (error) {
       next(error);

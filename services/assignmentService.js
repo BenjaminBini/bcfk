@@ -6,18 +6,18 @@ class AssignmentService {
     this.memberService = memberService;
   }
 
-  async getDefaultAssignments() {
+  async getRecurringAssignments() {
     return new Promise((resolve, reject) => {
-      this.db.getDefaultAssignments((err, assignments) => {
+      this.db.getRecurringAssignments((err, assignments) => {
         if (err) reject(err);
         else resolve(assignments);
       });
     });
   }
 
-  async setDefaultAssignment(weekday, slotType, memberIds) {
+  async setRecurringAssignment(weekday, slotType, memberIds) {
     return new Promise((resolve, reject) => {
-      this.db.setDefaultAssignment(weekday, slotType, memberIds, (err) => {
+      this.db.setRecurringAssignment(weekday, slotType, memberIds, (err) => {
         if (err) reject(err);
         else resolve();
       });
@@ -27,7 +27,7 @@ class AssignmentService {
   async getAssignmentData() {
     try {
       const members = await this.memberService.getMembersWithDisplayNames();
-      const assignments = await this.getDefaultAssignments();
+      const assignments = await this.getRecurringAssignments();
       const assignmentsWithDisplayNames = this.memberService.applyDisplayNamesToData(assignments, members);
       
       return {
@@ -71,18 +71,18 @@ class AssignmentService {
     return { valid: true, warnings };
   }
 
-  async createAssignment(weekday, slot_type, member_id) {
+  async createRecurringAssignment(weekday, slot_type, member_id) {
     return new Promise((resolve, reject) => {
-      this.db.createAssignment(weekday, slot_type, member_id, (err, assignment) => {
+      this.db.createRecurringAssignment(weekday, slot_type, member_id, (err, assignment) => {
         if (err) reject(err);
         else resolve(assignment);
       });
     });
   }
 
-  async deleteAssignment(id) {
+  async deleteRecurringAssignment(id) {
     return new Promise((resolve, reject) => {
-      this.db.deleteAssignment(id, (err) => {
+      this.db.deleteRecurringAssignment(id, (err) => {
         if (err) reject(err);
         else resolve();
       });

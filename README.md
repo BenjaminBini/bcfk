@@ -47,8 +47,8 @@ npm run dev
 
 L'application utilise SQLite avec trois tables principales :
 - `members` : Stocker les membres de l'association
-- `default_assignments` : Stocker les affectations par défaut pour les créneaux de jour de semaine
-- `weekly_slots` : Stocker les affectations de créneaux hebdomadaires concrètes
+- `recurring_assignments` : Stocker les affectations récurrentes pour les créneaux de jour de semaine
+- `specific_assignments` : Stocker les affectations spécifiques pour des dates précises
 
 ## Points d'Accès API
 

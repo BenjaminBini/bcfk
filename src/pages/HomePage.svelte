@@ -15,13 +15,18 @@
   import AbsenteesCell from '../components/AbsenteesCell.svelte';
   import ContentWrapper from '../components/ContentWrapper.svelte';
   import AbsenceConfirmModal from '../components/AbsenceConfirmModal.svelte';
+  import MemberSelector from '../components/MemberSelector.svelte';
+  import AssignmentConfirmModal from '../components/AssignmentConfirmModal.svelte';
   import { showToast } from '../stores/toast.js';
 
   let weeklyAbsences = writable([]);
+  let specificAssignments = writable([]);
 
   onMount(async () => {
     await assignmentActions.loadData();
     await loadWeeklyAbsences();
+    await loadSpecificAssignments();
+    await loadAllMembers();
   });
 
 
@@ -42,7 +47,7 @@
   }
 
   // Calculate absence data for all days reactively
-  $: absenceData = ($assignments.length > 0 && $weeklyAbsences.length > 0) ? weekDays.map((_, dayIndex) => {
+  $: absenceData = (slotSchedule.length > 0 && $weeklyAbsences.length > 0) ? weekDays.map((_, dayIndex) => {
     const absentScheduled = getAbsentScheduledMembers(dayIndex, 'ouverture').concat(getAbsentScheduledMembers(dayIndex, 'fermeture'));
     const absentOthers = getOtherAbsentMembers(dayIndex);
     
@@ -118,7 +123,7 @@
   // Get absent members who were scheduled for a specific date and slot
   function getAbsentScheduledMembers(dateIndex, slotType) {
     if ($weeklyAbsences.length === 0) return [];
-    const scheduledMembers = $assignments.filter(a => a.weekday === dateIndex && a.slot_type === slotType);
+    const scheduledMembers = slotSchedule.filter(a => a.weekday === dateIndex && a.slot_type === slotType);
     return scheduledMembers.filter(member => isMemberAbsent(member.member_id, dateIndex));
   }
 
@@ -126,7 +131,7 @@
   function getOtherAbsentMembers(dateIndex) {
     if ($weeklyAbsences.length === 0) return [];
     const scheduledMemberIds = new Set(
-      $assignments
+      slotSchedule
         .filter(a => a.weekday === dateIndex)
         .map(a => a.member_id)
     );
@@ -140,6 +145,14 @@
   let selectedMemberId = null;
   let selectedMemberName = '';
   let selectedDayIndex = 0;
+  
+  // Modal state for member assignment
+  let showMemberSelectionModal = false;
+  let showAssignmentConfirmModal = false;
+  let selectedMemberForAssignment = null;
+  let selectedDayForAssignment = 0;
+  let selectedSlotForAssignment = '';
+  let allMembers = [];
 
   function handleMarkAbsent(memberId, memberName, dayIndex) {
     selectedMemberId = memberId;
@@ -174,10 +187,142 @@
       showToast('Erreur lors de la création de l\'absence', 'error');
     }
   }
+  
+  // Load specific assignments for specific dates
+  async function loadSpecificAssignments() {
+    const weekDates = getCurrentWeekDates();
+    const startDate = weekDates[0].toISOString().split('T')[0];
+    const endDate = weekDates[6].toISOString().split('T')[0];
+    
+    try {
+      const response = await fetch(`/api/specific-assignments?start_date=${startDate}&end_date=${endDate}`);
+      if (response.ok) {
+        const assignments = await response.json();
+        specificAssignments.set(assignments);
+      }
+    } catch (error) {
+      console.error('Error loading specific assignments:', error);
+      specificAssignments.set([]);
+    }
+  }
+  
+  // Load all members for assignment selection
+  async function loadAllMembers() {
+    try {
+      const response = await fetch('/api/members');
+      if (response.ok) {
+        allMembers = await response.json();
+      }
+    } catch (error) {
+      console.error('Error loading members:', error);
+    }
+  }
+  
+  // Handle adding member to slot
+  function handleAddMember(dayIndex, slotType) {
+    selectedDayForAssignment = dayIndex;
+    selectedSlotForAssignment = slotType;
+    showMemberSelectionModal = true;
+  }
+  
+  // Handle member selection from modal
+  function handleMemberSelected(event) {
+    const { memberIds } = event.detail;
+    if (memberIds.length > 0) {
+      // For now, take the first selected member (MemberSelector supports multi-select)
+      const selectedMember = allMembers.find(m => m.id === memberIds[0]);
+      selectedMemberForAssignment = selectedMember;
+      showMemberSelectionModal = false;
+      showAssignmentConfirmModal = true;
+    }
+  }
+  
+  // Handle assignment confirmation
+  async function handleAssignmentConfirmed() {
+    if (selectedMemberForAssignment) {
+      try {
+        const selectedDate = getCurrentWeekDates()[selectedDayForAssignment].toISOString().split('T')[0];
+        
+        // Create specific assignment
+        const response = await fetch('/api/specific-assignments', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            member_id: selectedMemberForAssignment.id,
+            date: selectedDate,
+            slot_type: selectedSlotForAssignment
+          })
+        });
+        
+        if (response.ok) {
+          // Reload specific assignments to reflect the change
+          await loadSpecificAssignments();
+          showToast(`${selectedMemberForAssignment.first_name} affecté(e) pour cette date`, 'success');
+        } else {
+          throw new Error('Failed to create assignment');
+        }
+      } catch (error) {
+        console.error('Error creating assignment:', error);
+        showToast('Erreur lors de l\'affectation', 'error');
+      }
+    }
+    
+    // Reset modal states
+    showAssignmentConfirmModal = false;
+    selectedMemberForAssignment = null;
+    selectedDayForAssignment = 0;
+    selectedSlotForAssignment = '';
+  }
+  
+  // Handle modal cancellation
+  function handleModalCancel() {
+    showMemberSelectionModal = false;
+    showAssignmentConfirmModal = false;
+    selectedMemberForAssignment = null;
+    selectedDayForAssignment = 0;
+    selectedSlotForAssignment = '';
+  }
+
+  // Handle deleting specific assignment
+  async function handleDeleteSpecificAssignment(assignmentId, memberId, memberName, dayIndex, slotType) {
+    try {
+      const response = await fetch(`/api/specific-assignments/${assignmentId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete assignment');
+      }
+
+      // Reload specific assignments to update the UI
+      await loadSpecificAssignments();
+      
+      // Show success notification
+      showToast(`Affectation supprimée pour ${memberName}`, 'success');
+    } catch (error) {
+      console.error('Error deleting specific assignment:', error);
+      showToast('Erreur lors de la suppression de l\'affectation', 'error');
+    }
+  }
+  
+  // Compute the final slot schedule by combining recurring assignments with specific assignments
+  $: slotSchedule = [
+    ...$assignments,
+    ...$specificAssignments.map(assignment => ({
+      ...assignment,
+      weekday: new Date(assignment.date).getDay() === 0 ? 6 : new Date(assignment.date).getDay() - 1, // Convert to 0-6 weekday
+      is_specific_date: assignment.source === 'manual' // Only mark manual assignments as specific
+    }))
+  ];
 </script>
 
 <div class="py-10">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+  <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
     <!-- Page header -->
     <PageHeader 
       title="Planning Semaine {getCurrentWeek()}"
@@ -204,13 +349,15 @@
           {#each weekDays as _, dayIndex}
             <Cell>
               <SlotCell
-                assignments={$assignments}
+                assignments={slotSchedule}
                 slotType="ouverture"
                 dayIndex={dayIndex}
                 weeklyAbsences={$weeklyAbsences}
                 isMemberAbsent={isMemberAbsent}
                 getAbsencePeriod={getAbsencePeriod}
                 onMarkAbsent={handleMarkAbsent}
+                onAddMember={handleAddMember}
+                onDeleteSpecificAssignment={handleDeleteSpecificAssignment}
               />
             </Cell>
           {/each}
@@ -222,13 +369,15 @@
           {#each weekDays as _, dayIndex}
             <Cell variant="third">
               <SlotCell
-                assignments={$assignments}
+                assignments={slotSchedule}
                 slotType="fermeture"
                 dayIndex={dayIndex}
                 weeklyAbsences={$weeklyAbsences}
                 isMemberAbsent={isMemberAbsent}
                 getAbsencePeriod={getAbsencePeriod}
                 onMarkAbsent={handleMarkAbsent}
+                onAddMember={handleAddMember}
+                onDeleteSpecificAssignment={handleDeleteSpecificAssignment}
               />
             </Cell>
           {/each}
@@ -264,4 +413,31 @@
   dayIndex={selectedDayIndex}
   on:confirm={confirmAbsence}
   on:cancel={closeAbsenceModal}
+/>
+
+<!-- Member Selection Modal -->
+<MemberSelector 
+  show={showMemberSelectionModal}
+  members={allMembers}
+  assignments={$assignments}
+  selectedDay={selectedDayForAssignment}
+  selectedSlot={selectedSlotForAssignment}
+  absentMembers={showMemberSelectionModal ? getAbsentMembersForDate(selectedDayForAssignment) : []}
+  specificAssignments={$specificAssignments.map(assignment => ({
+    ...assignment,
+    weekday: new Date(assignment.date).getDay() === 0 ? 6 : new Date(assignment.date).getDay() - 1
+  }))}
+  on:select={handleMemberSelected}
+  on:close={handleModalCancel}
+/>
+
+<!-- Assignment Confirmation Modal -->
+<AssignmentConfirmModal 
+  isOpen={showAssignmentConfirmModal}
+  member={selectedMemberForAssignment}
+  dayIndex={selectedDayForAssignment}
+  date={selectedDayIndex >= 0 ? getCurrentWeekDates()[selectedDayIndex]?.toLocaleDateString('fr-FR') : ''}
+  slotType={selectedSlotForAssignment}
+  onConfirm={handleAssignmentConfirmed}
+  onCancel={handleModalCancel}
 />

@@ -21,18 +21,19 @@ class PlanningService {
     return dates;
   }
 
-  async getWeeklySlots(startDate, endDate) {
+  async getSpecificAssignments(startDate, endDate) {
     return new Promise((resolve, reject) => {
-      this.db.getWeeklySlots(startDate, endDate, (err, slots) => {
+      this.db.getSpecificAssignments(startDate, endDate, (err, assignments) => {
         if (err) reject(err);
-        else resolve(slots);
+        else resolve(assignments);
       });
     });
   }
 
-  async generateWeeklySlots(startDate) {
+
+  async generateRecurringSlots(startDate) {
     return new Promise((resolve, reject) => {
-      this.db.generateWeeklySlots(startDate, (err) => {
+      this.db.generateRecurringSlots(startDate, (err) => {
         if (err) reject(err);
         else resolve();
       });
@@ -47,18 +48,21 @@ class PlanningService {
       
       const members = await this.memberService.getMembersWithDisplayNames();
       
-      // Only regenerate weekly slots if they don't exist for this week
-      const existingSlots = await this.getWeeklySlots(startDate, endDate);
-      if (existingSlots.length === 0) {
-        await this.generateWeeklySlots(startDate);
+      // Only regenerate slots from recurring assignments if no generated ones exist
+      const existingAssignments = await this.getSpecificAssignments(startDate, endDate);
+      const generatedAssignments = existingAssignments.filter(a => a.source === 'generated');
+      
+      if (generatedAssignments.length === 0) {
+        await this.generateRecurringSlots(startDate);
       }
       
-      const slots = await this.getWeeklySlots(startDate, endDate);
-      const slotsWithDisplayNames = this.memberService.applyDisplayNamesToData(slots, members);
+      // Get all assignments (both generated from recurring and manual specific ones)
+      const assignments = await this.getSpecificAssignments(startDate, endDate);
+      const assignmentsWithDisplayNames = this.memberService.applyDisplayNamesToData(assignments, members);
       
       return {
         weekDates,
-        slots: slotsWithDisplayNames,
+        slots: assignmentsWithDisplayNames,
         dayNames: config.ui.dayNames
       };
     } catch (error) {
@@ -66,9 +70,19 @@ class PlanningService {
     }
   }
 
-  async updateWeeklySlot(date, slotType, memberIds) {
+
+  async createSpecificAssignment(memberId, date, slotType) {
     return new Promise((resolve, reject) => {
-      this.db.updateWeeklySlot(date, slotType, memberIds, (err) => {
+      this.db.createSpecificAssignment(memberId, date, slotType, (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+  }
+
+  async deleteSpecificAssignment(assignmentId) {
+    return new Promise((resolve, reject) => {
+      this.db.deleteSpecificAssignment(assignmentId, (err) => {
         if (err) reject(err);
         else resolve();
       });
