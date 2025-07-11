@@ -28,12 +28,20 @@
   let weeklyAbsences = writable([]);
   let specificAssignments = writable([]);
   let currentWeekOffset = $state(0); // 0 = current week, -1 = previous week, +1 = next week
+  let navigationDirection = $state('next'); // 'next' or 'previous' for animations
+  let isNavigating = $state(false); // Prevent rapid navigation
+  let showLabel = $state(false); // Control label animation
 
   onMount(async () => {
     await assignmentActions.loadData();
     await loadWeeklyAbsences();
     await loadSpecificAssignments();
     await loadAllMembers();
+    
+    // Show label with animation after 100ms delay
+    setTimeout(() => {
+      showLabel = true;
+    }, 100);
   });
 
   // Helper function to format date for tooltip
@@ -71,15 +79,33 @@
 
   // Week navigation functions
   async function goToPreviousWeek() {
+    if (isNavigating) return;
+    isNavigating = true;
+    navigationDirection = 'previous';
+    
     currentWeekOffset--;
     await loadWeeklyAbsences();
     await loadSpecificAssignments();
+    
+    // Reset navigation state after animation
+    setTimeout(() => {
+      isNavigating = false;
+    }, 300);
   }
 
   async function goToNextWeek() {
+    if (isNavigating) return;
+    isNavigating = true;
+    navigationDirection = 'next';
+    
     currentWeekOffset++;
     await loadWeeklyAbsences();
     await loadSpecificAssignments();
+    
+    // Reset navigation state after animation
+    setTimeout(() => {
+      isNavigating = false;
+    }, 300);
   }
 
   function getCurrentWeek() {
@@ -468,7 +494,8 @@
   <div class="px-2 mx-auto max-w-7xl sm:px-4 md:px-6 lg:px-8">
     <!-- Page header -->
     <PageHeader
-      title="Planning Semaine {getCurrentWeek()}"
+      title="Planning semaine {getCurrentWeek()}"
+      mobileTitle="Semaine {getCurrentWeek()}"
       startDate={getCurrentWeekDates()[0]}
       endDate={getCurrentWeekDates()[6]}
       showWeekNavigation={true}
@@ -486,18 +513,40 @@
           <div class="hidden md:block">
             <Legend />
           </div>
+          <!-- Label grid positioned above main grid -->
+          <div class="relative">
+            <div class="grid grid-cols-planning gap-px w-full]">
+              <!-- Empty corner cell -->
+              <div class="w-14"></div>
+              <!-- Label cells for each day -->
+              {#each weekDays as _, dayIndex}
+                <div class="flex justify-center">
+                  {#if isCurrentDay(dayIndex)}
+                    <div 
+                      class="hidden px-2 py-1 text-xs font-medium text-blue-100 whitespace-nowrap rounded-t-md border border-b-0 shadow-lg backdrop-blur-sm transition-transform duration-300 ease-out md:block bg-blue-600/90 border-blue-400/50"
+                      style="transform: translateY({showLabel ? '0' : '28px'});"
+                    >
+                      Aujourd'hui
+                    </div>
+                  {/if}
+                </div>
+              {/each}
+            </div>
+          </div>
+
           <!-- Horizontal scroll container for the table -->
-          <div class="overflow-x-auto relative pb-2 custom-scrollbar">
-           
+          <div class="overflow-x-auto relative pb-2 custom-scrollbar">           
             <div class="min-w-full">
               <WeeklyScheduleGrid>
                 <!-- Header row -->
                 <ColumnHeader isCorner={true}></ColumnHeader>
                 {#each weekDays as day, dayIndex}
-                  <ColumnHeader>
+                  <ColumnHeader isToday={isCurrentDay(dayIndex)}>
                     <DayHeaderCell
                       {day}
                       date={getCurrentWeekDates()[dayIndex]}
+                      {navigationDirection}
+                      dateKey={currentWeekOffset}
                     />
                   </ColumnHeader>
                 {/each}
@@ -507,7 +556,7 @@
                     <RowHeaderCell title="Ouverture" iconName="doorOpen" />
                 </RowHeader>
                 {#each weekDays as _, dayIndex}
-                  <Cell>
+                  <Cell isToday={isCurrentDay(dayIndex)}>
                     <SlotCell
                       assignments={slotSchedule}
                       slotType="ouverture"
@@ -528,7 +577,7 @@
 
                 </RowHeader>
                 {#each weekDays as _, dayIndex}
-                  <Cell>
+                  <Cell isToday={isCurrentDay(dayIndex)}>
                     <SlotCell
                       assignments={slotSchedule}
                       slotType="fermeture"
@@ -552,7 +601,7 @@
                     uniqueAbsentMembers: [],
                   }}
 
-                  <Cell>
+                  <Cell isToday={isCurrentDay(dayIndex)}>
                     <AbsenteesCell
                       absentMembers={dayAbsenceData.uniqueAbsentMembers}
                       {getAbsencePeriod}
