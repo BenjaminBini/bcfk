@@ -1,9 +1,19 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const fs = require('fs');
 
 class Database {
   constructor() {
-    this.db = new sqlite3.Database(path.join(__dirname, 'planning.db'));
+    // Use data directory for database persistence in Docker
+    const dataDir = path.join(__dirname, 'data');
+    
+    // Ensure data directory exists
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    
+    const dbPath = path.join(dataDir, 'planning.db');
+    this.db = new sqlite3.Database(dbPath);
     this.init();
   }
 
