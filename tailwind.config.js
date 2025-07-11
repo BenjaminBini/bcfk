@@ -30,8 +30,11 @@ module.exports = {
       gridTemplateColumns: {
         '8': 'repeat(8, minmax(0, 1fr))',
         'planning': 'min-content repeat(7, 1fr)',
+        'planning-mobile': '1fr',
       }
     },
   },
-  plugins: [],
+  plugins: [
+    require('tailwind-scrollbar')({ nocompatible: true }),
+  ],
 }

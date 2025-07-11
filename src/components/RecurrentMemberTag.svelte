@@ -1,37 +1,28 @@
 <script>
+  import { getIcon } from '../lib/icons';
   import MemberTag from './MemberTag.svelte';
   
   /**
    * @typedef {Object} Props
    * @property {string} [text]
    * @property {string} [tooltip]
-   * @property {boolean} [showButton]
-   * @property {string} [buttonGradient]
-   * @property {string} [buttonHoverGradient]
-   * @property {string} [buttonRing]
-   * @property {string} [buttonIcon]
-   * @property {string} [buttonTooltip]
-   * @property {any} [onClick]
+   * @property {boolean} [showAbsentButton]
+   * @property {any} [onMarkAbsent]
    */
 
   /** @type {Props} */
   let {
     text = '',
     tooltip = '',
-    showButton = false,
-    buttonGradient = 'from-red-400/100 to-red-700',
-    buttonHoverGradient = 'hover:from-red-400/90 hover:to-red-500/90',
-    buttonRing = 'focus:ring-red-500/50',
-    buttonIcon = '',
-    buttonTooltip = '',
-    onClick = null
+    showAbsentButton = false,
+    onMarkAbsent = null
   } = $props();
 
-  function handleButtonClick() {
+  function handleAbsentClick() {
     // Small delay to let user see the slide-out button animation
     setTimeout(() => {
-      if (onClick) {
-        onClick();
+      if (onMarkAbsent) {
+        onMarkAbsent();
       }
     }, 200);
   }
@@ -40,11 +31,11 @@
 <MemberTag 
   {text}
   tooltipText={tooltip}
-  {showButton}
-  {buttonGradient}
-  {buttonHoverGradient}
-  {buttonRing}
-  {buttonIcon}
-  {buttonTooltip}
-  onClick={handleButtonClick}
+  showButton={showAbsentButton}
+  buttonGradient="from-orange-400/100 to-orange-700"
+  buttonHoverGradient="hover:from-orange-400/90 hover:to-orange-500/90"
+  buttonRing="focus:ring-orange-500/50"
+  buttonIcon={getIcon("plane").path}
+  buttonTooltip="Marquer comme absent"
+  onClick={handleAbsentClick}
 />

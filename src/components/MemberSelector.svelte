@@ -1,5 +1,6 @@
 <script>
   import { createEventDispatcher } from 'svelte';
+  import { fly, fade } from 'svelte/transition';
   import Icon from './Icon.svelte';
   
   /**
@@ -130,9 +131,13 @@
     class="fixed bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
     style="top: 0; left: 0; right: 0; bottom: 0; margin: 0;"
     onclick={handleModalClick}
+    transition:fade={{ duration: 200 }}
   >
     <!-- Modal Content -->
-    <div class="bg-gradient-to-br from-slate-800/95 via-slate-900/98 to-slate-800/95 backdrop-blur-xl rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl border border-slate-700/50">
+    <div 
+      class="bg-gradient-to-br from-slate-800/95 via-slate-900/98 to-slate-800/95 backdrop-blur-xl rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl border border-slate-700/50"
+      transition:fly={{ y: 50, duration: 300 }}
+    >
       <h3 class="text-lg font-medium text-transparent bg-gradient-to-r from-white to-slate-200 bg-clip-text mb-4">Ajouter un Membre</h3>
       
       <!-- Filter Input -->

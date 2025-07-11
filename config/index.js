@@ -10,7 +10,7 @@ module.exports = {
 
   // Database configuration
   database: {
-    path: path.join(__dirname, '..', 'planning.db'),
+    path: path.join(__dirname, '..', 'data', 'planning.db'),
     options: {
       verbose: process.env.NODE_ENV === 'development'
     }

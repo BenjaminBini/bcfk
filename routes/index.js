@@ -5,6 +5,7 @@ const AbsenceController = require('../controllers/absenceController');
 
 function createRoutes(planningService, assignmentService, memberService, absenceService) {
   const router = express.Router();
+  const path = require('path');
   
   // Initialize controllers
   const planningController = new PlanningController(planningService);
@@ -32,6 +33,11 @@ function createRoutes(planningService, assignmentService, memberService, absence
   router.delete('/api/absences/:id', absenceController.deleteAbsence.bind(absenceController));
   router.get('/api/absences/date-range', absenceController.getAbsencesForDateRange.bind(absenceController));
   router.get('/api/absences/date/:date', absenceController.getAbsentMembersForDate.bind(absenceController));
+
+  // Serve Svelte app for all non-API routes
+  router.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'public', 'dist', 'index.html'));
+  });
 
   return router;
 }

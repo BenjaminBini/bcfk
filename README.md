@@ -1,6 +1,6 @@
 # Application de Planning d'Association
 
-Une application web Node.js + HTMX pour gérer le planning hebdomadaire d'une association avec des créneaux quotidiens "ouverture" et "fermeture".
+Une application web full-stack avec frontend Svelte et backend Node.js pour gérer le planning hebdomadaire d'une association avec des créneaux quotidiens "ouverture" et "fermeture".
 
 ## Fonctionnalités
 
@@ -16,32 +16,37 @@ Une application web Node.js + HTMX pour gérer le planning hebdomadaire d'une as
 npm install
 ```
 
-2. Compiler le CSS :
-```bash
-npm run build-css
-```
-
-3. Initialiser la base de données avec des données d'exemple :
+2. Initialiser la base de données avec des données d'exemple :
 ```bash
 npm run seed
 ```
 
-4. Démarrer le serveur :
+3. Démarrer l'application en mode développement :
 ```bash
-npm start
+npm run dev            # Démarre backend (port 3001) et frontend (port 5173)
+npm run dev:server     # Démarre seulement le backend avec nodemon
+npm run dev:svelte     # Démarre seulement le frontend avec Vite
 ```
 
-Ou utiliser nodemon pour le développement :
+4. Compiler le frontend pour la production :
 ```bash
-npm run dev
+npm run build          # Compile le frontend Svelte
+npm start              # Démarre le serveur de production
+```
+
+Commandes utiles :
+```bash
+npm run cleanup        # Termine les processus sur le port 3001
 ```
 
 ## Utilisation
 
-1. Ouvrez votre navigateur et allez à `http://localhost:3000`
-2. Naviguez entre les deux vues principales :
-   - **Semaine Actuelle** : Voir et gérer le planning de la semaine actuelle
-   - **Affectations par Défaut** : Configurer les affectations de membres par défaut pour chaque créneau de jour de semaine
+1. En développement : ouvrez votre navigateur et allez à `http://localhost:5173`
+2. En production : ouvrez votre navigateur et allez à `http://localhost:3001`
+3. Naviguez entre les vues principales :
+   - **Planning** : Voir et gérer le planning de la semaine actuelle
+   - **Affectations** : Configurer les affectations de membres par défaut pour chaque créneau de jour de semaine
+   - **Absences** : Gérer les absences des membres
 
 ## Schéma de Base de Données
 
@@ -62,23 +67,39 @@ L'application utilise SQLite avec trois tables principales :
 ## Pile Technologique
 
 - **Backend** : Node.js, Express.js (Architecture MVC)
-- **Base de Données** : SQLite3
-- **Frontend** : HTMX, Modèles EJS avec Partials
+- **Base de Données** : SQLite3 avec wrapper Database personnalisé
+- **Frontend** : Svelte SPA + Vite (développement)
 - **Style** : Tailwind CSS (Thème sombre)
 - **Architecture** : Services, Controllers, Middleware
+- **État** : Stores Svelte pour la gestion d'état frontend
 
 ## Architecture
 
-L'application suit une architecture MVC modulaire :
+L'application suit une architecture full-stack avec séparation frontend/backend :
 
+### Structure Backend
 ```
-├── app.js                      # Application principale
-├── server.js                   # Point d'entrée
+├── app.js                      # Application Express principale
+├── database.js                 # Wrapper SQLite avec méthodes Promise
 ├── config/                     # Configuration centralisée
 ├── controllers/                # Contrôleurs (gestion routes)
 ├── services/                   # Services (logique métier)
 ├── middleware/                 # Middleware (gestion erreurs)
-├── routes/                     # Routage modulaire
-├── views/partials/             # Composants EJS réutilisables
-└── public/js/                  # JavaScript modulaire
+└── routes/                     # Routage modulaire API
 ```
+
+### Structure Frontend (Svelte)
+```
+src/
+├── App.svelte                  # Composant racine
+├── pages/                      # Composants de page (routes)
+├── components/                 # Composants réutilisables
+├── stores/                     # Stores Svelte (état global)
+└── lib/                        # Utilitaires (client API)
+```
+
+### Architecture Hybride
+- **Backend** : Node.js + Express sur port 3001 (routes `/api/*`)
+- **Frontend** : Svelte SPA servi par Vite sur port 5173 (développement)
+- **Base de Données** : SQLite3 avec classe Database wrapper personnalisée
+- **Vues** : Hybride - templates EJS (`/planning`, `/assignments`) + routes Svelte SPA

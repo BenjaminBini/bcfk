@@ -51,10 +51,10 @@
   
 </script>
 
-<div class="flex flex-col h-full">
+<div class="flex relative flex-col h-full">
   <SlotWarning {shouldShowWarning} {warningText} />
   
-  <div class="flex-1 flex items-center justify-center">
+  <div class="flex flex-1 justify-center items-center" class:pt-16={shouldShowWarning}>
     <SlotAssignmentsList 
       {slotAssignments}
       {weeklyAbsences}

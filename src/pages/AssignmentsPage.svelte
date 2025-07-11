@@ -160,8 +160,8 @@
 
 </script>
 
-<div class="py-10">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+<div class="py-4 md:py-10">
+  <div class="px-2 mx-auto max-w-7xl sm:px-4 md:px-6 lg:px-8">
     <!-- Page header -->
     <PageHeader 
       title="Gestion des Affectations"
@@ -174,20 +174,62 @@
 
       <ContentWrapper isLoading={$isLoading} error={$error}>
         <WeeklyScheduleGrid>
-          <!-- Header row -->
-          <ColumnHeader></ColumnHeader>
+          <!-- Header row - hidden on mobile, shown as individual day headers -->
+          <ColumnHeader class="hidden md:block"></ColumnHeader>
           {#each weekDays as day}
-            <ColumnHeader>
+            <ColumnHeader class="hidden md:block">
               <DayHeaderCell day={day} />
             </ColumnHeader>
           {/each}
 
-          <!-- Ouverture row -->
-          <RowHeader>
+          {#each weekDays as day, dayIndex}
+            <!-- Mobile: Single column with stacked cells (desktop column transformed) -->
+            <div class="md:hidden space-y-px">
+              <!-- Day header cell -->
+              <div class="bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-slate-800/90 backdrop-blur-xl border border-slate-700/50 p-4">
+                <DayHeaderCell day={day} />
+              </div>
+              
+              <!-- Ouverture row header -->
+              <div class="bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-slate-800/90 backdrop-blur-xl border border-slate-700/50 p-4">
+                <SlotTypeCell slotType="ouverture" />
+              </div>
+              
+              <!-- Ouverture cell -->
+              <div class="bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-slate-800/90 backdrop-blur-xl border border-slate-700/50 p-4">
+                <SlotEditionCell
+                  assignments={$assignments}
+                  slotType="ouverture"
+                  dayIndex={dayIndex}
+                  onRemove={removeMember}
+                  onAdd={openMemberSelector}
+                />
+              </div>
+              
+              <!-- Fermeture row header -->
+              <div class="bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-slate-800/90 backdrop-blur-xl border border-slate-700/50 p-4">
+                <SlotTypeCell slotType="fermeture" />
+              </div>
+              
+              <!-- Fermeture cell -->
+              <div class="bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-slate-800/90 backdrop-blur-xl border border-slate-700/50 p-4">
+                <SlotEditionCell
+                  assignments={$assignments}
+                  slotType="fermeture"
+                  dayIndex={dayIndex}
+                  onRemove={removeMember}
+                  onAdd={openMemberSelector}
+                />
+              </div>
+            </div>
+          {/each}
+
+          <!-- Desktop: Ouverture row -->
+          <RowHeader class="hidden md:block">
             <SlotTypeCell slotType="ouverture" />
           </RowHeader>
           {#each weekDays as _, dayIndex}
-            <Cell>
+            <Cell class="hidden md:block">
               <SlotEditionCell
                 assignments={$assignments}
                 slotType="ouverture"
@@ -198,12 +240,12 @@
             </Cell>
           {/each}
 
-          <!-- Fermeture row -->
-          <RowHeader>
+          <!-- Desktop: Fermeture row -->
+          <RowHeader class="hidden md:block">
             <SlotTypeCell slotType="fermeture" />
           </RowHeader>
           {#each weekDays as _, dayIndex}
-            <Cell variant="third">
+            <Cell variant="third" class="hidden md:block">
               <SlotEditionCell
                 assignments={$assignments}
                 slotType="fermeture"

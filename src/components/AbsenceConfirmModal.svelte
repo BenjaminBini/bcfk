@@ -1,5 +1,6 @@
 <script>
   import { createEventDispatcher } from 'svelte';
+  import { fly, fade } from 'svelte/transition';
   
   /**
    * @typedef {Object} Props
@@ -45,9 +46,13 @@
     class="fixed bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
     style="top: 0; left: 0; right: 0; bottom: 0; margin: 0;"
     onclick={handleModalClick}
+    transition:fade={{ duration: 200 }}
   >
     <!-- Modal Content -->
-    <div class="bg-gradient-to-br from-slate-800/95 via-slate-900/98 to-slate-800/95 backdrop-blur-xl rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl border border-slate-700/50 mb-4">
+    <div 
+      class="bg-gradient-to-br from-slate-800/95 via-slate-900/98 to-slate-800/95 backdrop-blur-xl rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl border border-slate-700/50 mb-4"
+      transition:fly={{ y: 50, duration: 300 }}
+    >
       <div class="flex items-center space-x-3 mb-4">
         <div class="w-10 h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
           <svg class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">

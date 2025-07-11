@@ -136,7 +136,7 @@ class Database {
         // Only delete GENERATED assignments for this week, preserve manual ones
         const endDate = new Date(startDate);
         endDate.setDate(endDate.getDate() + 6);
-        const endDateStr = endDate.toISOString().split('T')[0];
+        const endDateStr = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
         
         this.db.run(
           'DELETE FROM specific_assignments WHERE date >= ? AND date <= ? AND source = ?',
@@ -155,7 +155,7 @@ class Database {
             recurringAssignments.forEach(assignment => {
               const date = new Date(startDate);
               date.setDate(date.getDate() + assignment.weekday);
-              const dateStr = date.toISOString().split('T')[0];
+              const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
               
               stmt.run([dateStr, assignment.slot_type, assignment.member_id, 'generated']);
             });

@@ -1,5 +1,4 @@
 <script>
-  import { tooltip } from "@svelte-plugins/tooltips";
   
   
   
@@ -45,8 +44,8 @@
 
 <div class="flex relative transition-all duration-300 delay-200 group {onClick ? 'hover:-translate-x-3' : ''} {customClasses}">
     <span 
-      class="inline-flex relative z-10 px-3 py-1.5 text-sm font-semibold {tagTextColor} bg-gradient-to-r {tagGradient} rounded-full shadow-lg transition-all duration-300 cursor-pointer {tagShadowColor} {onClick ? `group-hover:scale-105 group-hover:shadow-2xl ${tagHoverShadowColor}` : ''} {customClasses}"
-      use:tooltip={tooltipText ? { content: tooltipText, position: 'top', theme: 'high-z-index' } : undefined}
+      class="inline-flex relative z-10 px-3 py-1 text-sm font-semibold {tagTextColor} bg-gradient-to-r {tagGradient} rounded-full shadow-lg transition-all duration-300 cursor-pointer {tagShadowColor} {onClick ? `group-hover:scale-105 group-hover:shadow-2xl ${tagHoverShadowColor}` : ''} {customClasses}"
+      title={tooltipText || ''}
     >
 {#if icon}{@render icon()}{/if}
       {text || 'Membre inconnu'}
@@ -57,7 +56,7 @@
     <button 
       class="absolute top-0 h-full w-10 overflow-hidden bg-gradient-to-tr {buttonGradient} rounded-r-full flex items-center justify-end pr-1.5 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 delay-150 focus:outline-none focus:ring-2 {buttonRing} {buttonHoverGradient} right-0 group-hover:right-[-1.5rem]"
       onclick={onClick}
-      use:tooltip={buttonTooltip ? { content: buttonTooltip, position: 'top', theme: 'high-z-index' } : undefined}
+      title={buttonTooltip || ''}
     >
       <span class="sr-only">{buttonTooltip}</span>
       {#if buttonIcon}
