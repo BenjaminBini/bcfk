@@ -27,5 +27,6 @@ USER nodejs
 # Expose port 3001
 EXPOSE 3001
 
+
 # Start the application
-CMD ["npm", "start"]
+CMD ["ENV=0.0.0.0;", "npm", "start"]

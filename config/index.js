@@ -22,7 +22,7 @@ module.exports = {
     version: '1.0.0',
     environment: process.env.NODE_ENV || 'development',
     viewEngine: 'ejs',
-    staticDir: 'public'
+    staticDir: 'public/dist'
   },
 
   // Date and time settings
