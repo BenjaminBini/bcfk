@@ -1,6 +1,5 @@
 services:
   bcfk:
-    user: nodejs
     build: .
     ports:
       - "3001:3001"
