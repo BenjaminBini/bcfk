@@ -52,7 +52,7 @@
   
 </script>
 
-<div class="flex relative flex-col h-full">
+<div class="flex relative flex-col w-full h-full px-2 md:px-0">
   <SlotWarning {shouldShowWarning} {warningText} />
   
   <div class="flex flex-1 justify-center items-center" class:pt-16={shouldShowWarning}>
