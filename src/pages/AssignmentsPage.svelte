@@ -170,92 +170,54 @@
     />
 
     <!-- Content -->
-    <div class="mt-8">
-
+    <div class="mt-4 md:mt-8">
       <ContentWrapper isLoading={$isLoading} error={$error}>
-        <WeeklyScheduleGrid>
-          <!-- Header row - hidden on mobile, shown as individual day headers -->
-          <ColumnHeader class="hidden md:block" isCorner={true}></ColumnHeader>
-          {#each weekDays as day}
-            <ColumnHeader class="hidden md:block">
-              <DayHeaderCell day={day} />
-            </ColumnHeader>
-          {/each}
+        <!-- Horizontal scroll container for the table -->
+        <div class="overflow-x-auto relative pb-2 custom-scrollbar">
+          <div class="min-w-full">
+            <WeeklyScheduleGrid>
+              <!-- Header row -->
+              <ColumnHeader isCorner={true}></ColumnHeader>
+              {#each weekDays as day}
+                <ColumnHeader>
+                  <DayHeaderCell {day} />
+                </ColumnHeader>
+              {/each}
 
-          {#each weekDays as day, dayIndex}
-            <!-- Mobile: Single column with stacked cells (desktop column transformed) -->
-            <div class="space-y-px md:hidden">
-              <!-- Day header cell -->
-              <div class="p-4 bg-gradient-to-br border backdrop-blur-xl from-slate-800/90 via-slate-900/95 to-slate-800/90 border-slate-700/50">
-                <DayHeaderCell day={day} />
-              </div>
-              
-              <!-- Ouverture row header -->
-              <div class="p-4 bg-gradient-to-br border backdrop-blur-xl from-slate-800/90 via-slate-900/95 to-slate-800/90 border-slate-700/50">
+              <!-- Ouverture row -->
+              <RowHeader>
                 <RowHeaderCell title="Ouverture" iconName="doorOpen" />
-              </div>
-              
-              <!-- Ouverture cell -->
-              <div class="p-4 bg-gradient-to-br border backdrop-blur-xl from-slate-800/90 via-slate-900/95 to-slate-800/90 border-slate-700/50">
-                <SlotEditionCell
-                  assignments={$assignments}
-                  slotType="ouverture"
-                  dayIndex={dayIndex}
-                  onRemove={removeMember}
-                  onAdd={openMemberSelector}
-                />
-              </div>
-              
-              <!-- Fermeture row header -->
-              <div class="p-4 bg-gradient-to-br border backdrop-blur-xl from-slate-800/90 via-slate-900/95 to-slate-800/90 border-slate-700/50">
+              </RowHeader>
+              {#each weekDays as _, dayIndex}
+                <Cell>
+                  <SlotEditionCell
+                    assignments={$assignments}
+                    slotType="ouverture"
+                    dayIndex={dayIndex}
+                    onRemove={removeMember}
+                    onAdd={openMemberSelector}
+                  />
+                </Cell>
+              {/each}
+
+              <!-- Fermeture row -->
+              <RowHeader>
                 <RowHeaderCell title="Fermeture" iconName="lockClosed" />
-              </div>
-              
-              <!-- Fermeture cell -->
-              <div class="p-4 bg-gradient-to-br border backdrop-blur-xl from-slate-800/90 via-slate-900/95 to-slate-800/90 border-slate-700/50">
-                <SlotEditionCell
-                  assignments={$assignments}
-                  slotType="fermeture"
-                  dayIndex={dayIndex}
-                  onRemove={removeMember}
-                  onAdd={openMemberSelector}
-                />
-              </div>
-            </div>
-          {/each}
-
-          <!-- Desktop: Ouverture row -->
-          <RowHeader class="hidden md:block">
-            <RowHeaderCell title="Ouverture" iconName="doorOpen" />
-          </RowHeader>
-          {#each weekDays as _, dayIndex}
-            <Cell class="hidden md:block">
-              <SlotEditionCell
-                assignments={$assignments}
-                slotType="ouverture"
-                dayIndex={dayIndex}
-                onRemove={removeMember}
-                onAdd={openMemberSelector}
-              />
-            </Cell>
-          {/each}
-
-          <!-- Desktop: Fermeture row -->
-          <RowHeader class="hidden md:block">
-            <RowHeaderCell title="Fermeture" iconName="lockClosed" />
-          </RowHeader>
-          {#each weekDays as _, dayIndex}
-            <Cell variant="third" class="hidden md:block">
-              <SlotEditionCell
-                assignments={$assignments}
-                slotType="fermeture"
-                dayIndex={dayIndex}
-                onRemove={removeMember}
-                onAdd={openMemberSelector}
-              />
-            </Cell>
-          {/each}
-        </WeeklyScheduleGrid>
+              </RowHeader>
+              {#each weekDays as _, dayIndex}
+                <Cell>
+                  <SlotEditionCell
+                    assignments={$assignments}
+                    slotType="fermeture"
+                    dayIndex={dayIndex}
+                    onRemove={removeMember}
+                    onAdd={openMemberSelector}
+                  />
+                </Cell>
+              {/each}
+            </WeeklyScheduleGrid>
+          </div>
+        </div>
       </ContentWrapper>
     </div>
   </div>
@@ -270,3 +232,30 @@
   on:select={(event) => assignMembers(event.detail.memberIds)}
   on:close={closeMemberSelector}
 />
+
+<style>
+  .custom-scrollbar {
+    /* Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: rgb(100 116 139 / 0.7) rgb(71 85 105 / 0.3);
+  }
+
+  /* Webkit browsers (Chrome, Safari, Edge) */
+  .custom-scrollbar::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgb(71 85 105 / 0.3);
+    border-radius: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgb(100 116 139 / 0.7);
+    border-radius: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgb(148 163 184 / 0.8);
+  }
+</style>
