@@ -1,5 +1,8 @@
-# Use Node.js 18 LTS as base image
-FROM node:23-alpine
+# Use Node.js 20 LTS as base image
+FROM node:20-alpine
+
+# Update Alpine and install security fixes
+RUN apk update && apk upgrade && rm -rf /var/cache/apk/*
 
 # Set working directory
 WORKDIR /app
@@ -29,4 +32,4 @@ EXPOSE 3001
 
 
 # Start the application
-CMD ["HOST=0.0.0.0;", "npm", "start"]
+CMD ["node", "server.js"]
