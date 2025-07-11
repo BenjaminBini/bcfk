@@ -473,7 +473,7 @@
             <div class="min-w-full">
               <WeeklyScheduleGrid>
                 <!-- Header row -->
-                <ColumnHeader></ColumnHeader>
+                <ColumnHeader isCorner={true}></ColumnHeader>
                 {#each weekDays as day, dayIndex}
                   <ColumnHeader>
                     <DayHeaderCell
