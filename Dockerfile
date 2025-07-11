@@ -16,10 +16,6 @@ COPY . .
 # Build the Svelte frontend
 RUN npm run build
 
-# Create a non-root user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nodejs -u 1001
-
 # Expose port 3001
 EXPOSE 3001
 
