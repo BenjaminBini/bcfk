@@ -16,14 +16,16 @@
   
 </script>
 
-<div class="flex flex-col justify-center items-center py-4 h-full text-center min-w-[132px]">
-  <div class="text-lg font-semibold" class:text-white={!isToday} class:text-blue-200={isToday}>{day}</div>
+<div class="flex flex-col justify-center items-center h-full text-center py-0 md:py-4 min-w-[50px] md:min-w-[132px] px-1 md:px-4">
+  <div class="text-sm md:text-lg font-semibold" class:text-white={!isToday} class:text-blue-200={isToday}>{day}</div>
   {#if date}
-    <div class="text-sm" class:text-gray-300={!isToday} class:text-blue-100={isToday}>
+    <div class="text-xs md:text-sm" class:text-gray-300={!isToday} class:text-blue-100={isToday}>
       {date.getDate()} {date.toLocaleDateString('fr-FR', { month: 'long' })}
     </div>
   {/if}
   {#if isToday}
-    <div class="absolute top-1 px-2 py-[.25rem] text-xs font-medium text-blue-200 rounded-full bg-indigo-500/30">Aujourd'hui</div>
+    <div class="absolute top-0.5 px-2 py-[.25rem] text-xs font-medium text-blue-200 rounded-full bg-indigo-500/30 hidden md:block">
+      Aujourd'hui
+    </div>
   {/if}
 </div>

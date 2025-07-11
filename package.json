@@ -10,12 +10,15 @@
     "dev:svelte": "vite",
     "build": "vite build",
     "seed": "node seed-real.js",
+    "sync": "node sync-to-remote.js",
+    "sync:dry-run": "node sync-to-remote.js --dry-run",
     "cleanup": "lsof -ti:3001 | xargs kill -9 || true"
   },
   "dependencies": {
     "@svelte-plugins/tooltips": "^4.0.0-beta.1",
     "ejs": "^3.1.9",
     "express": "^4.18.2",
+    "node-fetch": "^2.7.0",
     "sqlite3": "^5.1.6",
     "svelte-spa-router": "^4.0.1",
     "tailwind-scrollbar": "^3.1.0"

@@ -13,7 +13,7 @@
   <div class="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-blue-500/5"></div>
   
   <!-- Grid layout -->
-  <div class="relative grid grid-cols-planning gap-px bg-slate-700/30 p-0 min-w-[800px]">
+  <div class="relative grid grid-cols-planning gap-px bg-slate-700/30 p-0 min-w-[400px] md:min-w-[800px] overflow-x-auto">
     {@render children?.()}
   </div>
 </div>

@@ -7,11 +7,11 @@
   import RowHeader from '../components/table/RowHeader.svelte';
   import Cell from '../components/table/Cell.svelte';
   import DayHeaderCell from '../components/DayHeaderCell.svelte';
-  import SlotTypeCell from '../components/SlotTypeCell.svelte';
   import SlotEditionCell from '../components/SlotEditionCell.svelte';
   import ContentWrapper from '../components/ContentWrapper.svelte';
   import PageHeader from '../components/PageHeader.svelte';
-
+  import RowHeaderCell from '../components/RowHeaderCell.svelte';
+  
   onMount(() => {
     assignmentActions.loadData();
   });
@@ -184,19 +184,19 @@
 
           {#each weekDays as day, dayIndex}
             <!-- Mobile: Single column with stacked cells (desktop column transformed) -->
-            <div class="md:hidden space-y-px">
+            <div class="space-y-px md:hidden">
               <!-- Day header cell -->
-              <div class="bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-slate-800/90 backdrop-blur-xl border border-slate-700/50 p-4">
+              <div class="p-4 bg-gradient-to-br border backdrop-blur-xl from-slate-800/90 via-slate-900/95 to-slate-800/90 border-slate-700/50">
                 <DayHeaderCell day={day} />
               </div>
               
               <!-- Ouverture row header -->
-              <div class="bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-slate-800/90 backdrop-blur-xl border border-slate-700/50 p-4">
-                <SlotTypeCell slotType="ouverture" />
+              <div class="p-4 bg-gradient-to-br border backdrop-blur-xl from-slate-800/90 via-slate-900/95 to-slate-800/90 border-slate-700/50">
+                <RowHeaderCell title="Ouverture" iconName="doorOpen" />
               </div>
               
               <!-- Ouverture cell -->
-              <div class="bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-slate-800/90 backdrop-blur-xl border border-slate-700/50 p-4">
+              <div class="p-4 bg-gradient-to-br border backdrop-blur-xl from-slate-800/90 via-slate-900/95 to-slate-800/90 border-slate-700/50">
                 <SlotEditionCell
                   assignments={$assignments}
                   slotType="ouverture"
@@ -207,12 +207,12 @@
               </div>
               
               <!-- Fermeture row header -->
-              <div class="bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-slate-800/90 backdrop-blur-xl border border-slate-700/50 p-4">
-                <SlotTypeCell slotType="fermeture" />
+              <div class="p-4 bg-gradient-to-br border backdrop-blur-xl from-slate-800/90 via-slate-900/95 to-slate-800/90 border-slate-700/50">
+                <RowHeaderCell title="Fermeture" iconName="lockClosed" />
               </div>
               
               <!-- Fermeture cell -->
-              <div class="bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-slate-800/90 backdrop-blur-xl border border-slate-700/50 p-4">
+              <div class="p-4 bg-gradient-to-br border backdrop-blur-xl from-slate-800/90 via-slate-900/95 to-slate-800/90 border-slate-700/50">
                 <SlotEditionCell
                   assignments={$assignments}
                   slotType="fermeture"
@@ -226,7 +226,7 @@
 
           <!-- Desktop: Ouverture row -->
           <RowHeader class="hidden md:block">
-            <SlotTypeCell slotType="ouverture" />
+            <RowHeaderCell title="Ouverture" iconName="doorOpen" />
           </RowHeader>
           {#each weekDays as _, dayIndex}
             <Cell class="hidden md:block">
@@ -242,7 +242,7 @@
 
           <!-- Desktop: Fermeture row -->
           <RowHeader class="hidden md:block">
-            <SlotTypeCell slotType="fermeture" />
+            <RowHeaderCell title="Fermeture" iconName="lockClosed" />
           </RowHeader>
           {#each weekDays as _, dayIndex}
             <Cell variant="third" class="hidden md:block">

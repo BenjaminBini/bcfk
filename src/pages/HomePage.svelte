@@ -13,7 +13,6 @@
   import RowHeader from "../components/table/RowHeader.svelte";
   import Cell from "../components/table/Cell.svelte";
   import SlotCell from "../components/SlotCell.svelte";
-  import SlotTypeCell from "../components/SlotTypeCell.svelte";
   import DayHeaderCell from "../components/DayHeaderCell.svelte";
   import PageHeader from "../components/PageHeader.svelte";
   import RowHeaderCell from "../components/RowHeaderCell.svelte";
@@ -486,7 +485,7 @@
 
                 <!-- Ouverture row -->
                 <RowHeader>
-                  <SlotTypeCell slotType="ouverture" />
+                    <RowHeaderCell title="Ouverture" iconName="doorOpen" />
                 </RowHeader>
                 {#each weekDays as _, dayIndex}
                   <Cell>
@@ -506,7 +505,8 @@
 
                 <!-- Fermeture row -->
                 <RowHeader>
-                  <SlotTypeCell slotType="fermeture" />
+                    <RowHeaderCell title="Fermeture" iconName="lockClosed" />
+
                 </RowHeader>
                 {#each weekDays as _, dayIndex}
                   <Cell>
