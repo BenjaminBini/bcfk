@@ -11,7 +11,7 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: true,
     rollupOptions: {
-      input: 'src/main.js',
+      input: 'index.html',
     },
   },
   publicDir: 'public/assets',

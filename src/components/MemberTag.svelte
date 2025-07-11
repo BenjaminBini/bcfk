@@ -1,4 +1,5 @@
 <script>
+  import { onMount } from 'svelte';
   
   
   
@@ -40,12 +41,45 @@
     icon
   } = $props();
   
+  let isExpanded = $state(false);
+  let containerRef = $state();
+  
+  function toggleExpanded() {
+    if (showButton && onClick) {
+      isExpanded = !isExpanded;
+    }
+  }
+  
+  function handleKeyDown(event) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      toggleExpanded();
+    }
+  }
+  
+  function handleClickOutside(event) {
+    if (containerRef && !containerRef.contains(event.target)) {
+      isExpanded = false;
+    }
+  }
+  
+  onMount(() => {
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  });
+  
 </script>
 
-<div class="flex relative transition-all duration-300 delay-200 group {onClick ? 'hover:-translate-x-3' : ''} {customClasses}">
+<div bind:this={containerRef} class="flex relative transition-all duration-300 {isExpanded ? '-translate-x-3' : ''} {customClasses}">
     <span 
-      class="inline-flex relative z-10 px-3 py-1 text-sm font-semibold {tagTextColor} bg-gradient-to-r {tagGradient} rounded-full shadow-lg transition-all duration-300 cursor-pointer {tagShadowColor} {onClick ? `group-hover:scale-105 group-hover:shadow-2xl ${tagHoverShadowColor}` : ''} {customClasses}"
+      class="inline-flex relative z-10 px-3 py-1 text-sm font-semibold {tagTextColor} bg-gradient-to-r {tagGradient} rounded-full shadow-lg transition-all duration-300 cursor-pointer {tagShadowColor} {isExpanded ? `scale-105 shadow-2xl ${tagHoverShadowColor.replace('group-hover:', '')}` : ''} {customClasses}"
       title={tooltipText || ''}
+      role={showButton && onClick ? 'button' : undefined}
+      tabIndex="0"
+      onclick={toggleExpanded}
+      onkeydown={handleKeyDown}
     >
 {#if icon}{@render icon()}{/if}
       {text || 'Membre inconnu'}
@@ -54,7 +88,7 @@
   {#if showButton && onClick}
     <!-- Configurable slide-out button -->
     <button 
-      class="absolute top-0 h-full w-10 overflow-hidden bg-gradient-to-tr {buttonGradient} rounded-r-full flex items-center justify-end pr-1.5 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 delay-150 focus:outline-none focus:ring-2 {buttonRing} {buttonHoverGradient} right-0 group-hover:right-[-1.5rem]"
+      class="absolute top-0 h-full w-10 overflow-hidden bg-gradient-to-tr {buttonGradient} rounded-r-full flex items-center justify-end pr-1.5 text-white transition-all duration-300 focus:outline-none focus:ring-2 {buttonRing} {buttonHoverGradient} {isExpanded ? 'opacity-100 right-[-1.5rem]' : 'opacity-0 right-0'}"
       onclick={onClick}
       title={buttonTooltip || ''}
     >
