@@ -29,4 +29,4 @@ EXPOSE 3001
 
 
 # Start the application
-CMD ["ENV=0.0.0.0;", "npm", "start"]
+CMD ["HOST=0.0.0.0;", "npm", "start"]
