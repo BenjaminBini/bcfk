@@ -1,4 +1,5 @@
 <script>
+  import { fade, fly } from 'svelte/transition';
   import MemberTag from './MemberTag.svelte';
   
   /**
@@ -96,8 +97,9 @@
     class="fixed bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999]"
     style="top: 0; left: 0; right: 0; bottom: 0; margin: 0;"
     onclick={(e) => e.target === e.currentTarget && cancelDelete()}
+    transition:fade={{ duration: 200 }}
   >
-    <div class="p-6 mx-4 w-full max-w-md bg-gradient-to-br rounded-2xl border shadow-2xl backdrop-blur-xl from-slate-800/95 via-slate-900/98 to-slate-800/95 border-slate-700/50">
+    <div class="p-6 mx-4 w-full max-w-md bg-gradient-to-br rounded-2xl border shadow-2xl backdrop-blur-xl from-slate-800/95 via-slate-900/98 to-slate-800/95 border-slate-700/50" transition:fly={{ y: 50, duration: 300 }}>
       <div class="flex items-center mb-4 space-x-3">
         <div class="flex flex-shrink-0 justify-center items-center w-10 h-10 rounded-full bg-red-500/20">
           <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">

@@ -27,6 +27,7 @@
 
   let weeklyAbsences = writable([]);
   let specificAssignments = writable([]);
+  let currentWeekOffset = $state(0); // 0 = current week, -1 = previous week, +1 = next week
 
   onMount(async () => {
     await assignmentActions.loadData();
@@ -68,8 +69,23 @@
     }
   }
 
+  // Week navigation functions
+  async function goToPreviousWeek() {
+    currentWeekOffset--;
+    await loadWeeklyAbsences();
+    await loadSpecificAssignments();
+  }
+
+  async function goToNextWeek() {
+    currentWeekOffset++;
+    await loadWeeklyAbsences();
+    await loadSpecificAssignments();
+  }
+
   function getCurrentWeek() {
     const now = new Date();
+    // Apply the week offset to get the correct week
+    now.setDate(now.getDate() + (currentWeekOffset * 7));
     const start = new Date(now.getFullYear(), 0, 1);
     const days = Math.floor((now - start) / (24 * 60 * 60 * 1000));
     const weekNumber = Math.ceil((days + start.getDay() + 1) / 7);
@@ -80,7 +96,7 @@
     const now = new Date();
     const dayOfWeek = now.getDay();
     const startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - dayOfWeek + 1);
+    startOfWeek.setDate(now.getDate() - dayOfWeek + 1 + (currentWeekOffset * 7));
 
     const dates = [];
     for (let i = 0; i < 7; i++) {
@@ -455,6 +471,9 @@
       title="Planning Semaine {getCurrentWeek()}"
       startDate={getCurrentWeekDates()[0]}
       endDate={getCurrentWeekDates()[6]}
+      showWeekNavigation={true}
+      onPreviousWeek={goToPreviousWeek}
+      onNextWeek={goToNextWeek}
     />
 
     <!-- Content -->

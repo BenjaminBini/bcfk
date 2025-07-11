@@ -10,7 +10,7 @@
 <div
   class="flex relative justify-center items-center p-4 mb-6 bg-gradient-to-r rounded-lg border backdrop-blur-sm border-slate-700"
 >
-  <div class="overflow-hidden absolute top-0 right-4 p-1 px-2 mb-px text-xs rounded-t-lg -translate-y-full bg-slate-800 text-white/50">Légende</div>
+  <div class="hidden overflow-hidden absolute top-0 right-4 p-1 px-2 mb-px text-xs rounded-t-lg -translate-y-full bg-slate-800 text-white/50 sm:block">Légende</div>
   <div class="flex flex-wrap gap-6 justify-center text-sm">
     <!-- Member Tags -->
     <div class="flex gap-2 items-center">

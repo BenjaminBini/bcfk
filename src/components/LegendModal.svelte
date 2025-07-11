@@ -1,4 +1,5 @@
 <script>
+  import { fade, fly } from 'svelte/transition';
   import Legend from './Legend.svelte';
 
   let { show = false, onClose = null } = $props();
@@ -40,8 +41,9 @@
     class="fixed bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
     style="top: 0; left: 0; right: 0; bottom: 0; margin: 0;"
     onclick={(e) => e.target === e.currentTarget && handleClose()}
+    transition:fade={{ duration: 200 }}
   >
-    <div class="max-w-lg w-full max-h-[90vh] overflow-y-auto">
+    <div class="max-w-lg w-full max-h-[90vh] overflow-y-auto" transition:fly={{ y: 50, duration: 300 }}>
       <!-- Close button -->
       <div class="flex justify-end mb-4">
         <button 
