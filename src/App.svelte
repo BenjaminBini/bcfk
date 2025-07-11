@@ -6,12 +6,37 @@
   import AbsencesPage from "./pages/AbsencesPage.svelte";
   import LegendModal from "./components/LegendModal.svelte";
   import { showLegendModal } from "./stores/legend.js";
+  import { onMount } from "svelte";
 
   const routes = {
     "/": HomePage,
     "/assignments": AssignmentsPage,
     "/absences": AbsencesPage,
   };
+
+  let showMobileMenu = $state(false);
+  let mobileMenuRef = $state();
+
+  function toggleMobileMenu() {
+    showMobileMenu = !showMobileMenu;
+  }
+
+  function closeMobileMenu() {
+    showMobileMenu = false;
+  }
+
+  function handleClickOutside(event) {
+    if (mobileMenuRef && !mobileMenuRef.contains(event.target)) {
+      closeMobileMenu();
+    }
+  }
+
+  onMount(() => {
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  });
 </script>
 
 <div class="overflow-hidden relative min-h-screen bg-slate-900 dark">
@@ -19,20 +44,22 @@
 
   <!-- Navigation -->
   <nav
-    class="relative bg-gradient-to-r border-b shadow-2xl backdrop-blur-xl from-slate-800/90 to-slate-900/90 border-slate-700/50"
+    class="relative z-[100] bg-gradient-to-r border-b shadow-2xl backdrop-blur-xl from-slate-800/90 to-slate-900/90 border-slate-700/50"
   >
     <div class="flex justify-start px-4 mx-auto max-w-7xl h-16 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center w-full sm:justify-start sm:w-auto">
         <h1
-          class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-200 shrink-0 no-wrap"
+          class="text-xl font-bold text-white shrink-0 no-wrap"
         >
           Planning BCFK
         </h1>
 
-          <div class="flex flex-col justify-center items-center sm:hidden" >
+        <div class="flex gap-3 sm:hidden">
+          <!-- Help Button -->
+          <div class="flex flex-col justify-center items-center" >
             <button
-              class="flex justify-center items-center p-1 pr-0 w-8 h-8 bg-gradient-to-r rounded-full border shadow-lg backdrop-blur-sm transition-all duration-300 m from-slate-600/80 to-slate-700/80 hover:from-slate-500/90 hover:to-slate-600/90 focus:outline-none focus:ring-2 focus:ring-slate-500/50 shadow-slate-500/25 hover:shadow-slate-500/40 hover:scale-110 border-slate-400/30 md:hidden"
-              on:click={() => showLegendModal.set(true)}
+              class="flex justify-center items-center p-1 pr-0 w-8 h-8 bg-gradient-to-r rounded-full border shadow-lg backdrop-blur-sm transition-all duration-300 m from-slate-600/80 to-slate-700/80 hover:from-slate-500/90 hover:to-slate-600/90 focus:outline-none focus:ring-2 focus:ring-slate-500/50 shadow-slate-500/25 hover:shadow-slate-500/40 hover:scale-110 border-slate-400/30"
+              onclick={() => showLegendModal.set(true)}
               title="Légende"
               aria-label="Ouvrir la légende"
             >
@@ -73,6 +100,60 @@
               Aide
             </div>
           </div>
+
+          <!-- Burger Menu Button -->
+          <div class="flex relative flex-col justify-center items-center" bind:this={mobileMenuRef}>
+            <button
+              class="flex justify-center items-center p-1 w-8 h-8 bg-gradient-to-r rounded-full border shadow-lg backdrop-blur-sm transition-all duration-300 from-slate-600/80 to-slate-700/80 hover:from-slate-500/90 hover:to-slate-600/90 focus:outline-none focus:ring-2 focus:ring-slate-500/50 shadow-slate-500/25 hover:shadow-slate-500/40 hover:scale-110 border-slate-400/30"
+              onclick={toggleMobileMenu}
+              title="Menu"
+              aria-label="Ouvrir le menu"
+            >
+              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+              </svg>
+            </button>
+            <div class="mt-1 w-full text-xs text-center text-white/80">
+              Menu
+            </div>
+
+            <!-- Mobile Menu Dropdown -->
+            {#if showMobileMenu}
+              <div class="absolute top-14 right-0 w-48 bg-gradient-to-b from-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-slate-700/50 rounded-xl shadow-2xl p-2 z-[9999]">
+                <a
+                  href="/"
+                  use:link
+                  onclick={closeMobileMenu}
+                  class="block w-full px-4 py-3 text-sm font-medium text-left rounded-lg transition-all duration-200 {$location === '/' 
+                    ? 'text-white bg-indigo-500/20 border border-indigo-400/30' 
+                    : 'text-slate-300 hover:text-white hover:bg-slate-700/40'}"
+                >
+                  📅 Semaine Actuelle
+                </a>
+                <a
+                  href="/assignments"
+                  use:link
+                  onclick={closeMobileMenu}
+                  class="block w-full px-4 py-3 text-sm font-medium text-left rounded-lg transition-all duration-200 {$location === '/assignments' 
+                    ? 'text-white bg-indigo-500/20 border border-indigo-400/30' 
+                    : 'text-slate-300 hover:text-white hover:bg-slate-700/40'}"
+                >
+                  ⚙️ Gestion Affectations
+                </a>
+                <a
+                  href="/absences"
+                  use:link
+                  onclick={closeMobileMenu}
+                  class="block w-full px-4 py-3 text-sm font-medium text-left rounded-lg transition-all duration-200 {$location === '/absences' 
+                    ? 'text-white bg-indigo-500/20 border border-indigo-400/30' 
+                    : 'text-slate-300 hover:text-white hover:bg-slate-700/40'}"
+                >
+                  🏠 Gestion Absences
+                </a>
+              </div>
+            {/if}
+          </div>
+        </div>
       </div>
       <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
         <a
@@ -83,7 +164,7 @@
             ? 'border-indigo-400 text-white bg-gradient-to-t from-indigo-500/10 to-transparent'
             : 'border-transparent text-slate-300 hover:border-slate-400 hover:text-white hover:bg-gradient-to-t hover:from-slate-700/20 hover:to-transparent'}"
         >
-          Semaine Actuelle
+          Planning
         </a>
         <a
           href="/assignments"

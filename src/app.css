@@ -25,7 +25,7 @@
     --tooltip-border-radius: 8px;
     --tooltip-box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.4);
     --tooltip-font-size: 12px;
-    --tooltip-font-weight: 500;
+    --tooltip-font-weight: 500; 
     --tooltip-padding: 8px 12px;
     --tooltip-max-width: 250px;
     --tooltip-z-index: 2147483647;

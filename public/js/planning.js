@@ -22,8 +22,8 @@ function setupPlanningActions() {
   // Handle refresh button
   const refreshButton = document.querySelector('button[hx-get="/planning"]');
   if (refreshButton) {
-    refreshButton.addEventListener('htmx:afterRequest', function(event) {
-      if (event.detail.xhr.status === 200) {
+    refreshButton.addEventListener('htmx:afterRequest', function(event) {i w
+      if (event.detail.xhr.status === 200) {xx
         showSuccessToast('Planning actualisé');
       }
     });
@@ -50,7 +50,7 @@ function updateSlotContent(date, slotType, members) {
     } else {
       members.forEach(member => {
         const badge = document.createElement('span');
-        badge.className = `inline-block px-2 py-1 text-xs font-semibold text-white rounded-full";
+        badge.className = `inline-block px-2 py-1 text-xs font-semibold text-white rounded-full`;
         badge.textContent = member.display_name || member.name;
         slot.appendChild(badge);
       });

@@ -45,9 +45,10 @@
       // Within same category, sort alphabetically
       return (a.first_name || '').localeCompare(b.first_name || '');
     }));
-  let shouldShowWarning = $derived(slotType === 'ouverture' ? slotAssignments.length === 0 : slotAssignments.length <= 1);
+    let presentMembersCount = $derived(slotAssignments.filter(a => !isMemberAbsent(a.member_id, dayIndex)));
+    let shouldShowWarning =  $derived(slotType === 'ouverture' ? presentMembersCount.length === 0 : presentMembersCount.length <= 1);
   let warningText = $derived(slotType === 'ouverture' ? 'Aucun membre' : 
-                  (slotAssignments.length === 0 ? 'Aucun membre' : 'Membre seul'));
+                  (presentMembersCount === 0 ? 'Aucun membre' : 'Membre seul'));
   
 </script>
 

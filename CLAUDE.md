@@ -83,7 +83,7 @@ Backend root files:
 ### Database Patterns
 - **Promise Wrappers**: All database methods return promises despite SQLite's callback nature
 - **Foreign Keys**: member_id references members.id in assignment tables
-- **Date Format**: 'YYYY-MM-DD' string format for specific_assignments.date
+- **Date Format**: 'YYYY-MM-DD' string format for specific_assignments.date and sc
 
 ## Development Setup
 

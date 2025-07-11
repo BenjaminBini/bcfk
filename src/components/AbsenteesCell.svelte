@@ -11,7 +11,7 @@
   <div class="flex flex-col gap-3 justify-start items-center h-full">
     {#each absentMembers as member (member.member_id || member.id)}
       <span 
-        class="inline-block px-3 py-1.5 text-xs font-semibold bg-gradient-to-r rounded-full border backdrop-blur-sm transition-all duration-300 cursor-help text-slate-200 from-slate-500/80 to-slate-600/80 border-slate-400/30 hover:bg-gradient-to-r hover:from-slate-400/90 hover:to-slate-500/90 hover:scale-105"
+        class="inline-block px-3 py-1.5 text-xs font-semibold bg-gradient-to-r rounded-full border backdrop-blur-sm transition-all duration-300 cursor-pointer text-slate-200 from-slate-500/80 to-slate-600/80 border-slate-400/30"
         title={`Absent du ${getAbsencePeriod(member.member_id)}`}
         in:scale={{ duration: 400, easing: quintOut, start: 0.5, opacity: 0 }}
         out:scale={{ duration: 200, easing: quintOut, start: 0.5, opacity: 0 }}

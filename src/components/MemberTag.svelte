@@ -42,11 +42,29 @@
   } = $props();
   
   let isExpanded = $state(false);
+  let isScaled = $state(false);
+  let showButtonPhase = $state(false);
   let containerRef = $state();
   
   function toggleExpanded() {
     if (showButton && onClick) {
-      isExpanded = !isExpanded;
+      if (!isExpanded) {
+        // Phase 1: Scale the tag
+        isExpanded = true;
+        isScaled = true;
+        
+        // Phase 2: Show button after scale animation
+        setTimeout(() => {
+          showButtonPhase = true;
+        }, 200); // Wait for scale animation to complete
+      } else {
+        // Collapse: reverse the animation
+        showButtonPhase = false;
+        setTimeout(() => {
+          isScaled = false;
+          isExpanded = false;
+        }, 100); // Brief delay before scaling back
+      }
     }
   }
   
@@ -59,7 +77,11 @@
   
   function handleClickOutside(event) {
     if (containerRef && !containerRef.contains(event.target)) {
-      isExpanded = false;
+      showButtonPhase = false;
+      setTimeout(() => {
+        isScaled = false;
+        isExpanded = false;
+      }, 100);
     }
   }
   
@@ -72,9 +94,10 @@
   
 </script>
 
-<div bind:this={containerRef} class="flex relative transition-all duration-300 {isExpanded ? '-translate-x-3' : ''} {customClasses}">
+<div bind:this={containerRef} class="flex relative transition-all duration-200 {showButtonPhase ? '-translate-x-4' : ''} {customClasses}">
     <span 
-      class="inline-flex relative z-10 px-3 py-1 text-sm font-semibold {tagTextColor} bg-gradient-to-r {tagGradient} rounded-full shadow-lg transition-all duration-300 cursor-pointer {tagShadowColor} {isExpanded ? `scale-105 shadow-2xl ${tagHoverShadowColor.replace('group-hover:', '')}` : ''} {customClasses}"
+      class="inline-flex relative z-10 px-3 py-1 text-sm font-semibold {tagTextColor} bg-gradient-to-r {tagGradient} rounded-full shadow-lg cursor-pointer {tagShadowColor} transition-all duration-200
+      {isScaled ? `scale-[1.10] shadow-[0_0_15px_rgba(255,255,255,0.8),0_0_30px_rgba(255,255,255,0.5),0_0_50px_rgba(255,255,255,0.3)] ${tagHoverShadowColor.replace('group-hover:', '')}` : 'scale-100'} {customClasses}"
       title={tooltipText || ''}
       role={showButton && onClick ? 'button' : undefined}
       tabIndex="0"
@@ -88,7 +111,7 @@
   {#if showButton && onClick}
     <!-- Configurable slide-out button -->
     <button 
-      class="absolute top-0 h-full w-10 overflow-hidden bg-gradient-to-tr {buttonGradient} rounded-r-full flex items-center justify-end pr-1.5 text-white transition-all duration-300 focus:outline-none focus:ring-2 {buttonRing} {buttonHoverGradient} {isExpanded ? 'opacity-100 right-[-1.5rem]' : 'opacity-0 right-0'}"
+      class="absolute top-0 h-full w-10 overflow-hidden bg-gradient-to-tr {buttonGradient} rounded-r-full flex items-center justify-end pr-2 text-white transition-all duration-200 focus:outline-none focus:ring-2 {buttonRing} {buttonHoverGradient} {showButtonPhase ? 'opacity-100 right-[-2rem]' : 'opacity-0 right-0'}"
       onclick={onClick}
       title={buttonTooltip || ''}
     >

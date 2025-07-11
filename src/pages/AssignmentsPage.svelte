@@ -175,7 +175,7 @@
       <ContentWrapper isLoading={$isLoading} error={$error}>
         <WeeklyScheduleGrid>
           <!-- Header row - hidden on mobile, shown as individual day headers -->
-          <ColumnHeader class="hidden md:block"></ColumnHeader>
+          <ColumnHeader class="hidden md:block" isCorner={true}></ColumnHeader>
           {#each weekDays as day}
             <ColumnHeader class="hidden md:block">
               <DayHeaderCell day={day} />
