@@ -4,7 +4,7 @@
   let { title, iconPath, iconName } = $props();
 </script>
 
-<div class="flex items-center -rotate-90">
+<div class="flex items-center -rotate-90" >
   {#if iconName}
     <Icon name={iconName} size="w-4 h-4" className="mr-2" />
   {:else if iconPath}

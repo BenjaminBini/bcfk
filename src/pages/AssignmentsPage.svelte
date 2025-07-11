@@ -11,7 +11,7 @@
   import ContentWrapper from '../components/ContentWrapper.svelte';
   import PageHeader from '../components/PageHeader.svelte';
   import RowHeaderCell from '../components/RowHeaderCell.svelte';
-  
+
   onMount(() => {
     assignmentActions.loadData();
   });

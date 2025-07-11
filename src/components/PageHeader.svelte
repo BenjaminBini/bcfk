@@ -16,6 +16,7 @@
   /** @type {Props} */
   let {
     title,
+    mobileTitle,
     subtitle = null,
     icon = null,
     startDate = null,
@@ -65,21 +66,21 @@
   const calendarIcon = "M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z";
 </script>
 
-<div class="flex flex-col md:flex-row md:justify-between md:items-center">
-  <div class="flex-1 min-w-0">
-    <h2 class="text-3xl font-bold tracking-tight leading-10 text-center text-white to-white drop-shadow-lg via-slate-100 md:text-left">
-      {title}
+<div class="flex flex-col items-center md:flex-row md:justify-between">
+    <h2 class="text-3xl font-bold tracking-tight leading-10 text-center text-white drop-shadow-lg md:text-left">
+      <span class="hidden md:block">{title}</span>
+      <span class="block md:hidden">{mobileTitle}</span>
     </h2>
     {#if subtitle || (startDate && endDate)}
-      <div class="flex flex-row flex-wrap justify-center mt-3 space-x-6 md:justify-start">
+      <div class="flex flex-row flex-wrap justify-center space-x-6 md:justify-start">
         <div class="flex items-center space-x-2">
           {#if showWeekNavigation && onPreviousWeek}
             <button
+              aria-label="Semaine précédente"
               onclick={handlePreviousWeek}
               disabled={isNavigating}
               class="flex justify-center items-center w-8 h-8 rounded-lg transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-700/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
               title="Semaine précédente"
-              aria-label="Semaine précédente"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -139,5 +140,4 @@
         </div>
       </div>
     {/if}
-  </div>
 </div>
