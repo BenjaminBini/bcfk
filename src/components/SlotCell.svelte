@@ -23,6 +23,7 @@
     weeklyAbsences,
     isMemberAbsent,
     getAbsencePeriod,
+    enableAnimations = true,
     onMarkAbsent = null,
     onAddMember = null,
     onDeleteSpecificAssignment = null
@@ -63,6 +64,7 @@
       {slotType}
       {isMemberAbsent}
       {getAbsencePeriod}
+      {enableAnimations}
       {onMarkAbsent}
       {onDeleteSpecificAssignment}
       {onAddMember}

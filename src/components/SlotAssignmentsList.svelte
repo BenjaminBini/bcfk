@@ -28,6 +28,7 @@
     slotType = '',
     isMemberAbsent = null,
     getAbsencePeriod = null,
+    enableAnimations = true,
     onMarkAbsent = null,
     onDeleteSpecificAssignment = null,
     onAddMember = null
@@ -38,9 +39,9 @@
   {#each slotAssignments as assignment (assignment.id || `${assignment.member_id}-${assignment.weekday}-${assignment.slot_type}`)}
     {@const isAbsent = weeklyAbsences.length > 0 && isMemberAbsent(assignment.member_id, dayIndex)}
     <div
-      in:scale={{ duration: 400, easing: quintOut, start: 0.5, opacity: 0 }}
-      out:scale={{ duration: 200, easing: quintOut, start: 0.5, opacity: 0 }}
-      animate:flip={{ duration: 300, easing: quintOut, delay: 200 }}
+      in:scale={enableAnimations ? { duration: 400, easing: quintOut, start: 0.5, opacity: 0 } : undefined}
+      out:scale={enableAnimations ? { duration: 200, easing: quintOut, start: 0.5, opacity: 0 } : undefined}
+      animate:flip={enableAnimations ? { duration: 300, easing: quintOut, delay: 200 } : undefined}
     >
       {#if isAbsent}
         <AbsentMemberTag 

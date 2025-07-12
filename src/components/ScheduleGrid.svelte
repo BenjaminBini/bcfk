@@ -16,12 +16,24 @@
     absenceData,
     currentWeekOffset,
     navigationDirection,
-    showLabel,
+    enableAnimations,
     weekNavigationLogic,
     absenceManagement,
     modalManager,
     onDeleteSpecificAssignment
   } = $props();
+
+  // State to control the "Aujourd'hui" label animation
+  let showTodayLabel = $state(false);
+
+  // Show the today label with animation 0.5 seconds after animations are enabled
+  $effect(() => {
+    if (enableAnimations && !showTodayLabel) {
+      setTimeout(() => {
+        showTodayLabel = true;
+      }, 500);
+    }
+  });
 
   // Helper functions that use the management objects directly
   function isCurrentDay(dayIndex) {
@@ -58,16 +70,17 @@
   
   <!-- Label grid positioned above main grid -->
   <div class="relative">
-    <div class="grid grid-cols-planning gap-px w-full]">
+    <div class="grid grid-cols-planning gap-px w-full">
       <!-- Empty corner cell -->
-      <div class="w-14"></div>
+      <div class="w-14 h-6"></div>
       <!-- Label cells for each day -->
       {#each weekDays as _, dayIndex}
-        <div class="flex justify-center">
+        <div class="flex justify-center h-6">
           {#if isCurrentDay(dayIndex)}
             <div 
               class="hidden px-2 py-1 text-xs font-medium text-blue-100 whitespace-nowrap rounded-t-md border border-b-0 shadow-lg backdrop-blur-sm transition-transform duration-300 ease-out md:block bg-blue-600/90 border-blue-400/50"
-              style="transform: translateY({showLabel ? '0' : '28px'});"
+              class:translate-y-0={showTodayLabel}
+              class:translate-y-7={!showTodayLabel}
             >
               Aujourd'hui
             </div>
@@ -107,6 +120,7 @@
               {weeklyAbsences}
               {isMemberAbsent}
               {getAbsencePeriod}
+              {enableAnimations}
               onMarkAbsent={handleMarkAbsent}
               onAddMember={handleAddMember}
               onDeleteSpecificAssignment={onDeleteSpecificAssignment}
@@ -127,6 +141,7 @@
               {weeklyAbsences}
               {isMemberAbsent}
               {getAbsencePeriod}
+              {enableAnimations}
               onMarkAbsent={handleMarkAbsent}
               onAddMember={handleAddMember}
               onDeleteSpecificAssignment={onDeleteSpecificAssignment}

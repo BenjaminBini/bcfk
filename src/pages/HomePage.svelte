@@ -18,7 +18,6 @@
   let currentWeekOffset = $state(0);
   let navigationDirection = $state('next');
   let isNavigating = $state(false);
-  let showLabel = $state(false);
 
   // Component instances to access their functions
   let weekNavigationLogic = $state();
@@ -30,6 +29,26 @@
   let isComponentsReady = $derived(
     weekNavigationLogic && absenceManagement && assignmentManagement && modalManager
   );
+
+  // Track initial data loading state
+  let isInitialDataLoaded = $state(false);
+  let hasDataLoaded = $derived(
+    $assignments && 
+    $assignments.length >= 0 && 
+    weeklyAbsences && 
+    slotSchedule && 
+    slotSchedule.length >= 0
+  );
+
+  // Mark initial data as loaded after everything is ready and data is present
+  $effect(() => {
+    if (hasDataLoaded && !isInitialDataLoaded) {
+      // Add a small delay to ensure all data is fully processed
+      setTimeout(() => {
+        isInitialDataLoaded = true;
+      }, 100);
+    }
+  });
 
   const weekDays = [
     "Lundi",
@@ -45,10 +64,7 @@
     await assignmentActions.loadData();
     await handleWeekChange();
     
-    // Show label with animation after 100ms delay
-    setTimeout(() => {
-      showLabel = true;
-    }, 100);
+  
   });
 
   async function handleWeekChange() {
@@ -133,7 +149,7 @@
   {weekNavigationLogic}
 />
 
-{#if isComponentsReady}
+{#if isComponentsReady && isInitialDataLoaded}
 <div class="py-4 md:py-10">
   <div class="px-2 mx-auto max-w-7xl sm:px-4 md:px-6 lg:px-8">
     <!-- Page header -->
@@ -157,7 +173,7 @@
           absenceData={absenceData()}
           {currentWeekOffset}
           {navigationDirection}
-          {showLabel}
+          enableAnimations={isInitialDataLoaded}
           {weekNavigationLogic}
           {absenceManagement}
           {modalManager}
