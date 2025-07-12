@@ -21,8 +21,8 @@
   <div class="px-2 mx-auto max-w-7xl sm:px-4 md:px-6 lg:px-8">
     <!-- Page header -->
     <PageHeader
-      title="Journal d'audit"
-      mobileTitle="Audit"
+      title="Historique des modifications"
+      mobileTitle="Historique"
       subtitle="Historique de toutes les actions effectuées sur le planning"
     />
 

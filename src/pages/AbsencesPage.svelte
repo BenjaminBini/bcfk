@@ -71,29 +71,29 @@
   <div class="px-2 mx-auto max-w-7xl sm:px-4 md:px-6 lg:px-8">
     <!-- Page header -->
     <PageHeader 
-      title="Gestion des Absences"
+      title="Absences"
       subtitle="Gérer les périodes d'absence des membres"
     />
 
     <!-- Content -->
     <div class="mt-4 md:mt-8">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-3 md:gap-8">
         
         <!-- Add Absence Form -->
         <div class="lg:col-span-1">
-          <div class="bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-slate-800/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-700/50 p-6">
-            <h3 class="text-lg font-medium text-transparent bg-gradient-to-r from-white to-slate-200 bg-clip-text mb-4">Ajouter une Absence</h3>
+          <div class="p-6 bg-gradient-to-br rounded-2xl border shadow-2xl backdrop-blur-xl from-slate-800/90 via-slate-900/95 to-slate-800/90 border-slate-700/50">
+            <h3 class="mb-4 text-lg font-medium text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-200">Ajouter une Absence</h3>
             
             <form onsubmit={preventDefault(handleSubmit)} class="space-y-4">
               <!-- Member Selection -->
               <div>
-                <label for="member" class="block text-sm font-medium text-gray-300 mb-2">
+                <label for="member" class="block mb-2 text-sm font-medium text-gray-300">
                   Membre
                 </label>
                 <select
                   id="member"
                   bind:value={selectedMember}
-                  class="w-full px-3 py-2 bg-gradient-to-r from-slate-700/80 to-slate-600/80 backdrop-blur-sm border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all duration-300"
+                  class="px-3 py-2 w-full text-white bg-gradient-to-r rounded-lg border backdrop-blur-sm transition-all duration-300 from-slate-700/80 to-slate-600/80 border-slate-600/50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50"
                   required
                 >
                   <option value="">Sélectionner un membre</option>
@@ -105,28 +105,28 @@
 
               <!-- Start Date -->
               <div>
-                <label for="startDate" class="block text-sm font-medium text-gray-300 mb-2">
+                <label for="startDate" class="block mb-2 text-sm font-medium text-gray-300">
                   Date de début
                 </label>
                 <input
                   id="startDate"
                   type="date"
                   bind:value={startDate}
-                  class="w-full px-3 py-2 bg-gradient-to-r from-slate-700/80 to-slate-600/80 backdrop-blur-sm border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all duration-300"
+                  class="px-3 py-2 w-full text-white bg-gradient-to-r rounded-lg border backdrop-blur-sm transition-all duration-300 from-slate-700/80 to-slate-600/80 border-slate-600/50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50"
                   required
                 />
               </div>
 
               <!-- End Date -->
               <div>
-                <label for="endDate" class="block text-sm font-medium text-gray-300 mb-2">
+                <label for="endDate" class="block mb-2 text-sm font-medium text-gray-300">
                   Date de fin
                 </label>
                 <input
                   id="endDate"
                   type="date"
                   bind:value={endDate}
-                  class="w-full px-3 py-2 bg-gradient-to-r from-slate-700/80 to-slate-600/80 backdrop-blur-sm border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all duration-300"
+                  class="px-3 py-2 w-full text-white bg-gradient-to-r rounded-lg border backdrop-blur-sm transition-all duration-300 from-slate-700/80 to-slate-600/80 border-slate-600/50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50"
                   required
                 />
               </div>
@@ -135,7 +135,7 @@
               <button
                 type="submit"
                 disabled={isSubmitting}
-                class="w-full px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:from-indigo-400 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-105"
+                class="px-4 py-2 w-full text-white bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg shadow-lg transition-all duration-300 hover:from-indigo-400 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 disabled:opacity-50 disabled:cursor-not-allowed shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-105"
               >
                 {isSubmitting ? 'Ajout en cours...' : 'Ajouter l\'absence'}
               </button>
@@ -146,9 +146,9 @@
         <!-- Absences Table -->
         <div class="lg:col-span-2">
           <ContentWrapper isLoading={$isLoading} error={$error}>
-            <div class="bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-slate-800/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-700/50 overflow-hidden">
-              <div class="px-6 py-4 border-b border-slate-700/50 bg-gradient-to-r from-slate-800/80 to-slate-900/80 backdrop-blur-sm">
-                <h3 class="text-lg font-medium text-transparent bg-gradient-to-r from-white to-slate-200 bg-clip-text">Liste des Absences</h3>
+            <div class="overflow-hidden bg-gradient-to-br rounded-2xl border shadow-2xl backdrop-blur-xl from-slate-800/90 via-slate-900/95 to-slate-800/90 border-slate-700/50">
+              <div class="px-6 py-4 bg-gradient-to-r border-b backdrop-blur-sm border-slate-700/50 from-slate-800/80 to-slate-900/80">
+                <h3 class="text-lg font-medium text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-200">Liste des Absences</h3>
               </div>
               
               {#if $absences.length === 0}
@@ -157,28 +157,28 @@
                 </div>
               {:else}
                 <!-- Desktop table -->
-                <div class="hidden md:block overflow-x-auto">
+                <div class="hidden overflow-x-auto md:block">
                   <table class="min-w-full divide-y divide-slate-700/50">
-                    <thead class="bg-gradient-to-r from-slate-800/70 to-slate-700/70 backdrop-blur-sm">
+                    <thead class="bg-gradient-to-r backdrop-blur-sm from-slate-800/70 to-slate-700/70">
                       <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-200 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-200">
                           Membre
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-200 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-slate-200">
                           Période
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-slate-200 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-right uppercase text-slate-200">
                           Actions
                         </th>
                       </tr>
                     </thead>
-                    <tbody class="bg-gradient-to-br from-slate-800/50 to-slate-700/60 backdrop-blur-sm divide-y divide-slate-700/50">
+                    <tbody class="bg-gradient-to-br divide-y backdrop-blur-sm from-slate-800/50 to-slate-700/60 divide-slate-700/50">
                       {#each $absences as absence (absence.id)}
-                        <tr class="hover:bg-slate-700/70 transition-all duration-300">
+                        <tr class="transition-all duration-300 hover:bg-slate-700/70">
                           <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
-                              <div class="flex-shrink-0 h-8 w-8">
-                                <div class="h-8 w-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+                              <div class="flex-shrink-0 w-8 h-8">
+                                <div class="flex justify-center items-center w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full shadow-lg shadow-indigo-500/25">
                                   <span class="text-sm font-medium text-white">
                                     {absence.first_name.charAt(0)}
                                   </span>
@@ -196,13 +196,13 @@
                               {formatPeriod(absence.start_date, absence.end_date)}
                             </div>
                           </td>
-                          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                             <button
                               onclick={() => handleDelete(absence.id)}
-                              class="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+                              class="p-2 text-red-400 rounded-lg transition-all duration-300 hover:text-red-300 hover:bg-red-500/10 focus:outline-none focus:ring-2 focus:ring-red-500/50"
                             >
                               <span class="sr-only">Supprimer</span>
-                              <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                              <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                 <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clip-rule="evenodd" />
                               </svg>
                             </button>
@@ -214,13 +214,13 @@
                 </div>
                 
                 <!-- Mobile card layout -->
-                <div class="md:hidden space-y-4 p-4">
+                <div class="p-4 space-y-4 md:hidden">
                   {#each $absences as absence (absence.id)}
-                    <div class="bg-gradient-to-br from-slate-700/60 to-slate-600/60 backdrop-blur-sm rounded-lg p-4 border border-slate-600/50">
-                      <div class="flex items-center justify-between">
+                    <div class="p-4 bg-gradient-to-br rounded-lg border backdrop-blur-sm from-slate-700/60 to-slate-600/60 border-slate-600/50">
+                      <div class="flex justify-between items-center">
                         <div class="flex items-center space-x-3">
-                          <div class="flex-shrink-0 h-8 w-8">
-                            <div class="h-8 w-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+                          <div class="flex-shrink-0 w-8 h-8">
+                            <div class="flex justify-center items-center w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full shadow-lg shadow-indigo-500/25">
                               <span class="text-sm font-medium text-white">
                                 {absence.first_name.charAt(0)}
                               </span>
@@ -237,10 +237,10 @@
                         </div>
                         <button
                           onclick={() => handleDelete(absence.id)}
-                          class="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+                          class="p-2 text-red-400 rounded-lg transition-all duration-300 hover:text-red-300 hover:bg-red-500/10 focus:outline-none focus:ring-2 focus:ring-red-500/50"
                         >
                           <span class="sr-only">Supprimer</span>
-                          <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                          <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clip-rule="evenodd" />
                           </svg>
                         </button>

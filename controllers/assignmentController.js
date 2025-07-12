@@ -12,13 +12,13 @@ class AssignmentController {
     try {
       const data = await this.assignmentService.getAssignmentData();
       
-      res.render('assignments', {
+      res.render("assignments", {
         ...data,
-        title: 'Affectations par Défaut',
-        pageTitle: 'Gestion des Affectations par Défaut',
-        subtitle: 'Configurer les défauts hebdomadaires',
-        currentPage: 'assignments',
-        pageScript: 'assignments.js'
+        title: "Affectations hebdomadaires",
+        pageTitle: "Affectations hebdomadaires",
+        subtitle: "Configurer les affectations hebdomadaires",
+        currentPage: "assignments",
+        pageScript: "assignments.js",
       });
     } catch (error) {
       next(error);
