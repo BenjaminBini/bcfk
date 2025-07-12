@@ -1,9 +1,10 @@
 const { asyncHandler } = require('../middleware/errorHandler');
 
 class AssignmentController {
-  constructor(assignmentService, memberService) {
+  constructor(assignmentService, memberService, auditService = null) {
     this.assignmentService = assignmentService;
     this.memberService = memberService;
+    this.auditService = auditService;
   }
 
   // GET /assignments
@@ -34,6 +35,26 @@ class AssignmentController {
       }
       
       const member = await this.memberService.addMemberFromFullName(name);
+      
+      // Log the creation action
+      if (this.auditService && member && member.id) {
+        const userInfo = this.auditService.extractUserInfo(req);
+        const rollbackData = this.auditService.generateRollbackData('CREATE', 'member', null, member);
+        
+        // Get complete member data for audit log (members don't need joins, but for consistency)
+        const completeMemberData = await this.auditService.getEntityData('member', member.id);
+        
+        await this.auditService.logAction(
+          'CREATE',
+          'member',
+          member.id,
+          null,
+          completeMemberData || member,
+          userInfo,
+          rollbackData
+        );
+      }
+      
       res.json(member);
     } catch (error) {
       next(error);
@@ -98,6 +119,26 @@ class AssignmentController {
       }
       
       const assignment = await this.assignmentService.createRecurringAssignment(weekday, slot_type, member_id);
+      
+      // Log the creation action
+      if (this.auditService && assignment && assignment.id) {
+        const userInfo = this.auditService.extractUserInfo(req);
+        const rollbackData = this.auditService.generateRollbackData('CREATE', 'recurring_assignment', null, assignment);
+        
+        // Get complete assignment data with member info for audit log
+        const completeAssignmentData = await this.auditService.getEntityData('recurring_assignment', assignment.id);
+        
+        await this.auditService.logAction(
+          'CREATE',
+          'recurring_assignment',
+          assignment.id,
+          null,
+          completeAssignmentData || assignment,
+          userInfo,
+          rollbackData
+        );
+      }
+      
       res.json(assignment);
     } catch (error) {
       next(error);
@@ -113,7 +154,30 @@ class AssignmentController {
         return res.status(400).json({ error: 'Assignment ID is required' });
       }
       
+      // Get existing data before deletion for audit log
+      let oldData = null;
+      if (this.auditService) {
+        oldData = await this.auditService.getEntityData('recurring_assignment', parseInt(id));
+      }
+      
       await this.assignmentService.deleteRecurringAssignment(parseInt(id));
+      
+      // Log the deletion action
+      if (this.auditService && oldData) {
+        const userInfo = this.auditService.extractUserInfo(req);
+        const rollbackData = this.auditService.generateRollbackData('DELETE', 'recurring_assignment', oldData, null);
+        
+        await this.auditService.logAction(
+          'DELETE',
+          'recurring_assignment',
+          parseInt(id),
+          oldData,
+          null,
+          userInfo,
+          rollbackData
+        );
+      }
+      
       res.json({ success: true });
     } catch (error) {
       next(error);

@@ -3,14 +3,14 @@ const PlanningController = require('../controllers/planningController');
 const AssignmentController = require('../controllers/assignmentController');
 const AbsenceController = require('../controllers/absenceController');
 
-function createRoutes(planningService, assignmentService, memberService, absenceService) {
+function createRoutes(planningService, assignmentService, memberService, absenceService, auditService) {
   const router = express.Router();
   const path = require('path');
   
   // Initialize controllers
-  const planningController = new PlanningController(planningService);
-  const assignmentController = new AssignmentController(assignmentService, memberService);
-  const absenceController = new AbsenceController(absenceService);
+  const planningController = new PlanningController(planningService, auditService);
+  const assignmentController = new AssignmentController(assignmentService, memberService, auditService);
+  const absenceController = new AbsenceController(absenceService, auditService);
 
   // Planning routes (legacy)
   router.get('/planning', planningController.getPlanning.bind(planningController));
@@ -33,6 +33,30 @@ function createRoutes(planningService, assignmentService, memberService, absence
   router.delete('/api/absences/:id', absenceController.deleteAbsence.bind(absenceController));
   router.get('/api/absences/date-range', absenceController.getAbsencesForDateRange.bind(absenceController));
   router.get('/api/absences/date/:date', absenceController.getAbsentMembersForDate.bind(absenceController));
+
+  // Audit logs API routes
+  router.get('/api/audit-logs', async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit) || 100;
+      const offset = parseInt(req.query.offset) || 0;
+      const logs = await auditService.getAuditLogs(limit, offset);
+      res.json(logs);
+    } catch (error) {
+      console.error('Error fetching audit logs:', error);
+      res.status(500).json({ error: 'Failed to fetch audit logs' });
+    }
+  });
+
+  router.get('/api/audit-logs/entity/:entityType/:entityId', async (req, res) => {
+    try {
+      const { entityType, entityId } = req.params;
+      const logs = await auditService.getAuditLogsByEntity(entityType, parseInt(entityId));
+      res.json(logs);
+    } catch (error) {
+      console.error('Error fetching entity audit logs:', error);
+      res.status(500).json({ error: 'Failed to fetch entity audit logs' });
+    }
+  });
 
   // Serve Svelte app for all non-API routes
   router.get('*', (req, res) => {

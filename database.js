@@ -67,6 +67,21 @@ class Database {
           FOREIGN KEY (member_id) REFERENCES members(id)
         )
       `);
+
+      // Audit logs table
+      this.db.run(`
+        CREATE TABLE IF NOT EXISTS audit_logs (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          action_type TEXT NOT NULL, -- 'CREATE', 'UPDATE', 'DELETE'
+          entity_type TEXT NOT NULL, -- 'member', 'recurring_assignment', 'specific_assignment', 'absence'
+          entity_id INTEGER, -- ID of the affected entity (null for CREATE before entity creation)
+          old_data TEXT, -- JSON of entity state before action (null for CREATE)
+          new_data TEXT, -- JSON of entity state after action (null for DELETE)
+          user_info TEXT, -- JSON with user details if available
+          timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+          rollback_data TEXT -- JSON with data needed to rollback this action
+        )
+      `);
     });
   }
 
@@ -251,6 +266,53 @@ class Database {
          OR (a.end_date >= ? AND a.end_date <= ?)
       ORDER BY m.first_name, m.last_name
     `, [endDate, startDate, startDate, endDate, startDate, endDate], callback);
+  }
+
+  // Audit logging methods
+  logAction(actionType, entityType, entityId, oldData, newData, userInfo, rollbackData, callback) {
+    const logEntry = {
+      action_type: actionType,
+      entity_type: entityType,
+      entity_id: entityId,
+      old_data: oldData ? JSON.stringify(oldData) : null,
+      new_data: newData ? JSON.stringify(newData) : null,
+      user_info: userInfo ? JSON.stringify(userInfo) : null,
+      rollback_data: rollbackData ? JSON.stringify(rollbackData) : null
+    };
+
+    this.db.run(`
+      INSERT INTO audit_logs (action_type, entity_type, entity_id, old_data, new_data, user_info, rollback_data)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `, [
+      logEntry.action_type,
+      logEntry.entity_type,
+      logEntry.entity_id,
+      logEntry.old_data,
+      logEntry.new_data,
+      logEntry.user_info,
+      logEntry.rollback_data
+    ], function(err) {
+      if (err) return callback && callback(err);
+      if (callback) callback(null, { id: this.lastID, ...logEntry });
+    });
+  }
+
+  getAuditLogs(limit = 100, offset = 0, callback) {
+    this.db.all(`
+      SELECT al.id, al.action_type, al.entity_type, al.entity_id, 
+             al.old_data, al.new_data, al.timestamp, al.rollback_data
+      FROM audit_logs al
+      ORDER BY al.timestamp DESC
+      LIMIT ? OFFSET ?
+    `, [limit, offset], callback);
+  }
+
+  getAuditLogsByEntity(entityType, entityId, callback) {
+    this.db.all(`
+      SELECT * FROM audit_logs 
+      WHERE entity_type = ? AND entity_id = ?
+      ORDER BY timestamp DESC
+    `, [entityType, entityId], callback);
   }
 
   close() {

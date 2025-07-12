@@ -22,6 +22,9 @@
 </script>
 
 {#if iconData}
+{#if iconData.icon}
+  {@html iconData.icon}
+{:else}
   <svg 
     class={classes}
     viewBox={iconData.viewBox}
@@ -38,6 +41,7 @@
       clip-rule={iconData.clipRule || 'nonzero'}
     />
   </svg>
+{/if}
 {:else}
   <!-- Fallback for unknown icon names -->
   <div class={classes} title="Unknown icon: {name}">?</div>

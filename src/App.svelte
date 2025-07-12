@@ -4,6 +4,7 @@
   import HomePage from "./pages/HomePage.svelte";
   import AssignmentsPage from "./pages/AssignmentsPage.svelte";
   import AbsencesPage from "./pages/AbsencesPage.svelte";
+  import AuditLogsPage from "./pages/AuditLogsPage.svelte";
   import LegendModal from "./components/LegendModal.svelte";
   import { showLegendModal } from "./stores/legend.js";
   import { onMount } from "svelte";
@@ -12,6 +13,7 @@
     "/": HomePage,
     "/assignments": AssignmentsPage,
     "/absences": AbsencesPage,
+    "/audit-logs": AuditLogsPage,
   };
 
   let showMobileMenu = $state(false);
@@ -150,6 +152,16 @@
                 >
                   🏠 Gestion Absences
                 </a>
+                <a
+                  href="/audit-logs"
+                  use:link
+                  onclick={closeMobileMenu}
+                  class="block w-full px-4 py-3 text-sm font-medium text-left rounded-lg transition-all duration-200 {$location === '/audit-logs' 
+                    ? 'text-white bg-indigo-500/20 border border-indigo-400/30' 
+                    : 'text-slate-300 hover:text-white hover:bg-slate-700/40'}"
+                >
+                  📋 Journal d'Audit
+                </a>
               </div>
             {/if}
           </div>
@@ -185,6 +197,16 @@
             : 'border-transparent text-slate-300 hover:border-slate-400 hover:text-white hover:bg-gradient-to-t hover:from-slate-700/20 hover:to-transparent'}"
         >
           Gestion Absences
+        </a>
+        <a
+          href="/audit-logs"
+          use:link
+          class="inline-flex items-center border-b-2 px-4 pt-1 text-sm font-medium rounded-t-lg transition-all duration-300 {$location ===
+          '/audit-logs'
+            ? 'border-indigo-400 text-white bg-gradient-to-t from-indigo-500/10 to-transparent'
+            : 'border-transparent text-slate-300 hover:border-slate-400 hover:text-white hover:bg-gradient-to-t hover:from-slate-700/20 hover:to-transparent'}"
+        >
+          Journal d'Audit
         </a>
       </div>
     </div>

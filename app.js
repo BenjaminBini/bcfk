@@ -6,6 +6,7 @@ const MemberService = require('./services/memberService');
 const PlanningService = require('./services/planningService');
 const AssignmentService = require('./services/assignmentService');
 const AbsenceService = require('./services/absenceService');
+const AuditService = require('./services/auditService');
 const createRoutes = require('./routes');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
@@ -21,6 +22,8 @@ class App {
 
   setupServices() {
     console.log('Setting up services...');
+    this.auditService = new AuditService(this.db);
+    console.log('AuditService created');
     this.memberService = new MemberService(this.db);
     console.log('MemberService created');
     this.planningService = new PlanningService(this.db, this.memberService);
@@ -64,7 +67,8 @@ class App {
       this.planningService,
       this.assignmentService,
       this.memberService,
-      this.absenceService
+      this.absenceService,
+      this.auditService
     );
     this.app.use('/', routes);
     console.log('Routes setup complete');

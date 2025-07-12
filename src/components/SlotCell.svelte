@@ -47,12 +47,13 @@
     }));
     let presentMembersCount = $derived(slotAssignments.filter(a => !isMemberAbsent(a.member_id, dayIndex)));
     let shouldShowWarning =  $derived(slotType === 'ouverture' ? presentMembersCount.length === 0 : presentMembersCount.length <= 1);
+    console.log(slotType, presentMembersCount.length);
   let warningText = $derived(slotType === 'ouverture' ? 'Aucun membre' : 
                   (presentMembersCount === 0 ? 'Aucun membre' : 'Membre seul'));
   
 </script>
 
-<div class="flex relative flex-col w-full h-full px-2 md:px-0">
+<div class="flex relative flex-col px-2 w-full h-full md:px-0">
   <SlotWarning {shouldShowWarning} {warningText} />
   
   <div class="flex flex-1 justify-center items-center" class:pt-16={shouldShowWarning}>
