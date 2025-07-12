@@ -13,6 +13,7 @@
    * @property {any} [onMarkAbsent] - Function to handle marking member as absent
    * @property {any} [onAddMember] - Function to handle adding member manually
    * @property {any} [onDeleteSpecificAssignment] - Function to handle deleting specific assignment
+   * @property {any} [onShowAbsenceDetails] - Function to handle showing absence details
    */
 
   /** @type {Props} */
@@ -26,7 +27,8 @@
     enableAnimations = true,
     onMarkAbsent = null,
     onAddMember = null,
-    onDeleteSpecificAssignment = null
+    onDeleteSpecificAssignment = null,
+    onShowAbsenceDetails = null
   } = $props();
   
   let slotAssignments = $derived(assignments
@@ -68,6 +70,7 @@
       {onMarkAbsent}
       {onDeleteSpecificAssignment}
       {onAddMember}
+      {onShowAbsenceDetails}
     />
   </div>
 </div>

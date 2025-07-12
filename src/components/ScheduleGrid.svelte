@@ -60,6 +60,12 @@
     modalManager.handleAddMember(dayIndex, slotType);
   }
 
+  function handleShowAbsenceDetails(memberName, memberId) {
+    // Trouver les données d'absence pour ce membre
+    const absenceData = weeklyAbsences.find((absence) => absence.member_id === memberId);
+    modalManager.handleShowAbsenceDetails(memberName, absenceData);
+  }
+
 </script>
 
 <div class="block relative">
@@ -78,7 +84,7 @@
         <div class="flex justify-center h-6">
           {#if isCurrentDay(dayIndex)}
             <div 
-              class="hidden px-2 py-1 text-xs font-medium text-blue-100 whitespace-nowrap rounded-t-md border border-b-0 shadow-lg backdrop-blur-sm transition-transform duration-300 ease-out md:block bg-blue-600/90 border-blue-400/50"
+              class="px-2 py-1 text-xs font-medium text-blue-100 whitespace-nowrap rounded-t-md border border-b-0 shadow-lg backdrop-blur-sm transition-transform duration-300 ease-out bg-blue-600/90 border-blue-400/50"
               class:translate-y-0={showTodayLabel}
               class:translate-y-7={!showTodayLabel}
             >
@@ -124,6 +130,7 @@
               onMarkAbsent={handleMarkAbsent}
               onAddMember={handleAddMember}
               onDeleteSpecificAssignment={onDeleteSpecificAssignment}
+              onShowAbsenceDetails={handleShowAbsenceDetails}
             />
           </Cell>
         {/each}
@@ -145,6 +152,7 @@
               onMarkAbsent={handleMarkAbsent}
               onAddMember={handleAddMember}
               onDeleteSpecificAssignment={onDeleteSpecificAssignment}
+              onShowAbsenceDetails={handleShowAbsenceDetails}
             />
           </Cell>
         {/each}

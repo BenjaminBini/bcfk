@@ -56,9 +56,5 @@
       </div>
     {/if}
     
-    <!-- Mobile today indicator only -->
-    {#if isToday}
-      <div class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-400 rounded-full shadow-lg md:hidden"></div>
-    {/if}
   </div>
 </div>

@@ -1,5 +1,6 @@
 <script>
   import AbsenceConfirmModal from "./AbsenceConfirmModal.svelte";
+  import AbsenceDetailsModal from "./AbsenceDetailsModal.svelte";
   import MemberSelector from "./MemberSelector.svelte";
   import AssignmentConfirmModal from "./AssignmentConfirmModal.svelte";
 
@@ -15,6 +16,11 @@
   let selectedMemberId = null;
   let selectedMemberName = $state("");
   let selectedDayIndex = $state(0);
+
+  // Modal state for absence details
+  let showAbsenceDetailsModal = $state(false);
+  let absenceDetailsMemberName = $state("");
+  let absenceDetailsData = $state(null);
 
   // Modal state for member assignment
   let showMemberSelectionModal = $state(false);
@@ -50,6 +56,18 @@
   }
 
   // Handle adding member to slot
+  function handleShowAbsenceDetails(memberName, absenceData) {
+    absenceDetailsMemberName = memberName;
+    absenceDetailsData = absenceData;
+    showAbsenceDetailsModal = true;
+  }
+
+  function closeAbsenceDetailsModal() {
+    showAbsenceDetailsModal = false;
+    absenceDetailsMemberName = "";
+    absenceDetailsData = null;
+  }
+
   function handleAddMember(dayIndex, slotType) {
     selectedDayForAssignment = dayIndex;
     selectedSlotForAssignment = slotType;
@@ -100,7 +118,7 @@
   }
 
   // Export the handler functions
-  export { handleMarkAbsent, handleAddMember };
+  export { handleMarkAbsent, handleAddMember, handleShowAbsenceDetails };
 </script>
 
 <!-- Absence Confirmation Modal -->
@@ -113,6 +131,14 @@
   dayIndex={selectedDayIndex}
   on:confirm={confirmAbsence}
   on:cancel={closeAbsenceModal}
+/>
+
+<!-- Absence Details Modal -->
+<AbsenceDetailsModal
+  show={showAbsenceDetailsModal}
+  memberName={absenceDetailsMemberName}
+  absenceData={absenceDetailsData}
+  on:close={closeAbsenceDetailsModal}
 />
 
 <!-- Member Selection Modal -->

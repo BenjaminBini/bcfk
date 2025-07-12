@@ -18,6 +18,7 @@
    * @property {any} [onMarkAbsent]
    * @property {any} [onDeleteSpecificAssignment]
    * @property {any} [onAddMember]
+   * @property {any} [onShowAbsenceDetails]
    */
 
   /** @type {Props} */
@@ -31,7 +32,8 @@
     enableAnimations = true,
     onMarkAbsent = null,
     onDeleteSpecificAssignment = null,
-    onAddMember = null
+    onAddMember = null,
+    onShowAbsenceDetails = null
   } = $props();
 </script>
 
@@ -47,6 +49,7 @@
         <AbsentMemberTag 
           text={assignment.first_name}
           tooltip="Absent du {getAbsencePeriod(assignment.member_id)}"
+          onShowAbsenceDetails={() => onShowAbsenceDetails?.(assignment.first_name, assignment.member_id)}
         />
       {:else if assignment.is_specific_date}
         <SpecificDateMemberTag 
