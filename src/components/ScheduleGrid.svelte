@@ -12,12 +12,13 @@
   let { 
     weekDays,
     slotSchedule,
+    weeklyAbsences,
+    absenceData,
     currentWeekOffset,
     navigationDirection,
     showLabel,
     weekNavigationLogic,
     absenceManagement,
-    assignmentManagement,
     modalManager,
     onDeleteSpecificAssignment
   } = $props();
@@ -47,53 +48,6 @@
     modalManager.handleAddMember(dayIndex, slotType);
   }
 
-  // Get weekly absences from the absence management component
-  let weeklyAbsencesStore = $derived(absenceManagement?.weeklyAbsences);
-  let weeklyAbsences = $derived(weeklyAbsencesStore && $weeklyAbsencesStore ? $weeklyAbsencesStore : []);
-
-  // Access specific assignments store at top level  
-  let specificAssignmentsStore = $derived(assignmentManagement?.specificAssignments);
-  
-  // Combine base assignments with specific assignments
-  let combinedAssignments = $derived([
-    ...(slotSchedule || []),
-    ...(specificAssignmentsStore && $specificAssignmentsStore ? $specificAssignmentsStore : []).map((assignment) => ({
-      ...assignment,
-      weekday:
-        new Date(assignment.date).getDay() === 0
-          ? 6
-          : new Date(assignment.date).getDay() - 1,
-      is_specific_date: assignment.source === "manual",
-    })),
-  ]);
-
-  // Calculate absence data for all days reactively
-  let calculatedAbsenceData = $derived(() => {
-    if (!combinedAssignments || !weeklyAbsences || weeklyAbsences.length === 0) {
-      return weekDays.map(() => ({ uniqueAbsentMembers: [] }));
-    }
-
-    return weekDays.map((_, dayIndex) => {
-      const absentScheduled = absenceManagement?.getAbsentScheduledMembers?.(
-        dayIndex,
-        "ouverture",
-        combinedAssignments
-      )?.concat(absenceManagement?.getAbsentScheduledMembers?.(dayIndex, "fermeture", combinedAssignments) || []) || [];
-      
-      const absentOthers = absenceManagement?.getOtherAbsentMembers?.(dayIndex, combinedAssignments) || [];
-
-      // Combine all absent members and remove duplicates
-      const allAbsentMembers = [...absentScheduled, ...absentOthers];
-      const uniqueAbsentMembers = allAbsentMembers.filter(
-        (member, index, self) =>
-          self.findIndex((m) => m.member_id === member.member_id) === index
-      );
-
-      return {
-        uniqueAbsentMembers,
-      };
-    });
-  });
 </script>
 
 <div class="block relative">
@@ -147,7 +101,7 @@
         {#each weekDays as _, dayIndex}
           <Cell isToday={isCurrentDay(dayIndex)}>
             <SlotCell
-              assignments={combinedAssignments}
+              assignments={slotSchedule}
               slotType="ouverture"
               {dayIndex}
               {weeklyAbsences}
@@ -167,7 +121,7 @@
         {#each weekDays as _, dayIndex}
           <Cell isToday={isCurrentDay(dayIndex)}>
             <SlotCell
-              assignments={combinedAssignments}
+              assignments={slotSchedule}
               slotType="fermeture"
               {dayIndex}
               {weeklyAbsences}
@@ -185,7 +139,7 @@
           <RowHeaderCell title="Absences" iconName="userOff" />
         </RowHeader>
         {#each weekDays as _, dayIndex}
-          {@const dayAbsenceData = calculatedAbsenceData()[dayIndex] || {
+          {@const dayAbsenceData = absenceData[dayIndex] || {
             uniqueAbsentMembers: [],
           }}
 

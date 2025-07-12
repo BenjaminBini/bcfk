@@ -62,8 +62,53 @@
       return await assignmentManagement.deleteSpecificAssignment(assignmentId, memberName);
   }
 
-  // For now, just pass the base assignments - ScheduleGrid will handle combining with specific assignments
-  let slotSchedule = $derived($assignments || []);
+  // Access stores at top level for reactive computations
+  let specificAssignmentsStore = $derived(assignmentManagement?.specificAssignments);
+  let weeklyAbsencesStore = $derived(absenceManagement?.weeklyAbsences);
+
+  // Combine base assignments with specific assignments
+  let slotSchedule = $derived([
+    ...($assignments || []),
+    ...(specificAssignmentsStore && $specificAssignmentsStore ? $specificAssignmentsStore : []).map((assignment) => ({
+      ...assignment,
+      weekday:
+        new Date(assignment.date).getDay() === 0
+          ? 6
+          : new Date(assignment.date).getDay() - 1,
+      is_specific_date: assignment.source === "manual",
+    })),
+  ]);
+
+  // Get weekly absences data
+  let weeklyAbsences = $derived(weeklyAbsencesStore && $weeklyAbsencesStore ? $weeklyAbsencesStore : []);
+
+  // Calculate absence data for all days reactively
+  let absenceData = $derived(() => {
+    if (!slotSchedule || !weeklyAbsences || weeklyAbsences.length === 0) {
+      return weekDays.map(() => ({ uniqueAbsentMembers: [] }));
+    }
+
+    return weekDays.map((_, dayIndex) => {
+      const absentScheduled = absenceManagement?.getAbsentScheduledMembers?.(
+        dayIndex,
+        "ouverture",
+        slotSchedule
+      )?.concat(absenceManagement?.getAbsentScheduledMembers?.(dayIndex, "fermeture", slotSchedule) || []) || [];
+      
+      const absentOthers = absenceManagement?.getOtherAbsentMembers?.(dayIndex, slotSchedule) || [];
+
+      // Combine all absent members and remove duplicates
+      const allAbsentMembers = [...absentScheduled, ...absentOthers];
+      const uniqueAbsentMembers = allAbsentMembers.filter(
+        (member, index, self) =>
+          self.findIndex((m) => m.member_id === member.member_id) === index
+      );
+
+      return {
+        uniqueAbsentMembers,
+      };
+    });
+  });
 
 </script>
 
@@ -108,12 +153,13 @@
         <ScheduleGrid
           {weekDays}
           {slotSchedule}
+          {weeklyAbsences}
+          absenceData={absenceData()}
           {currentWeekOffset}
           {navigationDirection}
           {showLabel}
           {weekNavigationLogic}
           {absenceManagement}
-          {assignmentManagement}
           {modalManager}
           onDeleteSpecificAssignment={handleDeleteSpecificAssignment}
         />
