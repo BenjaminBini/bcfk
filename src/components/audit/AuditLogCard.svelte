@@ -1,5 +1,5 @@
 <script>
-  import Icon from "../Icon.svelte";
+  import Icon from "../common/Icon.svelte";
   import AuditLogDetails from "./AuditLogDetails.svelte";
   import AuditLogHeader from "./AuditLogHeader.svelte";
 
@@ -47,7 +47,7 @@
       {#if log.old_data || log.new_data}
         <div class="mt-2">
           <button
-            on:click={toggleDetails}
+            onclick={toggleDetails}
             class="text-xs text-blue-400 transition-colors cursor-pointer hover:text-blue-300"
           >
             {showDetails ? 'Masquer les détails' : 'Voir les détails'}

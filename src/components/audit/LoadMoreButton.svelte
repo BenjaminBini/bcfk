@@ -1,5 +1,5 @@
 <script>
-  import Icon from "../Icon.svelte";
+  import Icon from "../common/Icon.svelte";
 
   /**
    * @typedef {Object} Props
@@ -15,7 +15,7 @@
 {#if hasMore}
   <div class="text-center">
     <button
-      on:click={onLoadMore}
+      onclick={onLoadMore}
       disabled={isLoading}
       class="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:opacity-50 text-white rounded-lg transition-colors"
     >
