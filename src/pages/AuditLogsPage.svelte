@@ -1,7 +1,7 @@
 <script>
   import { onMount } from "svelte";
-  import PageHeader from "../components/PageHeader.svelte";
-  import ContentWrapper from "../components/ContentWrapper.svelte";
+  import PageHeader from "../components/layout/PageHeader.svelte";
+  import ContentWrapper from "../components/layout/ContentWrapper.svelte";
   import AuditLogsList from "../components/audit/AuditLogsList.svelte";
   import LoadMoreButton from "../components/audit/LoadMoreButton.svelte";
   import { auditLogs, isLoading, error, hasMoreLogs, auditLogActions, processAuditLog } from "../stores/auditLogs.js";

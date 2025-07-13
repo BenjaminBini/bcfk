@@ -1,6 +1,6 @@
 <script>
-  import MemberTag from './MemberTag.svelte';
-  import Icon from './Icon.svelte';
+  import MemberTag from '../members/MemberTag.svelte';
+  import Icon from '../common/Icon.svelte';
   
   let {
     assignments,

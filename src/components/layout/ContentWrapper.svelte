@@ -1,6 +1,6 @@
 <script>
-  import LoadingSpinner from './LoadingSpinner.svelte';
-  import ErrorMessage from './ErrorMessage.svelte';
+  import LoadingSpinner from '../common/LoadingSpinner.svelte';
+  import ErrorMessage from '../common/ErrorMessage.svelte';
   
   /**
    * @typedef {Object} Props

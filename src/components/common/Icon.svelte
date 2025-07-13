@@ -1,5 +1,5 @@
 <script>
-  import { getIcon } from '../lib/icons.js';
+  import { getIcon } from '../../lib/icons.js';
   
   /**
    * @typedef {Object} Props

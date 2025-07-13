@@ -1,5 +1,5 @@
 <script>
-  import WarningTag from './WarningTag.svelte';
+  import WarningTag from '../common/WarningTag.svelte';
   
   /**
    * @typedef {Object} Props

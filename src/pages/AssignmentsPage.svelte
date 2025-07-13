@@ -1,16 +1,16 @@
 <script>
   import { onMount } from 'svelte';
   import { assignmentActions, assignments, members, isLoading, error } from '../stores/assignments.js';
-  import MemberSelector from '../components/MemberSelector.svelte';
+  import MemberSelector from '../components/members/MemberSelector.svelte';
   import WeeklyScheduleGrid from '../components/table/WeeklyScheduleGrid.svelte';
   import ColumnHeader from '../components/table/ColumnHeader.svelte';
   import RowHeader from '../components/table/RowHeader.svelte';
   import Cell from '../components/table/Cell.svelte';
-  import DayHeaderCell from '../components/DayHeaderCell.svelte';
-  import SlotEditionCell from '../components/SlotEditionCell.svelte';
-  import ContentWrapper from '../components/ContentWrapper.svelte';
-  import PageHeader from '../components/PageHeader.svelte';
-  import RowHeaderCell from '../components/RowHeaderCell.svelte';
+  import DayHeaderCell from '../components/schedule/DayHeaderCell.svelte';
+  import SlotEditionCell from '../components/schedule/SlotEditionCell.svelte';
+  import ContentWrapper from '../components/layout/ContentWrapper.svelte';
+  import PageHeader from '../components/layout/PageHeader.svelte';
+  import RowHeaderCell from '../components/schedule/RowHeaderCell.svelte';
 
   onMount(() => {
     assignmentActions.loadData();

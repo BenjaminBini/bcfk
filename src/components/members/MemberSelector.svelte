@@ -1,7 +1,7 @@
 <script>
   import { createEventDispatcher } from 'svelte';
   import { fly, fade } from 'svelte/transition';
-  import Icon from './Icon.svelte';
+  import Icon from '../common/Icon.svelte';
   
   /**
    * @typedef {Object} Props

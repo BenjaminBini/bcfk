@@ -1,8 +1,8 @@
 <script>
-  import WeeklyScheduleGrid from "./table/WeeklyScheduleGrid.svelte";
-  import ColumnHeader from "./table/ColumnHeader.svelte";
-  import RowHeader from "./table/RowHeader.svelte";
-  import Cell from "./table/Cell.svelte";
+  import WeeklyScheduleGrid from "../table/WeeklyScheduleGrid.svelte";
+  import ColumnHeader from "../table/ColumnHeader.svelte";
+  import RowHeader from "../table/RowHeader.svelte";
+  import Cell from "../table/Cell.svelte";
   import SlotCell from "./SlotCell.svelte";
   import DayHeaderCell from "./DayHeaderCell.svelte";
   import RowHeaderCell from "./RowHeaderCell.svelte";

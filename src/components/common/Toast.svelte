@@ -1,5 +1,5 @@
 <script>
-  import { toasts, removeToast } from '../stores/toast.js';
+  import { toasts, removeToast } from '../../stores/toast.js';
   import { fly } from 'svelte/transition';
   import Icon from './Icon.svelte';
 

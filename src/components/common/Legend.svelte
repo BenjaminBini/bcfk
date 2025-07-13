@@ -1,12 +1,12 @@
 <script>
-  import AbsentMemberTag from "./AbsentMemberTag.svelte";
-  import RecurrentMemberTag from "./RecurrentMemberTag.svelte";
-  import SpecificDateMemberTag from "./SpecificDateMemberTag.svelte";
-  import AddMemberButton from "./AddMemberButton.svelte";
-  import LegendPanel from "./ui/LegendPanel.svelte";
-  import LegendItem from "./ui/LegendItem.svelte";
-  import LegendButton from "./ui/LegendButton.svelte";
-  import { getIcon } from "../lib/icons";
+  import AbsentMemberTag from "../members/AbsentMemberTag.svelte";
+  import RecurrentMemberTag from "../members/RecurrentMemberTag.svelte";
+  import SpecificDateMemberTag from "../members/SpecificDateMemberTag.svelte";
+  import AddMemberButton from "../members/AddMemberButton.svelte";
+  import LegendPanel from "../ui/LegendPanel.svelte";
+  import LegendItem from "../ui/LegendItem.svelte";
+  import LegendButton from "../ui/LegendButton.svelte";
+  import { getIcon } from "../../lib/icons";
 </script>
 
 <LegendPanel>

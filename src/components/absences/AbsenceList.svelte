@@ -1,8 +1,8 @@
 <script>
-  import ContentWrapper from './ContentWrapper.svelte';
-  import TableHeader from './ui/TableHeader.svelte';
-  import AbsenceTableRow from './ui/AbsenceTableRow.svelte';
-  import AbsenceCard from './ui/AbsenceCard.svelte';
+  import ContentWrapper from '../layout/ContentWrapper.svelte';
+  import TableHeader from '../ui/TableHeader.svelte';
+  import AbsenceTableRow from '../ui/AbsenceTableRow.svelte';
+  import AbsenceCard from '../ui/AbsenceCard.svelte';
 
   /**
    * Component for displaying list of absences in table/card format

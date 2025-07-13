@@ -6,13 +6,13 @@
     isLoading,
     error,
   } from "../stores/assignments.js";
-  import PageHeader from "../components/PageHeader.svelte";
-  import ContentWrapper from "../components/ContentWrapper.svelte";
-  import WeekNavigationLogic from "../components/WeekNavigationLogic.svelte";
-  import AbsenceManagement from "../components/AbsenceManagement.svelte";
-  import AssignmentManagement from "../components/AssignmentManagement.svelte";
-  import ScheduleGrid from "../components/ScheduleGrid.svelte";
-  import ModalManager from "../components/ModalManager.svelte";
+  import PageHeader from "../components/layout/PageHeader.svelte";
+  import ContentWrapper from "../components/layout/ContentWrapper.svelte";
+  import WeekNavigationLogic from "../components/schedule/WeekNavigationLogic.svelte";
+  import AbsenceManagement from "../components/absences/AbsenceManagement.svelte";
+  import AssignmentManagement from "../components/assignments/AssignmentManagement.svelte";
+  import ScheduleGrid from "../components/schedule/ScheduleGrid.svelte";
+  import ModalManager from "../components/layout/ModalManager.svelte";
 
   // Week navigation state
   let currentWeekOffset = $state(0);

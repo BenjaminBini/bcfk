@@ -1,5 +1,5 @@
 <script>
-  import { getIcon } from '../lib/icons';
+  import { getIcon } from '../../lib/icons';
   import MemberTag from './MemberTag.svelte';
   
   /**

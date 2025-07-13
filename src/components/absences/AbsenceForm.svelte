@@ -1,9 +1,9 @@
 <script>
   import { preventDefault } from 'svelte/legacy';
-  import FormField from './ui/FormField.svelte';
-  import SelectField from './ui/SelectField.svelte';
-  import DateField from './ui/DateField.svelte';
-  import SubmitButton from './ui/SubmitButton.svelte';
+  import FormField from '../ui/FormField.svelte';
+  import SelectField from '../ui/SelectField.svelte';
+  import DateField from '../ui/DateField.svelte';
+  import SubmitButton from '../ui/SubmitButton.svelte';
 
   /**
    * Form component for adding absences

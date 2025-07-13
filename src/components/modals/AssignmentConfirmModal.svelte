@@ -90,7 +90,7 @@
           Voulez-vous affecter 
           <span class="font-medium text-white">
             {#each members as member, index}
-              {member.first_name}{#if member.last_name} {member.last_name}{/if}{#if index < members.length - 1},&nbsp;{/if}
+              {member.first_name}{#if index < members.length - 2},&nbsp;{/if}{#if index == members.length - 2}&nbsp;et&nbsp;{/if}
             {/each}
           </span>
           au <span class="font-medium text-white">{dayNames[dayIndex]} {date}</span> 

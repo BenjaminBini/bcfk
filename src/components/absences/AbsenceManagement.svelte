@@ -1,7 +1,7 @@
 <script>
   import { writable } from "svelte/store";
-  import { absenceActions } from "../stores/absences.js";
-  import { showToast } from "../stores/toast.js";
+  import { absenceActions } from "../../stores/absences.js";
+  import { showToast } from "../../stores/toast.js";
 
   let { weekNavigationLogic } = $props();
 

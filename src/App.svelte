@@ -6,7 +6,7 @@
   import AbsencesPage from "./pages/AbsencesPage.svelte";
   import AuditLogsPage from "./pages/AuditLogsPage.svelte";
   import NavigationBar from "./components/navigation/NavigationBar.svelte";
-  import LegendModal from "./components/LegendModal.svelte";
+  import LegendModal from "./components/modals/LegendModal.svelte";
   import { showLegendModal } from "./stores/legend.js";
 
   const routes = {

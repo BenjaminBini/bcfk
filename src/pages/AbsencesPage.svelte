@@ -3,9 +3,9 @@
   import { absences, isLoading, error, absenceActions } from '../stores/absences.js';
   import { members } from '../stores/assignments.js';
   import { showToast } from '../stores/toast.js';
-  import PageHeader from '../components/PageHeader.svelte';
-  import AbsenceForm from '../components/AbsenceForm.svelte';
-  import AbsenceList from '../components/AbsenceList.svelte';
+  import PageHeader from '../components/layout/PageHeader.svelte';
+  import AbsenceForm from '../components/absences/AbsenceForm.svelte';
+  import AbsenceList from '../components/absences/AbsenceList.svelte';
 
   onMount(() => {
     absenceActions.loadAbsences();

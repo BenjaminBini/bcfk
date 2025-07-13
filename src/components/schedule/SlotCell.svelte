@@ -1,6 +1,6 @@
 <script>
-  import SlotWarning from './SlotWarning.svelte';
-  import SlotAssignmentsList from './SlotAssignmentsList.svelte';
+  import SlotWarning from '../assignments/SlotWarning.svelte';
+  import SlotAssignmentsList from '../assignments/SlotAssignmentsList.svelte';
   
   /**
    * @typedef {Object} Props

@@ -1,8 +1,8 @@
 <script>
-  import AbsenceConfirmModal from "./AbsenceConfirmModal.svelte";
-  import AbsenceDetailsModal from "./AbsenceDetailsModal.svelte";
-  import MemberSelector from "./MemberSelector.svelte";
-  import AssignmentConfirmModal from "./AssignmentConfirmModal.svelte";
+  import AbsenceConfirmModal from "../modals/AbsenceConfirmModal.svelte";
+  import AbsenceDetailsModal from "../modals/AbsenceDetailsModal.svelte";
+  import MemberSelector from "../members/MemberSelector.svelte";
+  import AssignmentConfirmModal from "../modals/AssignmentConfirmModal.svelte";
 
   let { 
     weekNavigationLogic,

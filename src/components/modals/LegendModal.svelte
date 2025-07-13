@@ -1,6 +1,6 @@
 <script>
   import { fade, fly } from 'svelte/transition';
-  import Legend from './Legend.svelte';
+  import Legend from '../common/Legend.svelte';
 
   let { show = false, onClose = null } = $props();
 

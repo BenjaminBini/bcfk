@@ -1,4 +1,4 @@
-const { generateDisplayNames, applyDisplayNames } = require('../utils');
+const { generateDisplayNames, applyDisplayNames } = require('../scripts/data/utils');
 
 class MemberService {
   constructor(database) {

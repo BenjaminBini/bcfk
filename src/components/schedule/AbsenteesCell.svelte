@@ -2,7 +2,7 @@
   import { scale } from 'svelte/transition';
   import { flip } from 'svelte/animate';
   import { quintOut } from 'svelte/easing';
-  import Icon from './Icon.svelte';
+  import Icon from '../common/Icon.svelte';
   
   let { absentMembers, getAbsencePeriod } = $props();
 </script>

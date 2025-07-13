@@ -2,10 +2,10 @@
   import { scale } from 'svelte/transition';
   import { flip } from 'svelte/animate';
   import { quintOut } from 'svelte/easing';
-  import AbsentMemberTag from './AbsentMemberTag.svelte';
-  import SpecificDateMemberTag from './SpecificDateMemberTag.svelte';
-  import RecurrentMemberTag from './RecurrentMemberTag.svelte';
-  import AddMemberButton from './AddMemberButton.svelte';
+  import AbsentMemberTag from '../members/AbsentMemberTag.svelte';
+  import SpecificDateMemberTag from '../members/SpecificDateMemberTag.svelte';
+  import RecurrentMemberTag from '../members/RecurrentMemberTag.svelte';
+  import AddMemberButton from '../members/AddMemberButton.svelte';
   
   /**
    * @typedef {Object} Props
