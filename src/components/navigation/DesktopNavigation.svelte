@@ -1,6 +1,6 @@
 <script>
-  import NavigationLink from "../ui/NavigationLink.svelte";
-  import HelpButton from "../ui/HelpButton.svelte";
+  import NavigationLink from "./NavigationLink.svelte";
+  import HelpButton from "../help/HelpButton.svelte";
 
   /**
    * @typedef {Object} NavigationItem

@@ -4,7 +4,7 @@
   import RowHeader from "../table/RowHeader.svelte";
   import Cell from "../table/Cell.svelte";
   import SlotCell from "./SlotCell.svelte";
-  import DayHeaderCell from "./DayHeaderCell.svelte";
+  import DayHeaderCell from "../table/DayHeaderCell.svelte";
   import RowHeaderCell from "./RowHeaderCell.svelte";
   import AbsenteesCell from "./AbsenteesCell.svelte";
 

@@ -1,6 +1,6 @@
 <script>
-  import HelpButton from "../ui/HelpButton.svelte";
-  import BurgerMenuButton from "../ui/BurgerMenuButton.svelte";
+  import HelpButton from "../help/HelpButton.svelte";
+  import BurgerMenuButton from "./BurgerMenuButton.svelte";
   import MobileMenu from "./MobileMenu.svelte";
   import { onMount } from "svelte";
 

@@ -3,9 +3,9 @@
   import RecurrentMemberTag from "../members/RecurrentMemberTag.svelte";
   import SpecificDateMemberTag from "../members/SpecificDateMemberTag.svelte";
   import AddMemberButton from "../members/AddMemberButton.svelte";
-  import LegendPanel from "../ui/LegendPanel.svelte";
-  import LegendItem from "../ui/LegendItem.svelte";
-  import LegendButton from "../ui/LegendButton.svelte";
+  import LegendPanel from "./LegendPanel.svelte";
+  import LegendItem from "./LegendItem.svelte";
+  import LegendButton from "./LegendButton.svelte";
   import { getIcon } from "../../lib/icons";
 </script>
 

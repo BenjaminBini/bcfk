@@ -128,7 +128,7 @@
             <button
               onclick={handleNextWeek}
               disabled={isNavigating}
-              class="flex justify-center items-center w-8 h-8 rounded-lg transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-700/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="flex justify-center items-center w-8 h-8 rounded-lg transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-700/50 focus:outline-none focus:ring-4 focus:ring-indigo-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
               title="Semaine suivante"
               aria-label="Semaine suivante"
             >

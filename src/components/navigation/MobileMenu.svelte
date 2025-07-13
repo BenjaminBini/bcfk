@@ -1,5 +1,5 @@
 <script>
-  import NavigationLink from "../ui/NavigationLink.svelte";
+  import NavigationLink from "./NavigationLink.svelte";
 
   /**
    * @typedef {Object} NavigationItem

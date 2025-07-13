@@ -6,8 +6,8 @@
   import ColumnHeader from '../components/table/ColumnHeader.svelte';
   import RowHeader from '../components/table/RowHeader.svelte';
   import Cell from '../components/table/Cell.svelte';
-  import DayHeaderCell from '../components/schedule/DayHeaderCell.svelte';
-  import SlotEditionCell from '../components/schedule/SlotEditionCell.svelte';
+  import DayHeaderCell from '../components/table/DayHeaderCell.svelte';
+  import SlotEditionCell from '../components/assignments/SlotEditionCell.svelte';
   import ContentWrapper from '../components/layout/ContentWrapper.svelte';
   import PageHeader from '../components/layout/PageHeader.svelte';
   import RowHeaderCell from '../components/schedule/RowHeaderCell.svelte';

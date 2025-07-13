@@ -1,6 +1,6 @@
 <script>
-  import Avatar from './Avatar.svelte';
-  import DeleteButton from './DeleteButton.svelte';
+  import Avatar from '../common/Avatar.svelte';
+  import DeleteButton from '../common/DeleteButton.svelte';
 
   /**
    * Pure UI component for absence table row

@@ -14,9 +14,25 @@
 
   <button 
     type="button"
-    class="flex justify-center items-center w-6 h-6 bg-gradient-to-br rounded-full border shadow-lg backdrop-blur-sm transition-all duration-300 from-slate-600/80 to-slate-700/80 hover:from-slate-500/90 hover:to-slate-600/90 focus:outline-none focus:ring-2 focus:ring-slate-500/50 shadow-slate-500/25 hover:shadow-slate-500/40 hover:scale-110 border-slate-400/30"
-    onclick={() => onAddMember(dayIndex, slotType)}
+    class="flex justify-center items-center w-8 h-8 bg-gradient-to-br rounded-full border shadow-[0_0_0_0_transparent] backdrop-blur-sm transition-all duration-300 from-slate-600/80 to-slate-700/80 hover:from-slate-500/90 hover:to-slate-600/90 focus:outline-none border-slate-400/30 hover:scale-125 focus:animate-[focus-ring_100ms_ease-out_forwards] add-member-btn"
   >
     <span class="sr-only">Ajouter membre</span>
-    <Icon name="plus" size="w-3 h-3" className="text-white" />
+    <Icon name="plus" size="w-4 h-4" className="text-white" />
   </button>
+
+<style>
+  
+
+  @keyframes focus-ring {
+    0% {
+      box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.8);
+    }
+    90% {
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.8);
+    }
+    99% {
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
+    }
+  }
+</style>
+
