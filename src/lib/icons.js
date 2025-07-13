@@ -73,25 +73,13 @@ export const icons = {
     clipRule: "evenodd",
   },
 
-  info: {
-    viewBox: "0 0 24 24",
-    path: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: "2",
-    strokeLinecap: "round",
-    strokeLinejoin: "round",
-  },
-
   // BUSINESS LOGIC ICONS
-  lockOpen: {
-    viewBox: "0 0 24 24",
-    path: "M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: "2",
-    strokeLinecap: "round",
-    strokeLinejoin: "round",
+  pencil: {
+    viewBox: "0 0 20 20",
+    path: "M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z",
+    fill: "currentColor",
+    fillRule: "evenodd",
+    clipRule: "evenodd",
   },
 
   lockClosed: {
@@ -106,29 +94,6 @@ export const icons = {
     fill: "currentColor",
   },
 
-  doorClosed: {
-    viewBox: "0 0 24 24",
-    path: "M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16M9 9h6M15 13h.01",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: "2",
-    strokeLinecap: "round",
-    strokeLinejoin: "round",
-  },
-
-  calendar: {
-    viewBox: "0 0 20 20",
-    path: "M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z",
-    fill: "currentColor",
-    fillRule: "evenodd",
-    clipRule: "evenodd",
-  },
-
-  flag: {
-    viewBox: "0 0 20 20",
-    path: "M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z",
-    fill: "currentColor",
-  },
   plane: {
     viewBox: "0 0 20 20",
     path: "M17.5 1.666a1.938 1.938 0 0 0 -1.416 0.584l-2.416 2.416a0.838 0.838 0 0 1 -0.777 0.222L3.334 2.5l-0.861 0.861a0.834 0.834 0 0 0 0.222 1.334L10 8.334 6.666 11.668H3.028a0.838 0.838 0 0 0 -0.75 0.473l-0.611 1.194L5 15l1.666 3.334 1.194 -0.611a0.838 0.838 0 0 0 0.473 -0.75v-3.639L11.666 10l3.639 7.306a0.834 0.834 0 0 0 1.334 0.222l0.861 -0.862 -2.389 -9.527a0.838 0.838 0 0 1 0.222 -0.779L17.75 3.944A1.938 1.938 0 0 0 18.334 2.5 0.834 0.834 0 0 0 17.5 1.666",

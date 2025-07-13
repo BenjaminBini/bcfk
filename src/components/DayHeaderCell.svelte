@@ -19,7 +19,7 @@
   
   // Check if this is today
   let isToday = $derived(date ? 
-    date.toDateString() === new Date().toDateString() : false
+    date.toDateString() === (new Date()).toDateString() : false
   );
   
 </script>

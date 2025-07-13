@@ -14,7 +14,7 @@
     const now = new Date();
     const dayOfWeek = now.getDay();
     const startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - dayOfWeek + 1 + (currentWeekOffset * 7));
+    startOfWeek.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1) + (currentWeekOffset * 7));
 
     const dates = [];
     for (let i = 0; i < 7; i++) {

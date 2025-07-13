@@ -13,8 +13,6 @@
         return `${baseClass} bg-red-600`;
       case 'warning':
         return `${baseClass} bg-yellow-600`;
-      case 'info':
-        return `${baseClass} bg-blue-600`;
       default:
         return `${baseClass} bg-gray-600`;
     }
@@ -28,10 +26,8 @@
         return 'error';
       case 'warning':
         return 'warning';
-      case 'info':
-        return 'info';
       default:
-        return 'info';
+        return 'error';
     }
   }
 </script>

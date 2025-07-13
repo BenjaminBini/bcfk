@@ -9,7 +9,7 @@ class PlanningService {
   getCurrentWeekDates() {
     const today = new Date();
     const monday = new Date(today);
-    monday.setDate(today.getDate() - today.getDay() + 1);
+    monday.setDate(today.getDate() - (today.getDay() === 0 ? 6 : today.getDay() - 1));
     
     const dates = [];
     for (let i = 0; i < 7; i++) {

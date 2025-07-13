@@ -6,34 +6,6 @@ class PlanningController {
     this.auditService = auditService;
   }
 
-  // GET /planning
-  async getPlanning(req, res, next) {
-    try {
-      console.log("PlanningController.getPlanning called");
-      console.log("this.planningService:", !!this.planningService);
-
-      const data = await this.planningService.getWeeklyPlanningData();
-      console.log("Data keys:", Object.keys(data));
-
-      const renderData = {
-        ...data,
-        title: "Planning Hebdomadaire",
-        pageTitle: "Planning Hebdomadaire de l'Association",
-        subtitle: `Semaine du ${new Date(data.weekDates[0]).toLocaleDateString(
-          "fr-FR"
-        )}`,
-        currentPage: "planning",
-        pageScript: "planning.js",
-      };
-
-      console.log("Render data keys:", Object.keys(renderData));
-
-      res.render("planning", renderData);
-    } catch (error) {
-      console.error("Error in getPlanning:", error);
-      next(error);
-    }
-  }
 
   // GET /api/specific-assignments
   async getSpecificAssignments(req, res, next) {

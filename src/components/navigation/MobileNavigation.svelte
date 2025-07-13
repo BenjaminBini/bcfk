@@ -45,7 +45,7 @@
   });
 </script>
 
-<div class="flex gap-3 sm:hidden">
+<div class="flex gap-3 md:hidden">
   <HelpButton onClick={onShowLegend} />
   
   <div bind:this={mobileMenuRef}>

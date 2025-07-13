@@ -67,6 +67,7 @@
   
   let displayTooltip = $derived(tooltip || "Affectation spécifique - Ce membre n'est pas habituellement assigné ce jour");
   let memberTagTooltip = $derived(`${displayTooltip} - ${text || 'Membre inconnu'}`);
+  
 </script>
 
 <MemberTag 
@@ -110,7 +111,11 @@
       </div>
       
       <div class="mb-6 text-slate-300">
-        <p>Êtes-vous sûr de vouloir supprimer l'affectation de <span class="font-semibold text-white">{memberName || (text || 'Membre inconnu')}</span> pour le <span class="font-semibold text-white">{date || 'Date non spécifiée'}</span> en <span class="font-semibold text-white">{slotType === 'ouverture' ? 'ouverture' : 'fermeture'}</span> ?</p>
+        <p>Êtes-vous sûr de vouloir supprimer l'affectation de <span class="font-semibold text-white">{memberName || (text || 'Membre inconnu')}</span> pour le <span class="font-semibold text-white">{date ? new Date(date).toLocaleDateString('fr-FR', { 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric' 
+      }) : 'Date non spécifiée'}</span> en <span class="font-semibold text-white">{slotType === 'ouverture' ? 'ouverture' : 'fermeture'}</span> ?</p>
       </div>
       
       <div class="flex justify-end space-x-3">

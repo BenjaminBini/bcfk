@@ -12,8 +12,6 @@ function createRoutes(planningService, assignmentService, memberService, absence
   const assignmentController = new AssignmentController(assignmentService, memberService, auditService);
   const absenceController = new AbsenceController(absenceService, auditService);
 
-  // Planning routes (legacy)
-  router.get('/planning', planningController.getPlanning.bind(planningController));
   
   // API routes
   router.post('/api/members', assignmentController.addMember.bind(assignmentController));

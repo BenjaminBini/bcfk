@@ -7,7 +7,6 @@
   import DayHeaderCell from "./DayHeaderCell.svelte";
   import RowHeaderCell from "./RowHeaderCell.svelte";
   import AbsenteesCell from "./AbsenteesCell.svelte";
-  import Legend from "./Legend.svelte";
 
   let { 
     weekDays,
@@ -69,10 +68,6 @@
 </script>
 
 <div class="block relative">
-  <!-- Legend - only show on desktop -->
-  <div class="hidden md:block">
-    <Legend />
-  </div>
   
   <!-- Label grid positioned above main grid -->
   <div class="relative">
@@ -84,7 +79,7 @@
         <div class="flex justify-center h-6">
           {#if isCurrentDay(dayIndex)}
             <div 
-              class="px-2 py-1 text-xs font-medium text-blue-100 whitespace-nowrap rounded-t-md border border-b-0 shadow-lg backdrop-blur-sm transition-transform duration-300 ease-out bg-blue-600/90 border-blue-400/50"
+              class="hidden md:block px-2 py-1 text-xs font-medium text-blue-100 whitespace-nowrap rounded-t-md border border-b-0 shadow-lg backdrop-blur-sm transition-transform duration-300 ease-out bg-blue-600/90 border-blue-400/50"
               class:translate-y-0={showTodayLabel}
               class:translate-y-7={!showTodayLabel}
             >
