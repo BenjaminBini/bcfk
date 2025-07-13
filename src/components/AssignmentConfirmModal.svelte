@@ -1,15 +1,15 @@
 <script>
-  import { run } from 'svelte/legacy';
   import { fly, fade } from 'svelte/transition';
+  
   /**
    * @typedef {Object} Props
    * @property {boolean} [isOpen]
-   * @property {any} [members]
+   * @property {Array} [members]
    * @property {number} [dayIndex]
-   * @property {any} [date]
+   * @property {string} [date]
    * @property {string} [slotType]
-   * @property {any} [onConfirm]
-   * @property {any} [onCancel]
+   * @property {function} [onConfirm]
+   * @property {function} [onCancel]
    */
 
   /** @type {Props} */
@@ -43,21 +43,29 @@
     }
   }
   
-  run(() => {
+  function handleBackdropClick(event) {
+    if (event.target === event.currentTarget) {
+      handleCancel();
+    }
+  }
+  
+  $effect(() => {
     if (isOpen) {
       document.addEventListener('keydown', handleKeydown);
-    } else {
-      document.removeEventListener('keydown', handleKeydown);
+      return () => {
+        document.removeEventListener('keydown', handleKeydown);
+      };
     }
   });
 </script>
 
 {#if isOpen && members && members.length > 0}
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div 
     class="flex fixed z-50 justify-center items-center bg-black bg-opacity-50" 
     style="top: 0; left: 0; right: 0; bottom: 0; margin: 0;" 
-    onclick={handleCancel} 
-    onkeydown={handleKeydown} 
+    onclick={handleBackdropClick} 
     role="dialog" 
     aria-modal="true" 
     tabindex="-1"
