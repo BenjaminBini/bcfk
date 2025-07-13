@@ -93,7 +93,11 @@
               {member.first_name}{#if index < members.length - 2},&nbsp;{/if}{#if index == members.length - 2}&nbsp;et&nbsp;{/if}
             {/each}
           </span>
-          au <span class="font-medium text-white">{dayNames[dayIndex]} {date}</span> 
+          au <span class="font-medium text-white">{new Date(date).toLocaleDateString('fr-FR', { 
+            day: 'numeric', 
+            month: 'long', 
+            year: 'numeric' 
+          })}</span> 
           en <span class="font-medium text-white">{slotType}</span> ?
         </p>
         <p class="mt-2 text-xs text-slate-400">
