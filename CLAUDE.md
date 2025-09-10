@@ -33,9 +33,17 @@ npm run sync           # Sync local data to remote server (https://bcfk.bini.io/
 src/                   # Svelte 5 frontend
 ├── pages/            # Route components (HomePage, AssignmentsPage, AbsencesPage)
 ├── components/       # Reusable components with animations
-│   ├── table/        # Grid layout components (WeeklyScheduleGrid, ColumnHeader, etc.)
+│   ├── absences/     # Absence management components (AbsenceForm, AbsenceList, etc.)
+│   ├── assignments/  # Assignment components (SlotEditionCell, SlotWarning, etc.)
+│   ├── audit/        # Audit log components (AuditLogCard, AuditLogsList, etc.)
+│   ├── common/       # Common UI components (Avatar, FormField, SubmitButton, etc.)
+│   ├── help/         # Help and legend components (Legend, LegendModal, etc.)
+│   ├── layout/       # Layout components (PageHeader, ContentWrapper, etc.)
+│   ├── members/      # Member-related components (MemberTag, AddMemberButton, etc.)
 │   ├── modals/       # Modal components with transitions
-│   └── ui/           # UI components (MemberTag, PageHeader, etc.)
+│   ├── navigation/   # Navigation components (DesktopNavigation, MobileMenu, etc.)
+│   ├── schedule/     # Schedule grid components (ScheduleGrid, SlotCell, etc.)
+│   └── table/        # Table components (WeeklyScheduleGrid, ColumnHeader, etc.)
 ├── stores/           # Svelte stores for state management
 └── lib/              # Utilities (API client, icons)
 
@@ -90,6 +98,7 @@ Backend root files:
 - **CSS Grid Layout**: 8-column grid for weekly schedules with sticky headers on mobile
 - **Dark Theme**: Default dark mode with Tailwind CSS gradients and glassmorphism
 - **Responsive Design**: Mobile-first approach with burger menu navigation
+- **Component Organization**: Domain-driven folder structure (absences/, assignments/, members/, etc.)
 - **Animations**: Coordinated sliding animations for week navigation
   - PageHeader date range slides horizontally
   - DayHeaderCell dates slide with week changes
