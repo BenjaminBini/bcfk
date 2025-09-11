@@ -169,7 +169,7 @@
 
 <!-- Absence Confirmation Modal -->
 <AbsenceConfirmModal
-  show={showAbsenceModal}
+  isOpen={showAbsenceModal}
   memberName={selectedMemberName}
   date={selectedDayIndex >= 0
     ? weekNavigationLogic?.getCurrentWeekDates?.()?.[selectedDayIndex]?.toLocaleDateString("fr-FR") || ""

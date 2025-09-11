@@ -1,5 +1,4 @@
 <script>
-  import { preventDefault } from 'svelte/legacy';
   import FormField from '../common/FormField.svelte';
   import SelectField from '../common/SelectField.svelte';
   import DateField from '../common/DateField.svelte';
@@ -17,13 +16,15 @@
   let { members, onSubmit, isSubmitting = false } = $props();
 
   // Form state
+  const today = new Date().toISOString().split('T')[0];
   let selectedMember = $state('');
-  let startDate = $state('');
-  let endDate = $state('');
+  let startDate = $state(today);
+  let endDate = $state(today);
   let startSlot = $state('ouverture');
   let endSlot = $state('fermeture');
 
-  function handleSubmit() {
+  function handleSubmit(event) {
+    event.preventDefault();
     onSubmit({
       selectedMember,
       startDate,
@@ -32,8 +33,8 @@
       endSlot,
       resetForm: () => {
         selectedMember = '';
-        startDate = '';
-        endDate = '';
+        startDate = today;
+        endDate = today;
         startSlot = 'ouverture';
         endSlot = 'fermeture';
       }
@@ -56,7 +57,7 @@
     Ajouter une Absence
   </h3>
   
-  <form onsubmit={preventDefault(handleSubmit)} class="space-y-4">
+  <form onsubmit={handleSubmit} class="space-y-4">
     <!-- Member Selection -->
     <FormField label="Membre" id="member" required>
       <SelectField 

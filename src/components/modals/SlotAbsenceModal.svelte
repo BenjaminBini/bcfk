@@ -1,8 +1,8 @@
 <script>
-  import { fly, fade } from 'svelte/transition';
-  import { quintOut } from 'svelte/easing';
-  import Icon from '../common/Icon.svelte';
-  import SubmitButton from '../common/SubmitButton.svelte';
+  import { fly, fade } from "svelte/transition";
+  import { quintOut } from "svelte/easing";
+  import Icon from "../common/Icon.svelte";
+  import SubmitButton from "../common/SubmitButton.svelte";
 
   /**
    * @typedef {Object} Props
@@ -16,17 +16,17 @@
    */
 
   /** @type {Props} */
-  let { 
-    isOpen = false, 
-    memberName = '', 
-    slotType = 'ouverture',
-    date = '',
-    onClose, 
+  let {
+    isOpen = false,
+    memberName = "",
+    slotType = "ouverture",
+    date = "",
+    onClose,
     onConfirm,
-    isSubmitting = false 
+    isSubmitting = false,
   } = $props();
 
-  let selectedChoice = $state('slot');
+  let selectedChoice = $state("slot");
 
   function handleConfirm() {
     onConfirm?.(selectedChoice);
@@ -34,57 +34,67 @@
 
   function handleClose() {
     onClose?.();
-    selectedChoice = 'slot'; // Reset for next time
+    selectedChoice = "slot"; // Reset for next time
+  }
+
+  function handleBackdropClick(event) {
+    // Only close if clicking directly on the backdrop, not on the modal content
+    if (event.target === event.currentTarget) {
+      handleClose();
+    }
   }
 
   function handleKeydown(event) {
-    if (event.key === 'Escape') {
+    if (event.key === "Escape") {
       handleClose();
     }
   }
 
   // Format date for display
   function formatDate(dateStr) {
-    return new Date(dateStr).toLocaleDateString('fr-FR', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return new Date(dateStr).toLocaleDateString("fr-FR", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   }
 
   // Get slot display name
   function getSlotDisplayName(slot) {
-    return slot === 'ouverture' ? 'ouverture' : 'fermeture';
+    return slot === "ouverture" ? "ouverture" : "fermeture";
   }
 </script>
 
 {#if isOpen}
   <!-- Modal backdrop -->
-  <div 
-    class="flex fixed inset-0 z-50 justify-center items-center p-4 bg-black/50 backdrop-blur-sm"
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
     transition:fade={{ duration: 200 }}
-    onclick={handleClose}
+    onclick={handleBackdropClick}
     onkeydown={handleKeydown}
     role="dialog"
     aria-modal="true"
     aria-labelledby="modal-title"
+    tabindex="0"
   >
     <!-- Modal content -->
-    <div 
-      class="w-full max-w-md p-6 bg-gradient-to-br rounded-2xl border shadow-2xl backdrop-blur-xl from-slate-800/95 via-slate-900/98 to-slate-800/95 border-slate-700/50"
+    <div
+      class="w-full max-w-md p-6 border shadow-2xl bg-gradient-to-br rounded-2xl backdrop-blur-xl from-slate-800/95 via-slate-900/98 to-slate-800/95 border-slate-700/50"
       transition:fly={{ duration: 300, y: -20, opacity: 0, easing: quintOut }}
-      onclick={(e) => e.stopPropagation()}
       role="document"
     >
       <!-- Header -->
-      <div class="flex justify-between items-center mb-6">
-        <h3 id="modal-title" class="text-lg font-medium text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-200">
+      <div class="flex items-center justify-between mb-6">
+        <h3
+          id="modal-title"
+          class="text-lg font-medium text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-200"
+        >
           Marquer comme absent
         </h3>
         <button
           onclick={handleClose}
-          class="p-1 text-slate-400 rounded-lg transition-colors hover:text-white hover:bg-slate-700/50"
+          class="p-1 transition-colors rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50"
           aria-label="Fermer"
         >
           <Icon name="close" size="w-5 h-5" />
@@ -94,10 +104,10 @@
       <!-- Content -->
       <div class="space-y-4">
         <!-- Member and slot info -->
-        <div class="p-4 rounded-lg bg-slate-800/50 border-slate-700/50 border">
+        <div class="p-4 border rounded-lg bg-slate-800/50 border-slate-700/50">
           <p class="text-sm text-slate-300">
             <span class="font-medium text-white">{memberName}</span>
-            <br>
+            <br />
             <span class="text-slate-400">
               {getSlotDisplayName(slotType)} du {formatDate(date)}
             </span>
@@ -109,11 +119,13 @@
           <p class="text-sm font-medium text-slate-200">
             Pour quelle(s) période(s) souhaitez-vous déclarer l'absence&nbsp;?
           </p>
-          
+
           <!-- Radio options -->
           <div class="space-y-3">
             <!-- Just this slot -->
-            <label class="flex items-start p-3 rounded-lg border transition-colors cursor-pointer bg-slate-800/30 border-slate-700/30 hover:bg-slate-700/40 hover:border-slate-600/40">
+            <label
+              class="flex items-start p-3 transition-colors border rounded-lg cursor-pointer bg-slate-800/30 border-slate-700/30 hover:bg-slate-700/40 hover:border-slate-600/40"
+            >
               <input
                 type="radio"
                 bind:group={selectedChoice}
@@ -131,7 +143,9 @@
             </label>
 
             <!-- Both slots (full day) -->
-            <label class="flex items-start p-3 rounded-lg border transition-colors cursor-pointer bg-slate-800/30 border-slate-700/30 hover:bg-slate-700/40 hover:border-slate-600/40">
+            <label
+              class="flex items-start p-3 transition-colors border rounded-lg cursor-pointer bg-slate-800/30 border-slate-700/30 hover:bg-slate-700/40 hover:border-slate-600/40"
+            >
               <input
                 type="radio"
                 bind:group={selectedChoice}
@@ -152,15 +166,15 @@
       </div>
 
       <!-- Footer buttons -->
-      <div class="flex gap-3 justify-end mt-6">
+      <div class="flex justify-end gap-3 mt-6">
         <button
           onclick={handleClose}
-          class="px-4 py-2 text-sm font-medium text-slate-300 rounded-lg border transition-colors bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/60 hover:text-white"
+          class="px-4 py-2 text-sm font-medium transition-colors border rounded-lg text-slate-300 bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/60 hover:text-white"
           disabled={isSubmitting}
         >
           Annuler
         </button>
-        
+
         <SubmitButton
           text="Confirmer l'absence"
           loadingText="Confirmation..."

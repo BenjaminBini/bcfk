@@ -1,21 +1,52 @@
 <script>
   import { onMount } from 'svelte';
   import { absences, isLoading, error, absenceActions } from '../stores/absences.js';
-  import { members } from '../stores/assignments.js';
+  import { members, assignmentActions } from '../stores/assignments.js';
   import { showToast } from '../stores/toast.js';
   import PageHeader from '../components/layout/PageHeader.svelte';
-  import AbsenceForm from '../components/absences/AbsenceForm.svelte';
-  import AbsenceList from '../components/absences/AbsenceList.svelte';
+  import MemberAbsencePanel from '../components/absences/MemberAbsencePanel.svelte';
+  import AbsenceFormModal from '../components/absences/AbsenceFormModal.svelte';
 
-  onMount(() => {
-    absenceActions.loadAbsences();
+  onMount(async () => {
+    // Load both absences and members data
+    await Promise.all([
+      absenceActions.loadAbsences(),
+      assignmentActions.loadData()
+    ]);
   });
 
   let isSubmitting = $state(false);
+  let isModalOpen = $state(false);
+  let selectedMember = $state(null);
 
-  async function handleFormSubmit({ selectedMember, startDate, endDate, startSlot, endSlot, resetForm }) {
-    if (!selectedMember || !startDate || !endDate) {
-      showToast('Veuillez remplir tous les champs', 'error');
+  function handleAddAbsence(event) {
+    const memberId = event.detail.memberId;
+    selectedMember = $members.find(m => m.id === memberId);
+    isModalOpen = true;
+  }
+
+  function handleCloseModal() {
+    isModalOpen = false;
+    selectedMember = null;
+  }
+
+  async function handleFormSubmit(event) {
+    // Extract data from event.detail
+    const { selectedMember, startDate, endDate, startSlot, endSlot, resetForm } = event.detail || {};
+    
+    // Validate that we have the required fields
+    if (!selectedMember || selectedMember === undefined || selectedMember === null) {
+      showToast('Erreur: membre non sélectionné', 'error');
+      return;
+    }
+    
+    if (!startDate || startDate === undefined || startDate === null) {
+      showToast('Veuillez sélectionner une date de début', 'error');
+      return;
+    }
+    
+    if (!endDate || endDate === undefined || endDate === null) {
+      showToast('Veuillez sélectionner une date de fin', 'error');
       return;
     }
 
@@ -32,9 +63,16 @@
 
     isSubmitting = true;
     try {
-      await absenceActions.createAbsence(parseInt(selectedMember), startDate, endDate, startSlot, endSlot);
+      // Convert selectedMember to integer if it's not already
+      const memberId = typeof selectedMember === 'number' ? selectedMember : parseInt(selectedMember);
+      
+      await absenceActions.createAbsence(memberId, startDate, endDate, startSlot, endSlot);
       showToast('Absence ajoutée avec succès', 'success');
-      resetForm();
+      
+      if (resetForm && typeof resetForm === 'function') {
+        resetForm();
+      }
+      handleCloseModal();
     } catch (err) {
       showToast('Erreur lors de l\'ajout de l\'absence', 'error');
     } finally {
@@ -79,6 +117,12 @@
       return `${start}${startSlotText} - ${end}${endSlotText}`;
     }
   }
+
+  // Group absences by member
+  let membersWithAbsences = $derived($members.map(member => ({
+    ...member,
+    absences: $absences.filter(absence => absence.member_id === member.id)
+  })));
 </script>
 
 <div class="py-4 md:py-10">
@@ -91,28 +135,42 @@
 
     <!-- Content -->
     <div class="mt-4 md:mt-8">
-      <div class="grid grid-cols-1 gap-4 lg:grid-cols-3 md:gap-8">
-        
-        <!-- Add Absence Form -->
-        <div class="lg:col-span-1">
-          <AbsenceForm 
-            members={$members}
-            onSubmit={handleFormSubmit}
-            {isSubmitting}
-          />
+      {#if $isLoading}
+        <div class="flex justify-center items-center py-12">
+          <div class="w-8 h-8 rounded-full border-2 border-blue-500 animate-spin border-t-transparent"></div>
         </div>
-
-        <!-- Absences List -->
-        <div class="lg:col-span-2">
-          <AbsenceList 
-            absences={$absences}
-            isLoading={$isLoading}
-            error={$error}
-            {formatPeriod}
-            onDelete={handleDelete}
-          />
+      {:else if $error}
+        <div class="p-6 text-center bg-gradient-to-br rounded-2xl border shadow-xl from-red-900/50 to-red-800/50 border-red-700/50">
+          <p class="text-red-300">{$error}</p>
         </div>
-      </div>
+      {:else if membersWithAbsences.length === 0}
+        <div class="p-12 text-center bg-gradient-to-br rounded-2xl border shadow-xl from-slate-800/50 to-slate-700/50 border-slate-600/50">
+          <p class="text-slate-400">Aucun membre trouvé</p>
+        </div>
+      {:else}
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
+          {#each membersWithAbsences as member (member.id)}
+            <MemberAbsencePanel 
+              {member}
+              absences={member.absences}
+              {formatPeriod}
+              onDelete={handleDelete}
+              on:addAbsence={handleAddAbsence}
+            />
+          {/each}
+        </div>
+      {/if}
     </div>
+
+    <!-- Absence Form Modal -->
+    {#if selectedMember}
+      <AbsenceFormModal 
+        isOpen={isModalOpen}
+        member={selectedMember}
+        {isSubmitting}
+        on:submit={handleFormSubmit}
+        on:close={handleCloseModal}
+      />
+    {/if}
   </div>
 </div>
