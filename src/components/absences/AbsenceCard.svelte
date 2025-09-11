@@ -1,6 +1,6 @@
 <script>
-  import Avatar from '../common/Avatar.svelte';
-  import DeleteButton from '../common/DeleteButton.svelte';
+  import Avatar from "../common/Avatar.svelte";
+  import DeleteButton from "../common/DeleteButton.svelte";
 
   /**
    * Pure UI component for absence mobile card
@@ -10,7 +10,7 @@
    * @property {string} first_name - Member's first name
    * @property {string} start_date - Start date of absence
    * @property {string} end_date - End date of absence
-   * 
+   *
    * @typedef {Object} Props
    * @property {Absence} absence - Absence data
    * @property {function} formatPeriod - Function to format date period
@@ -22,7 +22,9 @@
   let { absence, formatPeriod, onDelete, hideMemberInfo = false } = $props();
 </script>
 
-<div class="p-4 bg-gradient-to-br rounded-lg border backdrop-blur-sm from-slate-700/60 to-slate-600/60 border-slate-600/50">
+<div
+  class="p-4 bg-gradient-to-br rounded-lg border backdrop-blur-sm from-slate-700/60 to-slate-600/60 border-slate-600/50"
+>
   <div class="flex justify-between items-center">
     <div class="flex items-center space-x-3">
       {#if !hideMemberInfo}
@@ -34,7 +36,11 @@
             {absence.member_name}
           </div>
         {/if}
-        <div class="{hideMemberInfo ? 'text-sm' : 'text-xs'} text-slate-400">
+        <div
+          class="{hideMemberInfo
+            ? 'text-sm'
+            : 'text-xs'} text-slate-100 font-semibold"
+        >
           {formatPeriod(absence)}
         </div>
       </div>

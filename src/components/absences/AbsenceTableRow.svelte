@@ -1,6 +1,6 @@
 <script>
-  import Avatar from '../common/Avatar.svelte';
-  import DeleteButton from '../common/DeleteButton.svelte';
+  import Avatar from "../common/Avatar.svelte";
+  import DeleteButton from "../common/DeleteButton.svelte";
 
   /**
    * Pure UI component for absence table row
@@ -10,7 +10,7 @@
    * @property {string} first_name - Member's first name
    * @property {string} start_date - Start date of absence
    * @property {string} end_date - End date of absence
-   * 
+   *
    * @typedef {Object} Props
    * @property {Absence} absence - Absence data
    * @property {function} formatPeriod - Function to format date period
@@ -33,7 +33,7 @@
     </div>
   </td>
   <td class="px-6 py-4 whitespace-nowrap">
-    <div class="text-sm text-slate-200">
+    <div class="text-sm text-slate-100 font-semibold">
       {formatPeriod(absence)}
     </div>
   </td>
