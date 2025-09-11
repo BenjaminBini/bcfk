@@ -102,6 +102,8 @@
         startSlot,
         endSlot
       );
+      // Reload absences to reflect any merge
+      await absenceActions.loadAbsences();
       showToast("Absence ajoutée avec succès", "success");
 
       if (resetForm && typeof resetForm === "function") {
