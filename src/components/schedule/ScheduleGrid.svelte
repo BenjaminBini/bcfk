@@ -47,8 +47,8 @@
     return absenceManagement.isMemberAbsentForSlot(memberId, dateIndex, slotType);
   }
 
-  function getAbsencePeriod(memberId) {
-    return absenceManagement.getAbsencePeriod(memberId);
+  function getAbsencePeriod(memberId, dayIndex = null) {
+    return absenceManagement.getAbsencePeriod(memberId, dayIndex);
   }
 
   function handleMarkAbsent(memberId, memberName, dayIndex, slotType = null) {
@@ -168,6 +168,7 @@
               dayIndex={dayIndex}
               currentDate={getCurrentWeekDates()[dayIndex]}
               {absenceManagement}
+              onShowAbsenceDetails={handleShowAbsenceDetails}
             />
           </Cell>
         {/each}

@@ -11,19 +11,36 @@
     dayIndex = null,
     currentDate = null,
     absenceManagement = null,
+    onShowAbsenceDetails = null,
   } = $props();
 
   // State for slot-specific absent members
   let slotAbsentMembers = $state([]);
 
-  // Load slot-specific data when dayIndex changes
+  // Create a reactive dependency on the weeklyAbsences store
+  let weeklyAbsencesValue = $state([]);
+
+  // Subscribe to weeklyAbsences changes
+  $effect(() => {
+    if (absenceManagement?.weeklyAbsences) {
+      return absenceManagement.weeklyAbsences.subscribe((value) => {
+        weeklyAbsencesValue = value;
+      });
+    }
+  });
+
+  // Load slot-specific data when dayIndex changes or when absence data updates
   $effect(async () => {
-    if (dayIndex !== null && currentDate && absenceManagement) {
+    if (dayIndex !== null && currentDate) {
       try {
+        // Depend on weeklyAbsencesValue to trigger updates when absences change
+        // This line creates a reactive dependency on the weeklyAbsences data
+        weeklyAbsencesValue.length; // Access to create dependency
+
         // Use the passed currentDate instead of calculating it
         const date = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}`;
 
-        // Call the API directly with the formatted date
+        // Call the API directly with the formatted date to get fresh data
         const members = await absenceActions.getAbsentMembersForDate(date);
         slotAbsentMembers = members;
       } catch (error) {
@@ -84,7 +101,7 @@
   <div
     class="inset-0 flex flex-col justify-center h-full space-y-4 text-slate-300 from-amber-500/10 to-orange-500/10"
   >
-    {#if slotAbsentMembers.length > 0 && absenceGroups}
+    {#if absenceGroups.fullDay.length > 0}
       <div>
         <div class="mb-2 text-xs font-medium text-center text-slate-400">
           Toute la journée
@@ -92,8 +109,9 @@
         <div class="flex flex-wrap items-center justify-center gap-1">
           {#each absenceGroups.fullDay as member (member.member_id || member.id)}
             <span
-              class="inline-block px-2 py-1 text-xs font-medium transition-all duration-300 border rounded-full cursor-pointer bg-gradient-to-r backdrop-blur-sm text-slate-200 from-slate-500/80 to-slate-600/80 border-slate-400/30"
-              title={`Absent du ${getAbsencePeriod(member.member_id)} (toute la journée)`}
+              class="inline-block px-2 py-1 text-xs font-medium transition-all duration-300 border rounded-full cursor-pointer bg-gradient-to-r backdrop-blur-sm text-slate-200 from-slate-500/80 to-slate-600/80 border-slate-400/30 hover:from-slate-400/80 hover:to-slate-500/80"
+              title={`Absent ${getAbsencePeriod(member.member_id, dayIndex)}`}
+              onclick={() => onShowAbsenceDetails?.(renderMemberName(member), member.member_id)}
               in:scale={{
                 duration: 400,
                 easing: quintOut,
@@ -124,8 +142,9 @@
         <div class="flex flex-wrap items-center justify-center gap-1">
           {#each absenceGroups.ouvertureOnly as member (member.member_id || member.id)}
             <span
-              class="inline-block px-2 py-1 text-xs font-medium transition-all duration-300 border rounded-full cursor-pointer bg-gradient-to-r backdrop-blur-sm text-slate-200 from-slate-500/80 to-slate-600/80 border-slate-400/30"
-              title={`Absent du ${getAbsencePeriod(member.member_id)} (ouverture seulement)`}
+              class="inline-block px-2 py-1 text-xs font-medium transition-all duration-300 border rounded-full cursor-pointer bg-gradient-to-r backdrop-blur-sm text-slate-200 from-slate-500/80 to-slate-600/80 border-slate-400/30 hover:from-slate-400/80 hover:to-slate-500/80"
+              title={`Absent ${getAbsencePeriod(member.member_id, dayIndex)}`}
+              onclick={() => onShowAbsenceDetails?.(renderMemberName(member), member.member_id)}
               in:scale={{
                 duration: 400,
                 easing: quintOut,
@@ -158,8 +177,9 @@
           <div class="flex flex-wrap items-center justify-center gap-1">
             {#each absenceGroups.fermetureOnly as member (member.member_id || member.id)}
               <span
-                class="inline-block px-2 py-1 text-xs font-medium transition-all duration-300 border rounded-full cursor-pointer bg-gradient-to-r backdrop-blur-sm text-slate-200 from-slate-500/80 to-slate-600/80 border-slate-400/30"
-                title={`Absent du ${getAbsencePeriod(member.member_id)} (fermeture seulement)`}
+                class="inline-block px-2 py-1 text-xs font-medium transition-all duration-300 border rounded-full cursor-pointer bg-gradient-to-r backdrop-blur-sm text-slate-200 from-slate-500/80 to-slate-600/80 border-slate-400/30 hover:from-slate-400/80 hover:to-slate-500/80"
+                title={`Absent ${getAbsencePeriod(member.member_id, dayIndex)}`}
+                onclick={() => onShowAbsenceDetails?.(renderMemberName(member), member.member_id)}
                 in:scale={{
                   duration: 400,
                   easing: quintOut,

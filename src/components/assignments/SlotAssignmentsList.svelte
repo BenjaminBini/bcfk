@@ -37,7 +37,7 @@
   } = $props();
 </script>
 
-<div class="flex flex-col gap-3 justify-start items-center h-full">
+<div class="flex flex-col items-center justify-start h-full gap-3">
   {#each slotAssignments as assignment (assignment.id || `${assignment.member_id}-${assignment.weekday}-${assignment.slot_type}`)}
     {@const isAbsent = weeklyAbsences.length > 0 && isMemberAbsent(assignment.member_id, dayIndex, slotType)}
     <div
@@ -48,7 +48,7 @@
       {#if isAbsent}
         <AbsentMemberTag 
           text={assignment.first_name}
-          tooltip="Absent du {getAbsencePeriod(assignment.member_id)}"
+          tooltip="Absent {getAbsencePeriod(assignment.member_id, dayIndex)}"
           onShowAbsenceDetails={() => onShowAbsenceDetails?.(assignment.first_name, assignment.member_id)}
         />
       {:else if assignment.is_specific_date}

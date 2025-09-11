@@ -26,11 +26,144 @@ class AbsenceService {
         throw new Error('Invalid slot configuration: cannot start at closing and end at opening on the same day');
       }
 
-      const absence = await this.addAbsence(memberId, startDate, endDate, startSlot, endSlot);
+      // Get all existing absences for this member
+      const allAbsences = await this.getAllAbsences();
+      const memberAbsences = allAbsences.filter(a => a.member_id === memberId);
+
+      // Find overlapping or adjacent absences
+      const { mergedPeriod, overlappingIds } = this.findOverlapsAndMerge(
+        memberAbsences, 
+        startDate, 
+        endDate, 
+        startSlot, 
+        endSlot
+      );
+
+      // Delete overlapping absences
+      for (const absenceId of overlappingIds) {
+        await this.deleteAbsence(absenceId);
+      }
+
+      // Create the new merged absence
+      const absence = await this.addAbsence(
+        memberId, 
+        mergedPeriod.startDate, 
+        mergedPeriod.endDate, 
+        mergedPeriod.startSlot, 
+        mergedPeriod.endSlot
+      );
+      
       return absence;
     } catch (error) {
       throw new Error(`Failed to create absence: ${error.message}`);
     }
+  }
+
+  // Helper method to find overlaps and merge periods
+  findOverlapsAndMerge(existingAbsences, newStartDate, newEndDate, newStartSlot, newEndSlot) {
+    const overlappingAbsences = [];
+    const slotOrder = { 'ouverture': 1, 'fermeture': 2 };
+
+    // Find all overlapping or adjacent absences
+    for (const absence of existingAbsences) {
+      if (this.isOverlappingOrAdjacent(absence, newStartDate, newEndDate, newStartSlot, newEndSlot)) {
+        overlappingAbsences.push(absence);
+      }
+    }
+
+    // Start with the new absence period
+    let mergedStartDate = newStartDate;
+    let mergedEndDate = newEndDate;
+    let mergedStartSlot = newStartSlot;
+    let mergedEndSlot = newEndSlot;
+
+    // Merge all overlapping periods
+    for (const absence of overlappingAbsences) {
+      // Determine the earliest start
+      if (absence.start_date < mergedStartDate || 
+          (absence.start_date === mergedStartDate && slotOrder[absence.start_slot] < slotOrder[mergedStartSlot])) {
+        mergedStartDate = absence.start_date;
+        mergedStartSlot = absence.start_slot;
+      }
+
+      // Determine the latest end
+      if (absence.end_date > mergedEndDate || 
+          (absence.end_date === mergedEndDate && slotOrder[absence.end_slot] > slotOrder[mergedEndSlot])) {
+        mergedEndDate = absence.end_date;
+        mergedEndSlot = absence.end_slot;
+      }
+    }
+
+    return {
+      mergedPeriod: {
+        startDate: mergedStartDate,
+        endDate: mergedEndDate,
+        startSlot: mergedStartSlot,
+        endSlot: mergedEndSlot
+      },
+      overlappingIds: overlappingAbsences.map(a => a.id)
+    };
+  }
+
+  // Helper method to check if two absence periods overlap or are adjacent
+  isOverlappingOrAdjacent(existingAbsence, newStartDate, newEndDate, newStartSlot, newEndSlot) {
+    const slotOrder = { 'ouverture': 1, 'fermeture': 2 };
+
+    // Convert dates for comparison
+    const existingStart = existingAbsence.start_date;
+    const existingEnd = existingAbsence.end_date;
+
+    // Case 1: Direct overlap (dates intersect)
+    if (!(newEndDate < existingStart || newStartDate > existingEnd)) {
+      return true; // Any overlap
+    }
+
+    // Case 2: Adjacent periods on the same day
+    if (newEndDate === existingStart && newStartDate === newEndDate) {
+      // Same day: check if new period ends where existing starts
+      const newEndSlotOrder = slotOrder[newEndSlot];
+      const existingStartSlotOrder = slotOrder[existingAbsence.start_slot];
+      return newEndSlotOrder === existingStartSlotOrder - 1; // Adjacent slots
+    }
+
+    if (newStartDate === existingEnd && existingStart === existingEnd) {
+      // Same day: check if existing period ends where new starts
+      const existingEndSlotOrder = slotOrder[existingAbsence.end_slot];
+      const newStartSlotOrder = slotOrder[newStartSlot];
+      return existingEndSlotOrder === newStartSlotOrder - 1; // Adjacent slots
+    }
+
+    // Case 3: Adjacent periods on consecutive days
+    const newStartDateObj = new Date(newStartDate);
+    const newEndDateObj = new Date(newEndDate);
+    const existingStartObj = new Date(existingStart);
+    const existingEndObj = new Date(existingEnd);
+
+    // Check if periods are on consecutive days
+    const oneDayMs = 24 * 60 * 60 * 1000;
+    
+    // New period ends day before existing starts
+    if (Math.abs(existingStartObj - newEndDateObj) === oneDayMs) {
+      // For consecutive full days, any adjacent days should merge
+      if (newEndSlot === 'fermeture' && existingAbsence.start_slot === 'ouverture') {
+        return true;
+      }
+      // Also merge if it's touching the next day
+      return newEndSlot === 'fermeture' || existingAbsence.start_slot === 'ouverture';
+    }
+
+    // Existing period ends day before new starts  
+    if (Math.abs(newStartDateObj - existingEndObj) === oneDayMs) {
+      // For consecutive full days, any adjacent days should merge
+      if (existingAbsence.end_slot === 'fermeture' && newStartSlot === 'ouverture') {
+        return true;
+      }
+      // Also merge if it's touching the previous day
+      return existingAbsence.end_slot === 'fermeture' || newStartSlot === 'ouverture';
+    }
+
+    // No adjacency or overlap
+    return false;
   }
 
   async getAbsences() {

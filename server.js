@@ -5,7 +5,10 @@ const config = require('./config');
 const app = new App();
 
 // Start the server
-app.start();
+app.start().catch(error => {
+  console.error('Failed to start application:', error);
+  process.exit(1);
+});
 
 // Graceful shutdown
 process.on('SIGINT', () => {

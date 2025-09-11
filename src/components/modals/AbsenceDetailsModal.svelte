@@ -19,7 +19,7 @@
   const dispatch = createEventDispatcher();
 
   // Fonction pour formater les dates selon les règles demandées avec HTML pour highlight
-  function formatAbsencePeriod(startDateStr, endDateStr) {
+  function formatAbsencePeriod(startDateStr, endDateStr, startSlot = null, endSlot = null) {
     const startDate = new Date(startDateStr);
     const endDate = new Date(endDateStr);
     
@@ -36,41 +36,63 @@
     const endMonth = months[endDate.getMonth()];
     const endYear = endDate.getFullYear();
     
-    const highlightClass = "font-semibold text-orange-300";
-    
-    // Si même jour
+    // Same start and end date (single day absence)
     if (startDateStr === endDateStr) {
+      // Check if it's a partial slot absence
+      if (startSlot && endSlot && startSlot === endSlot) {
+        return {
+          text: `Absence prévue le `,
+          date: `${startDay} ${startMonth} ${startYear} (${startSlot})`
+        };
+      }
+      // Full day absence or both slots
       return {
         text: `Absence prévue le `,
         date: `${startDay} ${startMonth} ${startYear}`
       };
     }
     
-    // Si même mois et année
-    if (startDate.getMonth() === endDate.getMonth() && startYear === endYear) {
-      return {
-        text: `Absence prévue du `,
-        date: `${startDay} au ${endDay} ${startMonth} ${startYear}`
-      };
+    // Multi-day absence - build start and end text with slot info
+    let startText = `${startDay} ${startMonth}`;
+    let endText = `${endDay} ${endMonth}`;
+    
+    // Add year to start if different years or same year but different months
+    if (startYear !== endYear || startDate.getMonth() !== endDate.getMonth()) {
+      if (startYear !== endYear) {
+        startText += ` ${startYear}`;
+      }
     }
     
-    // Si même année mais mois différent
-    if (startYear === endYear) {
-      return {
-        text: `Absence prévue du `,
-        date: `${startDay} ${startMonth} au ${endDay} ${endMonth} ${startYear}`
-      };
+    // Always add year to end
+    if (startYear === endYear && startDate.getMonth() === endDate.getMonth()) {
+      // Same month and year - add year only to end
+      endText += ` ${endYear}`;
+    } else {
+      endText += ` ${endYear}`;
+      if (startYear === endYear && startDate.getMonth() !== endDate.getMonth()) {
+        // Same year but different months - add year to end, format as requested
+        startText += ` ${startYear}`;
+      }
     }
     
-    // Années différentes
+    // Add slot info to start date if it starts with "fermeture" slot
+    if (startSlot === 'fermeture') {
+      startText += ' (fermeture)';
+    }
+
+    // Add slot info to end date if it ends with "ouverture" slot  
+    if (endSlot === 'ouverture') {
+      endText += ' (ouverture)';
+    }
+    
     return {
       text: `Absence prévue du `,
-      date: `${startDay} ${startMonth} ${startYear} au ${endDay} ${endMonth} ${endYear}`
+      date: `${startText} au ${endText}`
     };
   }
 
   let formattedPeriod = $derived(
-    absenceData ? formatAbsencePeriod(absenceData.start_date, absenceData.end_date) : { text: '', date: '' }
+    absenceData ? formatAbsencePeriod(absenceData.start_date, absenceData.end_date, absenceData.start_slot, absenceData.end_slot) : { text: '', date: '' }
   );
   
   function close() {
