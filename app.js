@@ -15,12 +15,12 @@ class App {
     this.app = express();
     this.db = new Database();
     this.setupMiddleware();
-    this.setupErrorHandling();
   }
 
   async initialize() {
     await this.setupServices();
     this.setupRoutes();
+    this.setupErrorHandling();
   }
 
   async setupServices() {
