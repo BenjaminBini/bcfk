@@ -2,3 +2,9 @@ node_modules
 public/dist
 planning.db
 server.log
+.idea
+scripts/testing
+logs
+database.db
+playwright-report 
+playwright.config.js
