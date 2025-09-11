@@ -23,9 +23,9 @@
 </script>
 
 <div
-  class="p-4 bg-gradient-to-br rounded-lg border backdrop-blur-sm from-slate-700/60 to-slate-600/60 border-slate-600/50"
+  class="p-4 border rounded-lg bg-gradient-to-br backdrop-blur-sm from-slate-700/60 to-slate-600/60 border-slate-600/50"
 >
-  <div class="flex justify-between items-center">
+  <div class="flex items-center justify-between">
     <div class="flex items-center space-x-3">
       {#if !hideMemberInfo}
         <Avatar firstName={absence.first_name} />
@@ -36,13 +36,47 @@
             {absence.member_name}
           </div>
         {/if}
-        <div
-          class="{hideMemberInfo
-            ? 'text-sm'
-            : 'text-xs'} text-slate-100 font-semibold"
-        >
-          {formatPeriod(absence)}
-        </div>
+        {#if formatPeriod(absence)}
+          {@const period = formatPeriod(absence)}
+          <div
+            class="{hideMemberInfo
+              ? 'text-sm'
+              : 'text-xs'} flex flex-col items-end text-right"
+          >
+            <div class="flex flex-row items-center justify-end gap-2">
+              <span class="text-slate-400">{period.prefix}</span>
+              <span
+                class="font-semibold text-slate-100"
+                style="min-width: 10ch; display: inline-block; text-align: right;"
+                >{period.startDate}</span
+              >
+              <span
+                class="inline-block px-2 py-0.5 rounded bg-slate-600 text-xs text-amber-300 font-semibold align-middle {period.startSlot
+                  ? ''
+                  : 'invisible'}"
+              >
+                {period.startSlot ? period.startSlot : "ouverture"}
+              </span>
+            </div>
+            {#if period.endDate}
+              <div class="flex flex-row items-center justify-end gap-2 mt-1">
+                <span class="text-slate-400">au</span>
+                <span
+                  class="font-semibold text-slate-100"
+                  style="min-width: 10ch; display: inline-block; text-align: right;"
+                  >{period.endDate}</span
+                >
+                <span
+                  class="inline-block px-2 py-0.5 rounded bg-slate-600 text-xs text-amber-300 font-semibold align-middle {period.endSlot
+                    ? ''
+                    : 'invisible'}"
+                >
+                  {period.endSlot ? period.endSlot : "ouverture"}
+                </span>
+              </div>
+            {/if}
+          </div>
+        {/if}
       </div>
     </div>
     <DeleteButton onclick={() => onDelete(absence.id)} />

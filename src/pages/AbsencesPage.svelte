@@ -131,45 +131,55 @@
   }
 
   function formatPeriod(absence) {
-    // Format date as 'Le dd MMMM yyyy' in French
+    // Returns an object for custom rendering: { prefix, startDate, startSlot, endDate, endSlot }
     const dateOptions = { day: "2-digit", month: "long", year: "numeric" };
-    const start = new Date(absence.start_date).toLocaleDateString(
+    const startDate = new Date(absence.start_date).toLocaleDateString(
       "fr-FR",
       dateOptions
     );
-    const end = new Date(absence.end_date).toLocaleDateString(
+    const endDate = new Date(absence.end_date).toLocaleDateString(
       "fr-FR",
       dateOptions
     );
-
-    // Format slot indicators
-    const startSlotText =
-      absence.start_slot === "fermeture" ? " (fermeture)" : "";
-    const endSlotText = absence.end_slot === "ouverture" ? " (ouverture)" : "";
+    const startSlot = absence.start_slot;
+    const endSlot = absence.end_slot;
 
     if (absence.start_date === absence.end_date) {
-      // Full single day absence
-      if (
-        absence.start_slot === "ouverture" &&
-        absence.end_slot === "fermeture"
-      ) {
-        return `Le ${start}`;
-      } else if (absence.start_slot === absence.end_slot) {
-        // Single slot (ouverture or fermeture)
-        return `Le ${start} (${absence.start_slot})`;
+      if (startSlot === "ouverture" && endSlot === "fermeture") {
+        return {
+          prefix: "Le",
+          startDate,
+          startSlot: null,
+          endDate: null,
+          endSlot: null,
+        };
+      } else if (startSlot === endSlot) {
+        return {
+          prefix: "Le",
+          startDate,
+          startSlot,
+          endDate: null,
+          endSlot: null,
+        };
       }
     } else {
-      // Multi-day absence
-      let startLabel = start;
-      let endLabel = end;
-      if (absence.start_slot === "fermeture") {
-        startLabel += " (fermeture)";
-      }
-      if (absence.end_slot === "ouverture") {
-        endLabel += " (ouverture)";
-      }
-      return `Du ${startLabel} au ${endLabel}`;
+      // Multi-day
+      return {
+        prefix: "Du",
+        startDate,
+        startSlot: startSlot === "fermeture" ? startSlot : null,
+        endDate,
+        endSlot: endSlot === "ouverture" ? endSlot : null,
+      };
     }
+    // fallback
+    return {
+      prefix: "",
+      startDate,
+      startSlot: null,
+      endDate: null,
+      endSlot: null,
+    };
   }
 
   // Group absences by member
