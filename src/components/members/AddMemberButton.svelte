@@ -14,6 +14,7 @@
 
   <button 
     type="button"
+    onclick={() => onAddMember?.(dayIndex, slotType)}
     class="flex justify-center items-center w-8 h-8 bg-gradient-to-br rounded-full border shadow-[0_0_0_0_transparent] backdrop-blur-sm transition-all duration-300 from-slate-600/80 to-slate-700/80 hover:from-slate-500/90 hover:to-slate-600/90 focus:outline-none border-slate-400/30 hover:scale-125 focus:animate-[focus-ring_100ms_ease-out_forwards] add-member-btn"
   >
     <span class="sr-only">Ajouter membre</span>

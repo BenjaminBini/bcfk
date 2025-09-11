@@ -25,12 +25,13 @@ function createRoutes(planningService, assignmentService, memberService, absence
   router.post('/api/assignments', assignmentController.createAssignment.bind(assignmentController));
   router.delete('/api/assignments/:id', assignmentController.deleteAssignment.bind(assignmentController));
 
-  // Absence API routes
+  // Absence API routes (all slot-aware now)
   router.get('/api/absences', absenceController.getAbsences.bind(absenceController));
   router.post('/api/absences', absenceController.createAbsence.bind(absenceController));
   router.delete('/api/absences/:id', absenceController.deleteAbsence.bind(absenceController));
   router.get('/api/absences/date-range', absenceController.getAbsencesForDateRange.bind(absenceController));
   router.get('/api/absences/date/:date', absenceController.getAbsentMembersForDate.bind(absenceController));
+  router.get('/api/absences/check/:memberId/:date/:slot', absenceController.checkMemberAbsentForSlot.bind(absenceController));
 
   // Audit logs API routes
   router.get('/api/audit-logs', async (req, res) => {

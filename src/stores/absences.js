@@ -27,7 +27,7 @@ export const absenceActions = {
     }
   },
 
-  async createAbsence(memberId, startDate, endDate) {
+  async createAbsence(memberId, startDate, endDate, startSlot = 'ouverture', endSlot = 'fermeture') {
     try {
       const response = await fetch('/api/absences', {
         method: 'POST',
@@ -37,7 +37,9 @@ export const absenceActions = {
         body: JSON.stringify({
           member_id: memberId,
           start_date: startDate,
-          end_date: endDate
+          end_date: endDate,
+          start_slot: startSlot,
+          end_slot: endSlot
         })
       });
 
@@ -120,6 +122,22 @@ export const absenceActions = {
       console.error('Error loading absent members for date:', err);
       error.set(err.message);
       return [];
+    }
+  },
+
+  async checkMemberAbsentForSlot(memberId, date, slot) {
+    try {
+      const response = await fetch(`/api/absences/check/${memberId}/${date}/${slot}`);
+      if (!response.ok) {
+        throw new Error(`Failed to check member absence for slot: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.isAbsent;
+    } catch (err) {
+      console.error('Error checking member absence for slot:', err);
+      error.set(err.message);
+      return false;
     }
   }
 };

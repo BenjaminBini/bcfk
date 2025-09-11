@@ -53,6 +53,47 @@
     });
   }
 
+  // Helper function to check if a member is absent for a specific slot on a specific date
+  function isMemberAbsentForSlot(memberId, dateIndex, slot) {
+    const dateObj = weekNavigationLogic.getCurrentWeekDates()[dateIndex];
+    const date = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+    
+    const targetSlotOrder = { 'ouverture': 1, 'fermeture': 2 };
+    const targetSlot = targetSlotOrder[slot];
+    
+    return $weeklyAbsences.some((absence) => {
+      if (absence.member_id !== memberId || absence.start_date > date || absence.end_date < date) {
+        return false;
+      }
+      
+      // Multi-day absence (covers all slots) - absence spans multiple days
+      if (absence.start_date < date && absence.end_date > date) {
+        return true;
+      }
+      
+      // Single day absence - check slot range coverage
+      if (absence.start_date === date && absence.end_date === date) {
+        const startSlotOrder = targetSlotOrder[absence.start_slot] || 1;
+        const endSlotOrder = targetSlotOrder[absence.end_slot] || 2;
+        return startSlotOrder <= targetSlot && endSlotOrder >= targetSlot;
+      }
+      
+      // Absence starts on this date - check if slot is covered from start
+      if (absence.start_date === date && absence.end_date > date) {
+        const startSlotOrder = targetSlotOrder[absence.start_slot] || 1;
+        return startSlotOrder <= targetSlot;
+      }
+      
+      // Absence ends on this date - check if slot is covered until end
+      if (absence.start_date < date && absence.end_date === date) {
+        const endSlotOrder = targetSlotOrder[absence.end_slot] || 2;
+        return endSlotOrder >= targetSlot;
+      }
+      
+      return false;
+    });
+  }
+
   // Get all absent members for a specific date
   function getAbsentMembersForDate(dateIndex) {
     const dateObj = weekNavigationLogic.getCurrentWeekDates()[dateIndex];
@@ -62,6 +103,21 @@
     });
   }
 
+  // Get absent members for a specific date with slot information  
+  async function getAbsentMembersForDateWithSlots(dateIndex) {
+    const dateObj = weekNavigationLogic.getCurrentWeekDates()[dateIndex];
+    const date = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+    
+    try {
+      // Now the main API returns slot information
+      const absentMembers = await absenceActions.getAbsentMembersForDate(date);
+      return absentMembers;
+    } catch (error) {
+      console.error("Error getting absent members with slots:", error);
+      return [];
+    }
+  }
+
   // Get absent members who were scheduled for a specific date and slot
   function getAbsentScheduledMembers(dateIndex, slotType, slotSchedule) {
     if ($weeklyAbsences.length === 0) return [];
@@ -69,7 +125,7 @@
       (a) => a.weekday === dateIndex && a.slot_type === slotType
     );
     return scheduledMembers.filter((member) =>
-      isMemberAbsent(member.member_id, dateIndex)
+      isMemberAbsentForSlot(member.member_id, dateIndex, slotType)
     );
   }
 
@@ -88,17 +144,23 @@
     );
   }
 
-  async function createAbsence(memberId, selectedDate, memberName) {
+  async function createAbsence(memberId, selectedDate, memberName, startSlot = 'ouverture', endSlot = 'fermeture') {
     try {
       await absenceActions.createAbsence(
         memberId,
         selectedDate,
-        selectedDate
+        selectedDate,
+        startSlot,
+        endSlot
       );
 
       setTimeout(async () => {
         await loadWeeklyAbsences();
-        showToast(`${memberName} marqué(e) comme absent(e)`, "success");
+        const slotText = (startSlot === endSlot) ? 
+          ` pour ${startSlot}` : 
+          (startSlot === 'ouverture' && endSlot === 'fermeture') ? '' : 
+          ` de ${startSlot} à ${endSlot}`;
+        showToast(`${memberName} marqué(e) comme absent(e)${slotText}`, "success");
       }, 150);
     } catch (error) {
       console.error("Error creating absence:", error);
@@ -106,13 +168,16 @@
     }
   }
 
+
   // Export functions and store
   export { 
     weeklyAbsences, 
     loadWeeklyAbsences, 
-    isMemberAbsent, 
+    isMemberAbsent,
+    isMemberAbsentForSlot, 
     getAbsencePeriod, 
     getAbsentMembersForDate,
+    getAbsentMembersForDateWithSlots,
     getAbsentScheduledMembers,
     getOtherAbsentMembers,
     createAbsence

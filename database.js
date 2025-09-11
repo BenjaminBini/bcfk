@@ -63,10 +63,38 @@ class Database {
           member_id INTEGER NOT NULL,
           start_date TEXT NOT NULL, -- YYYY-MM-DD format
           end_date TEXT NOT NULL, -- YYYY-MM-DD format
+          start_slot TEXT DEFAULT 'ouverture', -- 'ouverture' or 'fermeture' for start date
+          end_slot TEXT DEFAULT 'fermeture', -- 'ouverture' or 'fermeture' for end date
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (member_id) REFERENCES members(id)
         )
       `);
+
+      // Add slot columns to existing absence tables (migration)
+      this.db.run(`
+        ALTER TABLE absences ADD COLUMN start_slot TEXT DEFAULT 'ouverture';
+      `, (err) => {
+        // Ignore error if column already exists
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding start_slot column:', err);
+        } else if (!err) {
+          // Update existing records to have proper slot values
+          this.db.run(`
+            UPDATE absences 
+            SET start_slot = 'ouverture', end_slot = 'fermeture' 
+            WHERE start_slot IS NULL OR end_slot IS NULL
+          `);
+        }
+      });
+      
+      this.db.run(`
+        ALTER TABLE absences ADD COLUMN end_slot TEXT DEFAULT 'fermeture';
+      `, (err) => {
+        // Ignore error if column already exists
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding end_slot column:', err);
+        }
+      });
 
       // Audit logs table
       this.db.run(`
@@ -240,13 +268,20 @@ class Database {
     `, callback);
   }
 
-  addAbsence(memberId, startDate, endDate, callback) {
+  addAbsence(memberId, startDate, endDate, startSlot = 'ouverture', endSlot = 'fermeture', callback) {
     this.db.run(
-      'INSERT INTO absences (member_id, start_date, end_date) VALUES (?, ?, ?)',
-      [memberId, startDate, endDate],
+      'INSERT INTO absences (member_id, start_date, end_date, start_slot, end_slot) VALUES (?, ?, ?, ?, ?)',
+      [memberId, startDate, endDate, startSlot, endSlot],
       function(err) {
         if (err) return callback(err);
-        callback(null, { id: this.lastID, member_id: memberId, start_date: startDate, end_date: endDate });
+        callback(null, { 
+          id: this.lastID, 
+          member_id: memberId, 
+          start_date: startDate, 
+          end_date: endDate,
+          start_slot: startSlot,
+          end_slot: endSlot 
+        });
       }
     );
   }
@@ -266,6 +301,36 @@ class Database {
          OR (a.end_date >= ? AND a.end_date <= ?)
       ORDER BY m.first_name, m.last_name
     `, [endDate, startDate, startDate, endDate, startDate, endDate], callback);
+  }
+
+  // Check if a member is absent for a specific slot on a specific date
+  isMemberAbsentForSlot(memberId, date, slot, callback) {
+    // Convert slots to numbers for comparison: ouverture=1, fermeture=2
+    const slotOrder = { 'ouverture': 1, 'fermeture': 2 };
+    const targetSlot = slotOrder[slot];
+    
+    this.db.get(`
+      SELECT * FROM absences 
+      WHERE member_id = ? 
+      AND start_date <= ? AND end_date >= ?
+      AND (
+        -- Multi-day absence (covers all slots) - absence spans multiple days
+        (start_date < ? AND end_date > ?) OR
+        -- Single day absence - check slot range coverage
+        (start_date = ? AND end_date = ? AND 
+         CASE WHEN start_slot = 'ouverture' THEN 1 ELSE 2 END <= ? AND
+         CASE WHEN end_slot = 'ouverture' THEN 1 ELSE 2 END >= ?) OR
+        -- Absence starts on this date - check if slot is covered from start
+        (start_date = ? AND end_date > ? AND 
+         CASE WHEN start_slot = 'ouverture' THEN 1 ELSE 2 END <= ?) OR
+        -- Absence ends on this date - check if slot is covered until end
+        (start_date < ? AND end_date = ? AND 
+         CASE WHEN end_slot = 'ouverture' THEN 1 ELSE 2 END >= ?)
+      )
+    `, [memberId, date, date, date, date, date, date, targetSlot, targetSlot, date, date, targetSlot, date, date, targetSlot], (err, result) => {
+      if (err) return callback(err);
+      callback(null, !!result);
+    });
   }
 
   // Audit logging methods

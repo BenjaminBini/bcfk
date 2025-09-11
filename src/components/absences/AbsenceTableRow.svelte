@@ -34,7 +34,7 @@
   </td>
   <td class="px-6 py-4 whitespace-nowrap">
     <div class="text-sm text-slate-200">
-      {formatPeriod(absence.start_date, absence.end_date)}
+      {formatPeriod(absence)}
     </div>
   </td>
   <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">

@@ -13,7 +13,7 @@
 
   let isSubmitting = $state(false);
 
-  async function handleFormSubmit({ selectedMember, startDate, endDate, resetForm }) {
+  async function handleFormSubmit({ selectedMember, startDate, endDate, startSlot, endSlot, resetForm }) {
     if (!selectedMember || !startDate || !endDate) {
       showToast('Veuillez remplir tous les champs', 'error');
       return;
@@ -24,9 +24,15 @@
       return;
     }
 
+    // Validate slot configuration for same-day absences
+    if (startDate === endDate && startSlot === 'fermeture' && endSlot === 'ouverture') {
+      showToast('Configuration invalide : impossible de commencer par la fermeture et finir par l\'ouverture le même jour', 'error');
+      return;
+    }
+
     isSubmitting = true;
     try {
-      await absenceActions.createAbsence(parseInt(selectedMember), startDate, endDate);
+      await absenceActions.createAbsence(parseInt(selectedMember), startDate, endDate, startSlot, endSlot);
       showToast('Absence ajoutée avec succès', 'success');
       resetForm();
     } catch (err) {
@@ -51,10 +57,27 @@
     return new Date(dateString).toLocaleDateString('fr-FR');
   }
 
-  function formatPeriod(startDate, endDate) {
-    const start = formatDate(startDate);
-    const end = formatDate(endDate);
-    return start === end ? start : `${start} - ${end}`;
+  function formatPeriod(absence) {
+    const start = formatDate(absence.start_date);
+    const end = formatDate(absence.end_date);
+    
+    // Format slot indicators
+    const startSlotText = absence.start_slot === 'fermeture' ? ' (fermeture)' : '';
+    const endSlotText = absence.end_slot === 'ouverture' ? ' (ouverture)' : '';
+    
+    if (absence.start_date === absence.end_date) {
+      // Same day absence - show slot range if not full day
+      if (absence.start_slot === 'ouverture' && absence.end_slot === 'fermeture') {
+        return start; // Full day, no need to show slots
+      } else if (absence.start_slot === absence.end_slot) {
+        return `${start} (${absence.start_slot})`; // Single slot
+      } else {
+        return `${start} (${absence.start_slot} - ${absence.end_slot})`; // Partial day
+      }
+    } else {
+      // Multi-day absence
+      return `${start}${startSlotText} - ${end}${endSlotText}`;
+    }
   }
 </script>
 

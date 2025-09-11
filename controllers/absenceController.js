@@ -19,7 +19,7 @@ class AbsenceController {
   // POST /api/absences
   async createAbsence(req, res, next) {
     try {
-      const { member_id, start_date, end_date } = req.body;
+      const { member_id, start_date, end_date, start_slot = 'ouverture', end_slot = 'fermeture' } = req.body;
       
       if (!member_id || !start_date || !end_date) {
         return res.status(400).json({ 
@@ -27,7 +27,7 @@ class AbsenceController {
         });
       }
       
-      const absence = await this.absenceService.createAbsence(member_id, start_date, end_date);
+      const absence = await this.absenceService.createAbsence(member_id, start_date, end_date, start_slot, end_slot);
       
       // Log the creation action
       if (this.auditService && absence && absence.id) {
@@ -122,6 +122,31 @@ class AbsenceController {
       
       const absentMembers = await this.absenceService.getAbsentMembersForDate(date);
       res.json(absentMembers);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+
+  // GET /api/absences/check/:memberId/:date/:slot - Check if member is absent for specific slot
+  async checkMemberAbsentForSlot(req, res, next) {
+    try {
+      const { memberId, date, slot } = req.params;
+      
+      if (!memberId || !date || !slot) {
+        return res.status(400).json({ 
+          error: 'memberId, date, and slot are required' 
+        });
+      }
+
+      if (!['ouverture', 'fermeture'].includes(slot)) {
+        return res.status(400).json({ 
+          error: 'slot must be either "ouverture" or "fermeture"' 
+        });
+      }
+      
+      const isAbsent = await this.absenceService.isMemberAbsentForSpecificSlot(parseInt(memberId), date, slot);
+      res.json({ isAbsent });
     } catch (error) {
       next(error);
     }

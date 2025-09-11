@@ -20,19 +20,35 @@
   let selectedMember = $state('');
   let startDate = $state('');
   let endDate = $state('');
+  let startSlot = $state('ouverture');
+  let endSlot = $state('fermeture');
 
   function handleSubmit() {
     onSubmit({
       selectedMember,
       startDate,
       endDate,
+      startSlot,
+      endSlot,
       resetForm: () => {
         selectedMember = '';
         startDate = '';
         endDate = '';
+        startSlot = 'ouverture';
+        endSlot = 'fermeture';
       }
     });
   }
+
+  // Reset end slot when start date changes
+  $effect(() => {
+    if (startDate && endDate && startDate === endDate) {
+      // Same day - validate slot logic
+      if (startSlot === 'fermeture' && endSlot === 'ouverture') {
+        endSlot = 'fermeture'; // Can't end before starting
+      }
+    }
+  });
 </script>
 
 <div class="p-6 bg-gradient-to-br rounded-2xl border shadow-2xl backdrop-blur-xl from-slate-800/90 via-slate-900/95 to-slate-800/90 border-slate-700/50">
@@ -55,23 +71,58 @@
       </SelectField>
     </FormField>
 
-    <!-- Start Date -->
-    <FormField label="Date de début" id="startDate" required>
-      <DateField 
-        id="startDate" 
-        bind:value={startDate}
-        required
-      />
-    </FormField>
+    <!-- Start Date/Time Group -->
+    <div class="p-3 rounded-lg bg-slate-700/30 border border-slate-600/30">
+      <h5 class="mb-3 text-xs font-medium text-slate-300 uppercase tracking-wide">
+        Début de l'absence
+      </h5>
+      <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <FormField label="Date" id="startDate" required>
+          <DateField 
+            id="startDate" 
+            bind:value={startDate}
+            required
+          />
+        </FormField>
+        <FormField label="À partir du créneau" id="startSlot">
+          <SelectField 
+            id="startSlot" 
+            bind:value={startSlot}
+            required
+          >
+            <option value="ouverture">Ouverture</option>
+            <option value="fermeture">Fermeture</option>
+          </SelectField>
+        </FormField>
+      </div>
+    </div>
 
-    <!-- End Date -->
-    <FormField label="Date de fin" id="endDate" required>
-      <DateField 
-        id="endDate" 
-        bind:value={endDate}
-        required
-      />
-    </FormField>
+    <!-- End Date/Time Group -->
+    <div class="p-3 rounded-lg bg-slate-700/30 border border-slate-600/30">
+      <h5 class="mb-3 text-xs font-medium text-slate-300 uppercase tracking-wide">
+        Fin de l'absence
+      </h5>
+      <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <FormField label="Date" id="endDate" required>
+          <DateField 
+            id="endDate" 
+            bind:value={endDate}
+            required
+          />
+        </FormField>
+        <FormField label="Jusqu'au créneau" id="endSlot">
+          <SelectField 
+            id="endSlot" 
+            bind:value={endSlot}
+            required
+          >
+            <option value="ouverture">Ouverture</option>
+            <option value="fermeture">Fermeture</option>
+          </SelectField>
+        </FormField>
+      </div>
+    </div>
+    
 
     <!-- Submit Button -->
     <SubmitButton 

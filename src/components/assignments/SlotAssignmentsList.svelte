@@ -39,7 +39,7 @@
 
 <div class="flex flex-col gap-3 justify-start items-center h-full">
   {#each slotAssignments as assignment (assignment.id || `${assignment.member_id}-${assignment.weekday}-${assignment.slot_type}`)}
-    {@const isAbsent = weeklyAbsences.length > 0 && isMemberAbsent(assignment.member_id, dayIndex)}
+    {@const isAbsent = weeklyAbsences.length > 0 && isMemberAbsent(assignment.member_id, dayIndex, slotType)}
     <div
       in:scale={enableAnimations ? { duration: 400, easing: quintOut, start: 0.5, opacity: 0 } : undefined}
       out:scale={enableAnimations ? { duration: 200, easing: quintOut, start: 0.5, opacity: 0 } : undefined}
@@ -64,7 +64,7 @@
         <RecurrentMemberTag 
           text={assignment.first_name}
           showAbsentButton={onMarkAbsent !== null}
-          onMarkAbsent={() => onMarkAbsent(assignment.member_id, assignment.first_name, dayIndex)}
+          onMarkAbsent={() => onMarkAbsent(assignment.member_id, assignment.first_name, dayIndex, slotType)}
         />
       {/if}
     </div>

@@ -1,5 +1,6 @@
 <script>
   import AbsenceConfirmModal from "../modals/AbsenceConfirmModal.svelte";
+  import SlotAbsenceModal from "../modals/SlotAbsenceModal.svelte";
   import AbsenceDetailsModal from "../modals/AbsenceDetailsModal.svelte";
   import MemberSelector from "../members/MemberSelector.svelte";
   import AssignmentConfirmModal from "../modals/AssignmentConfirmModal.svelte";
@@ -13,9 +14,12 @@
 
   // Modal state for absence confirmation
   let showAbsenceModal = $state(false);
+  let showSlotAbsenceModal = $state(false);
   let selectedMemberId = null;
   let selectedMemberName = $state("");
   let selectedDayIndex = $state(0);
+  let selectedSlotType = $state("");
+  let isSubmittingAbsence = $state(false);
 
   // Modal state for absence details
   let showAbsenceDetailsModal = $state(false);
@@ -29,11 +33,19 @@
   let selectedDayForAssignment = $state(0);
   let selectedSlotForAssignment = $state("");
 
-  function handleMarkAbsent(memberId, memberName, dayIndex) {
+  function handleMarkAbsent(memberId, memberName, dayIndex, slotType = null) {
     selectedMemberId = memberId;
     selectedMemberName = memberName;
     selectedDayIndex = dayIndex;
-    showAbsenceModal = true;
+    selectedSlotType = slotType;
+    
+    // If we have a specific slot, show the slot-specific modal
+    // Otherwise use the old general modal
+    if (slotType) {
+      showSlotAbsenceModal = true;
+    } else {
+      showAbsenceModal = true;
+    }
   }
 
   function closeAbsenceModal() {
@@ -41,6 +53,15 @@
     selectedMemberId = null;
     selectedMemberName = "";
     selectedDayIndex = 0;
+  }
+
+  function closeSlotAbsenceModal() {
+    showSlotAbsenceModal = false;
+    isSubmittingAbsence = false;
+    selectedMemberId = null;
+    selectedMemberName = "";
+    selectedDayIndex = 0;
+    selectedSlotType = "";
   }
 
   async function confirmAbsence() {
@@ -53,6 +74,31 @@
 
     await absenceManagement?.createAbsence?.(selectedMemberId, selectedDate, selectedMemberName);
     closeAbsenceModal();
+  }
+
+  async function confirmSlotAbsence(choice) {
+    if (!selectedMemberId || !selectedSlotType) return;
+
+    const weekDates = weekNavigationLogic?.getCurrentWeekDates?.();
+    if (!weekDates) return;
+
+    const selectedDate = weekDates[selectedDayIndex].toISOString().split("T")[0];
+    
+    isSubmittingAbsence = true;
+    
+    try {
+      if (choice === 'slot') {
+        // Create absence for just this slot (same start and end date/slot)
+        await absenceManagement?.createAbsence?.(selectedMemberId, selectedDate, selectedMemberName, selectedSlotType, selectedSlotType);
+      } else if (choice === 'both') {
+        // Create absence for the full day (ouverture to fermeture)
+        await absenceManagement?.createAbsence?.(selectedMemberId, selectedDate, selectedMemberName, 'ouverture', 'fermeture');
+      }
+      closeSlotAbsenceModal();
+    } catch (error) {
+      console.error('Error creating slot absence:', error);
+      isSubmittingAbsence = false;
+    }
   }
 
   // Handle adding member to slot
@@ -131,6 +177,19 @@
   dayIndex={selectedDayIndex}
   on:confirm={confirmAbsence}
   on:cancel={closeAbsenceModal}
+/>
+
+<!-- Slot-Specific Absence Modal -->
+<SlotAbsenceModal
+  isOpen={showSlotAbsenceModal}
+  memberName={selectedMemberName}
+  slotType={selectedSlotType}
+  date={selectedDayIndex >= 0
+    ? weekNavigationLogic?.getCurrentWeekDates?.()?.[selectedDayIndex]?.toISOString().split("T")[0] || ""
+    : ""}
+  isSubmitting={isSubmittingAbsence}
+  onClose={closeSlotAbsenceModal}
+  onConfirm={confirmSlotAbsence}
 />
 
 <!-- Absence Details Modal -->

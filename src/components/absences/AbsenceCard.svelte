@@ -30,7 +30,7 @@
           {absence.member_name}
         </div>
         <div class="text-xs text-slate-400">
-          {formatPeriod(absence.start_date, absence.end_date)}
+          {formatPeriod(absence)}
         </div>
       </div>
     </div>

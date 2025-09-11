@@ -24,7 +24,7 @@
   {id}
   bind:value
   {onchange}
-  class="px-3 py-2 w-full text-white bg-gradient-to-r rounded-lg border backdrop-blur-sm transition-all duration-300 from-slate-700/80 to-slate-600/80 border-slate-600/50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50"
+  class="px-3 py-2 w-full h-10 text-white bg-gradient-to-r rounded-lg border backdrop-blur-sm transition-all duration-300 from-slate-700/80 to-slate-600/80 border-slate-600/50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 leading-none text-sm"
   {required}
 >
   {#if placeholder}

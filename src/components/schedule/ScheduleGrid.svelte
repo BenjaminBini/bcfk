@@ -43,16 +43,16 @@
     return weekNavigationLogic.getCurrentWeekDates();
   }
 
-  function isMemberAbsent(memberId, dateIndex) {
-    return absenceManagement.isMemberAbsent(memberId, dateIndex);
+  function isMemberAbsentForSlot(memberId, dateIndex, slotType) {
+    return absenceManagement.isMemberAbsentForSlot(memberId, dateIndex, slotType);
   }
 
   function getAbsencePeriod(memberId) {
     return absenceManagement.getAbsencePeriod(memberId);
   }
 
-  function handleMarkAbsent(memberId, memberName, dayIndex) {
-    modalManager.handleMarkAbsent(memberId, memberName, dayIndex);
+  function handleMarkAbsent(memberId, memberName, dayIndex, slotType = null) {
+    modalManager.handleMarkAbsent(memberId, memberName, dayIndex, slotType);
   }
 
   function handleAddMember(dayIndex, slotType) {
@@ -119,7 +119,7 @@
               slotType="ouverture"
               {dayIndex}
               {weeklyAbsences}
-              {isMemberAbsent}
+              isMemberAbsent={isMemberAbsentForSlot}
               {getAbsencePeriod}
               {enableAnimations}
               onMarkAbsent={handleMarkAbsent}
@@ -141,7 +141,7 @@
               slotType="fermeture"
               {dayIndex}
               {weeklyAbsences}
-              {isMemberAbsent}
+              isMemberAbsent={isMemberAbsentForSlot}
               {getAbsencePeriod}
               {enableAnimations}
               onMarkAbsent={handleMarkAbsent}
@@ -165,6 +165,9 @@
             <AbsenteesCell
               absentMembers={dayAbsenceData.uniqueAbsentMembers}
               {getAbsencePeriod}
+              dayIndex={dayIndex}
+              currentDate={getCurrentWeekDates()[dayIndex]}
+              {absenceManagement}
             />
           </Cell>
         {/each}
