@@ -166,6 +166,38 @@ class AbsenceService {
     return false;
   }
 
+  // Helper method to merge two absence periods
+  mergePeriods(period1, period2) {
+    const slotOrder = { 'ouverture': 1, 'fermeture': 2 };
+    
+    // Determine the earliest start
+    let mergedStartDate = period1.start_date;
+    let mergedStartSlot = period1.start_slot;
+    
+    if (period2.start_date < mergedStartDate || 
+        (period2.start_date === mergedStartDate && slotOrder[period2.start_slot] < slotOrder[mergedStartSlot])) {
+      mergedStartDate = period2.start_date;
+      mergedStartSlot = period2.start_slot;
+    }
+
+    // Determine the latest end
+    let mergedEndDate = period1.end_date;
+    let mergedEndSlot = period1.end_slot;
+    
+    if (period2.end_date > mergedEndDate || 
+        (period2.end_date === mergedEndDate && slotOrder[period2.end_slot] > slotOrder[mergedEndSlot])) {
+      mergedEndDate = period2.end_date;
+      mergedEndSlot = period2.end_slot;
+    }
+
+    return {
+      start_date: mergedStartDate,
+      end_date: mergedEndDate,
+      start_slot: mergedStartSlot,
+      end_slot: mergedEndSlot
+    };
+  }
+
   async getAbsences() {
     try {
       const absences = await this.getAllAbsences();
