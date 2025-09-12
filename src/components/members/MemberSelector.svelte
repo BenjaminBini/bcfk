@@ -5,7 +5,7 @@
   
   /**
    * @typedef {Object} Props
-   * @property {boolean} [show]
+   * @property {boolean} [isOpen]
    * @property {any} [members]
    * @property {any} [assignments]
    * @property {any} [selectedDay]
@@ -16,7 +16,7 @@
 
   /** @type {Props} */
   let {
-    show = false,
+    isOpen = false,
     members = [],
     assignments = [],
     selectedDay = null,
@@ -124,7 +124,7 @@
   }
 </script>
 
-{#if show}
+{#if isOpen}
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div 

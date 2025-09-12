@@ -112,14 +112,19 @@
   }
 
   function handleAddMember(dayIndex, slotType) {
+    console.log('🔧 ModalManager.handleAddMember called with:', { dayIndex, slotType });
     const weekDates = weekNavigationLogic?.getCurrentWeekDates?.();
-    if (!weekDates) return;
+    if (!weekDates) {
+      console.error('❌ weekNavigationLogic or getCurrentWeekDates not available');
+      return;
+    }
 
     selectedSlot = {
       dayIndex,
       slotType,
       date: weekDates[dayIndex].toISOString().split("T")[0]
     };
+    console.log('✅ Setting showMemberSelectionModal = true, selectedSlot:', selectedSlot);
     showMemberSelectionModal = true;
   }
 

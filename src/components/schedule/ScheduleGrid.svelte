@@ -56,6 +56,8 @@
   }
 
   function handleAddMember(dayIndex, slotType) {
+    console.log('🎯 ScheduleGrid.handleAddMember called with:', { dayIndex, slotType });
+    console.log('📋 modalManager available:', !!modalManager);
     modalManager.handleAddMember(dayIndex, slotType);
   }
 
