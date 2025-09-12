@@ -191,7 +191,7 @@
 
 <!-- Member Selection Modal -->
 <MemberSelector
-  show={showMemberSelectionModal}
+  isOpen={showMemberSelectionModal}
   members={assignmentManagement?.allMembers || []}
   {assignments}
   selectedDay={selectedSlot?.dayIndex || 0}

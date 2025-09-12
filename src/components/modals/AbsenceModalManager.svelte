@@ -113,7 +113,7 @@
 
 <!-- Absence Details Modal -->
 <AbsenceDetailsModal
-  show={showAbsenceDetailsModal}
+  isOpen={showAbsenceDetailsModal}
   memberName={absenceDetailsMemberName}
   absenceData={absenceDetailsData}
   on:close={closeAbsenceDetailsModal}
