@@ -1,22 +1,21 @@
 <script>
-  import AbsenceDataService from './AbsenceDataService.svelte';
-  import AbsenceCreator from './AbsenceCreator.svelte';
   import { isMemberAbsent, isMemberAbsentForSlot } from '../../lib/absence/absenceChecker.js';
   import { formatDate, getAbsencePeriod } from '../../lib/absence/absenceUtils.js';
   import { getAbsentScheduledMembers, getOtherAbsentMembers } from '../../lib/absence/absenceQueries.js';
+  import { createAbsence } from '../../lib/absence/absenceCreator.js';
+  import { 
+    weeklyAbsences, 
+    loadWeeklyAbsences as loadWeeklyAbsencesStore,
+    getAbsentMembersForDate as getAbsentMembersForDateStore,
+    getAbsentMembersForDateWithSlots as getAbsentMembersForDateWithSlotsStore
+  } from '../../stores/weeklyAbsences.js';
 
   let { weekNavigationLogic } = $props();
 
-  // Component instances
-  let absenceDataService = $state();
-  let absenceCreator = $state();
-
+  // Load absences for the current week
   async function loadWeeklyAbsences() {
-    return await absenceDataService?.loadWeeklyAbsences?.();
+    return await loadWeeklyAbsencesStore(weekNavigationLogic);
   }
-
-  // Get the weeklyAbsences store from data service
-  let weeklyAbsences = $derived(absenceDataService?.weeklyAbsences || { subscribe: () => {} });
 
   // Get current absences array for pure functions
   let currentAbsences = $state([]);
@@ -25,15 +24,15 @@
   });
 
   function getAbsentMembersForDate(dateIndex) {
-    return absenceDataService?.getAbsentMembersForDate?.(dateIndex) || [];
+    return getAbsentMembersForDateStore(dateIndex, weekNavigationLogic);
   }
 
   async function getAbsentMembersForDateWithSlots(dateIndex) {
-    return await absenceDataService?.getAbsentMembersForDateWithSlots?.(dateIndex) || [];
+    return await getAbsentMembersForDateWithSlotsStore(dateIndex, weekNavigationLogic);
   }
 
-  async function createAbsence(memberId, selectedDate, memberName, startSlot = 'ouverture', endSlot = 'fermeture') {
-    return await absenceCreator?.createAbsence?.(memberId, selectedDate, memberName, startSlot, endSlot);
+  async function createAbsenceWrapper(memberId, selectedDate, memberName, startSlot = 'ouverture', endSlot = 'fermeture') {
+    return await createAbsence(memberId, selectedDate, memberName, startSlot, endSlot, loadWeeklyAbsences);
   }
 
   // Wrapper functions that use pure functions with current state
@@ -75,18 +74,9 @@
     getAbsentMembersForDateWithSlots,
     queryAbsentScheduledMembers as getAbsentScheduledMembers,
     queryOtherAbsentMembers as getOtherAbsentMembers,
-    createAbsence,
+    createAbsenceWrapper as createAbsence,
     formatDate
   };
 </script>
 
-<!-- Child Components -->
-<AbsenceDataService 
-  bind:this={absenceDataService}
-  {weekNavigationLogic}
-/>
-
-<AbsenceCreator 
-  bind:this={absenceCreator}
-  {loadWeeklyAbsences}
-/>
+<!-- No child components needed - using pure JS modules and stores -->
