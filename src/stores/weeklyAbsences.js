@@ -4,7 +4,7 @@
  * Manages weekly absence data with reactive updates
  */
 
-import { writable, derived } from "svelte";
+import { writable, derived } from "svelte/store";
 import { absenceActions } from "./absences.js";
 
 // Core store for weekly absences
