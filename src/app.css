@@ -1,20 +1,17 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 @layer components {
-  
   /* Custom scrollbar for dark theme */
   .custom-scrollbar::-webkit-scrollbar {
     width: 8px;
   }
-  
+
   .custom-scrollbar::-webkit-scrollbar-track {
-    @apply bg-gray-800;
+    @apply bg-gray-950;
   }
-  
+
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-gray-600 rounded-full;
+    @apply bg-gray-700 rounded-full;
   }
 
   /* Custom tooltip styling to match our dark theme */
@@ -23,9 +20,10 @@
     --tooltip-text-color: rgb(248 250 252);
     --tooltip-border: 1px solid rgb(51 65 85 / 0.5);
     --tooltip-border-radius: 8px;
-    --tooltip-box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.4);
+    --tooltip-box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.4),
+      0 8px 10px -6px rgb(0 0 0 / 0.4);
     --tooltip-font-size: 12px;
-    --tooltip-font-weight: 500; 
+    --tooltip-font-weight: 500;
     --tooltip-padding: 8px 12px;
     --tooltip-max-width: 250px;
     --tooltip-z-index: 2147483647;
@@ -38,7 +36,8 @@
     --tooltip-text-color: rgb(248 250 252);
     --tooltip-border: 1px solid rgb(51 65 85 / 0.5);
     --tooltip-border-radius: 8px;
-    --tooltip-box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.4);
+    --tooltip-box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.4),
+      0 8px 10px -6px rgb(0 0 0 / 0.4);
     --tooltip-font-size: 12px;
     --tooltip-font-weight: 500;
     --tooltip-padding: 8px 12px;

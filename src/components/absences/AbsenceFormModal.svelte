@@ -64,39 +64,12 @@
     }
   }
 
-  // Update end date/slot to first valid couple when start date or slot changes
+  // Reset end slot when start date changes
   $effect(() => {
-    // --- Start input logic ---
-    if (startDate) {
-      if (endDate < startDate) {
-        endDate = startDate;
-      }
-      if (endDate === startDate) {
-        endSlot = startSlot === 'fermeture' ? 'fermeture' : 'ouverture';
-      }
-    }
-    if (startDate === endDate) {
-      if (startSlot === 'fermeture') {
-        endSlot = 'fermeture';
-      } else {
-        endSlot = 'ouverture';
-      }
-    }
-
-    // --- End input logic ---
-    if (endDate) {
-      if (startDate > endDate) {
-        startDate = endDate;
-      }
-      if (startDate === endDate) {
-        startSlot = endSlot === 'ouverture' ? 'ouverture' : 'fermeture';
-      }
-    }
-    if (startDate === endDate) {
-      if (endSlot === 'ouverture') {
-        startSlot = 'ouverture';
-      } else {
-        startSlot = 'fermeture';
+    if (startDate && endDate && startDate === endDate) {
+      // Same day - validate slot logic
+      if (startSlot === 'fermeture' && endSlot === 'ouverture') {
+        endSlot = 'fermeture'; // Can't end before starting
       }
     }
   });
@@ -175,7 +148,6 @@
                 <DateField 
                   id="endDate" 
                   bind:value={endDate}
-                  min={startDate}
                   required
                 />
               </FormField>

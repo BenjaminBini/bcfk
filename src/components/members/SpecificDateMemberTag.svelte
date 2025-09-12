@@ -1,6 +1,7 @@
 <script>
   import { fade, fly } from 'svelte/transition';
   import MemberTag from './MemberTag.svelte';
+  import { styledButtons } from '../../lib/designTokens.js';
   
   /**
    * @typedef {Object} Props
@@ -121,13 +122,13 @@
       <div class="flex justify-end space-x-3">
         <button 
           onclick={cancelDelete}
-          class="px-4 py-2 bg-gradient-to-r rounded-lg border backdrop-blur-sm transition-all duration-300 text-slate-200 hover:text-white from-slate-700/70 to-slate-600/70 hover:from-slate-600/80 hover:to-slate-500/80 border-slate-500/40"
+          class="{styledButtons.secondary}"
         >
           Annuler
         </button>
         <button 
           onclick={confirmDelete}
-          class="px-4 py-2 text-white bg-gradient-to-r from-red-600 to-red-700 rounded-lg border shadow-lg transition-all duration-300 hover:from-red-500 hover:to-red-600 shadow-red-500/25 hover:shadow-red-500/40 focus:outline-none focus:ring-2 focus:ring-red-500/50 border-red-500/30"
+          class="{styledButtons.danger}"
         >
           Supprimer
         </button>

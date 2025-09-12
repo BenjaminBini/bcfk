@@ -1,7 +1,10 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
   import { fly, fade } from 'svelte/transition';
-  import Icon from '../common/Icon.svelte';
+  import { getCategorizedMembers } from '../../lib/memberCategorizer.js';
+  import { gradients } from '../../lib/designTokens.js';
+  import MemberFilter from './MemberFilter.svelte';
+  import MemberList from './MemberList.svelte';
+  import MemberSelectionActions from './MemberSelectionActions.svelte';
   
   /**
    * @typedef {Object} Props
@@ -12,6 +15,8 @@
    * @property {any} [selectedSlot]
    * @property {any} [absentMembers]
    * @property {any} [specificAssignments]
+   * @property {any} [onSelect]
+   * @property {any} [onClose]
    */
 
   /** @type {Props} */
@@ -22,104 +27,57 @@
     selectedDay = null,
     selectedSlot = null,
     absentMembers = [],
-    specificAssignments = []
+    specificAssignments = [],
+    onSelect = null,
+    onClose = null
   } = $props();
-
-  const dispatch = createEventDispatcher();
   let filterText = $state('');
   let selectedMembers = $state(new Set());
-  let hoveredMember = $state(null);
   
-  // Get available and assigned members (including specific assignments)
-  let currentAssignments = $derived(assignments.filter(a => a.weekday === selectedDay && a.slot_type === selectedSlot));
-  let currentSpecificAssignments = $derived(specificAssignments.filter(a => a.weekday === selectedDay && a.slot_type === selectedSlot));
-  let assignedMemberIds = $derived(new Set([
-    ...currentAssignments.map(a => a.member_id),
-    ...currentSpecificAssignments.map(a => a.member_id)
-  ]));
-  let absentMemberIds = $derived(new Set(absentMembers.map(m => m.member_id)));
+  // Get categorized and filtered members
+  let allFilteredMembers = $derived(
+    getCategorizedMembers({
+      members, 
+      assignments,
+      selectedDay,
+      selectedSlot,
+      absentMembers,
+      specificAssignments,
+      filterText
+    })
+  );
   
-  let availableMembers = $derived(members.filter(m => !assignedMemberIds.has(m.id) && !absentMemberIds.has(m.id)));
-  let assignedMembers = $derived(members.filter(m => assignedMemberIds.has(m.id)));
-  let absentMembersData = $derived(members.filter(m => absentMemberIds.has(m.id)));
-  
-  
-  // Filter members based on search
-  let filteredAvailable = $derived(availableMembers.filter(member => {
-    const searchTerm = filterText.toLowerCase();
-    const firstName = (member.first_name || '').toLowerCase();
-    const name = (member.name || '').toLowerCase();
-    return firstName.includes(searchTerm) || name.includes(searchTerm);
-  }));
-  
-  let filteredAssigned = $derived(assignedMembers.filter(member => {
-    const searchTerm = filterText.toLowerCase();
-    const firstName = (member.first_name || '').toLowerCase();
-    const name = (member.name || '').toLowerCase();
-    return firstName.includes(searchTerm) || name.includes(searchTerm);
-  }));
-  
-  let filteredAbsent = $derived(absentMembersData.filter(member => {
-    const searchTerm = filterText.toLowerCase();
-    const firstName = (member.first_name || '').toLowerCase();
-    const name = (member.name || '').toLowerCase();
-    return firstName.includes(searchTerm) || name.includes(searchTerm);
-  }));
-  
-  let allFilteredMembers = $derived((() => {
-    const memberMap = new Map();
-    
-    // Add available members first (lowest priority)
-    filteredAvailable.forEach(member => {
-      memberMap.set(member.id, { ...member, status: 'available' });
-    });
-    
-    // Add assigned members (medium priority)
-    filteredAssigned.forEach(member => {
-      memberMap.set(member.id, { ...member, status: 'assigned' });
-    });
-    
-    // Add absent members last (highest priority - overrides all others)
-    filteredAbsent.forEach(member => {
-      memberMap.set(member.id, { ...member, status: 'absent' });
-    });
-    
-    return Array.from(memberMap.values()).sort((a, b) => {
-      // Sort alphabetically by first name
-      const nameA = (a.first_name || '').toLowerCase();
-      const nameB = (b.first_name || '').toLowerCase();
-      return nameA.localeCompare(nameB);
-    });
-  })());
-  
-  function toggleMember(member) {
-    // Safety check: don't allow selection of absent or assigned members
-    if (member.status === 'absent' || member.status === 'assigned') {
-      return;
-    }
-    
-    if (selectedMembers.has(member.id)) {
-      selectedMembers.delete(member.id);
-    } else {
-      selectedMembers.add(member.id);
-    }
-    // Trigger reactivity by reassigning
-    selectedMembers = new Set(selectedMembers);
+  function handleMemberToggle() {
+    // Member toggle is handled by MemberList component
+    // This function exists for potential future custom logic
   }
   
-  function submitSelection() {
-    dispatch('select', { memberIds: Array.from(selectedMembers) });
+  function handleSubmit(memberIds) {
+    console.log('[DEBUG] MemberSelector.handleSubmit called with:', memberIds);
+    console.log('[DEBUG] MemberSelector - onSelect function available:', !!onSelect);
+    if (onSelect) {
+      console.log('[DEBUG] MemberSelector - calling onSelect with:', { detail: { memberIds } });
+      onSelect({ detail: { memberIds } });
+      console.log('[DEBUG] MemberSelector.onSelect fired');
+    } else {
+      console.error('[ERROR] MemberSelector - onSelect function is null!');
+    }
     selectedMembers.clear();
     selectedMembers = new Set();
+    console.log('[DEBUG] MemberSelector - cleared selectedMembers');
   }
   
-  function close() {
-    dispatch('close');
+  function handleCancel() {
+    console.log('[DEBUG] MemberSelector.handleCancel called');
+    if (onClose) {
+      onClose();
+      console.log('[DEBUG] MemberSelector.onClose fired');
+    }
   }
   
   function handleModalClick(event) {
     if (event.target === event.currentTarget) {
-      close();
+      handleCancel();
     }
   }
 </script>
@@ -128,86 +86,36 @@
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div 
-    class="fixed bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
+    class="fixed z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
     style="top: 0; left: 0; right: 0; bottom: 0; margin: 0;"
     onclick={handleModalClick}
     transition:fade={{ duration: 200 }}
   >
     <!-- Modal Content -->
     <div 
-      class="bg-gradient-to-br from-slate-800/95 via-slate-900/98 to-slate-800/95 backdrop-blur-xl rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl border border-slate-700/50"
+      class="{gradients.modalBackground} backdrop-blur-xl rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl border border-slate-700/50"
       transition:fly={{ y: 50, duration: 300 }}
     >
-      <h3 class="text-lg font-medium text-transparent bg-gradient-to-r from-white to-slate-200 bg-clip-text mb-4">Ajouter un Membre</h3>
+      <h3 class="text-lg font-medium text-transparent {gradients.titleText} bg-clip-text mb-4">Ajouter un Membre</h3>
       
       <!-- Filter Input -->
-      <div class="relative mb-4">
-        <input 
-          bind:value={filterText}
-          type="text" 
-          placeholder="Filtrer les membres..."
-          class="w-full px-3 py-2 bg-gradient-to-r from-slate-700/80 to-slate-600/80 backdrop-blur-sm border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all duration-300"
-        >
-        <div class="absolute right-3 top-2.5 text-slate-400">
-          <Icon name="search" size="w-5 h-5" />
-        </div>
-      </div>
+      <MemberFilter bind:filterText />
       
       <!-- Member Tags -->
-      <div class="space-y-3 max-h-60 overflow-y-auto overflow-x-visible p-1 -m-1">
-        {#if allFilteredMembers.length === 0}
-          <p class="text-slate-400 text-center">
-            {filterText ? 'Aucun membre trouvé' : 'Aucun membre disponible'}
-          </p>
-        {:else}
-          <div class="flex flex-wrap gap-2 p-1 overflow-visible">
-            {#each allFilteredMembers as member (member.id)}
-              {#if member.status === 'available'}
-                <!-- Clickable tag for available members -->
-                <button 
-                  class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transform hover:scale-105 shadow-lg {selectedMembers.has(member.id) ? 'bg-gradient-to-r from-emerald-500 to-teal-600 shadow-emerald-500/25 hover:from-emerald-400 hover:to-teal-500 hover:shadow-emerald-500/40' : 'bg-gradient-to-r from-indigo-500 to-purple-600 shadow-indigo-500/25 hover:from-indigo-400 hover:to-purple-500 hover:shadow-indigo-500/40'}"
-                  onclick={() => toggleMember(member)}
-                >
-                  {member.first_name}
-                </button>
-              {:else}
-                <!-- Disabled tag for unavailable members (assigned or absent) -->
-                <div 
-                  class="relative inline-flex items-center px-3 py-1.5 text-sm font-medium text-slate-300 rounded-full cursor-not-allowed bg-gradient-to-r from-slate-600/80 to-slate-700/80 opacity-60 backdrop-blur-sm border border-slate-500/30"
-                  onmouseenter={() => hoveredMember = {id: member.id, type: member.status}}
-                  onmouseleave={() => hoveredMember = null}
-                  title={member.status === 'assigned' ? 'Ce membre est déjà assigné à ce créneau' : 'Ce membre est absent'}
-                >
-                  {member.first_name}
-                  {#if hoveredMember?.id === member.id}
-                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded shadow-lg whitespace-nowrap z-50">
-                      {member.status === 'assigned' ? 'Ce membre est déjà assigné à ce créneau' : 'Ce membre est absent'}
-                      <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
-                    </div>
-                  {/if}
-                </div>
-              {/if}
-            {/each}
-          </div>
-        {/if}
-      </div>
+      <MemberList 
+        members={allFilteredMembers}
+        bind:selectedMembers
+        {filterText}
+        onToggleMember={handleMemberToggle}
+      />
       
-      <div class="flex justify-end space-x-3 mt-6">
-        <button 
-          onclick={close} 
-          class="px-4 py-2 text-slate-200 hover:text-white bg-gradient-to-r from-slate-700/70 to-slate-600/70 backdrop-blur-sm rounded-lg hover:from-slate-600/80 hover:to-slate-500/80 transition-all duration-300 border border-slate-500/40"
-        >
-          Annuler
-        </button>
-        <button 
-          onclick={submitSelection}
-          disabled={selectedMembers.size === 0}
-          class="px-4 py-2 text-white bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 rounded-lg transition-all duration-300 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-emerald-500/50 border border-emerald-500/30"
-        >
-          Valider ({selectedMembers.size})
-        </button>
-      </div>
+      <MemberSelectionActions 
+        {selectedMembers}
+        onSubmit={handleSubmit}
+        onCancel={handleCancel}
+      />
     </div>
   </div>
 {/if}
+
 

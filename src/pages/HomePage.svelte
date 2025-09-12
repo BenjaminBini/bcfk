@@ -6,6 +6,7 @@
     isLoading,
     error,
   } from "../stores/assignments.js";
+  import { WEEK_DAYS } from "../lib/constants.js";
   import PageHeader from "../components/layout/PageHeader.svelte";
   import ContentWrapper from "../components/layout/ContentWrapper.svelte";
   import WeekNavigationLogic from "../components/schedule/WeekNavigationLogic.svelte";
@@ -50,15 +51,7 @@
     }
   });
 
-  const weekDays = [
-    "Lundi",
-    "Mardi",
-    "Mercredi",
-    "Jeudi",
-    "Vendredi",
-    "Samedi",
-    "Dimanche",
-  ];
+  const weekDays = WEEK_DAYS;
 
   onMount(async () => {
     await assignmentActions.loadData();

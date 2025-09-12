@@ -2,7 +2,7 @@
   import { fade, fly } from 'svelte/transition';
   import Legend from '../help/Legend.svelte';
 
-  let { show = false, onClose = null } = $props();
+  let { isOpen = false, onClose = null } = $props();
 
   // Portal action to move modal to document.body
   function portal(node) {
@@ -32,7 +32,7 @@
   }
 </script>
 
-{#if show}
+{#if isOpen}
   <!-- Legend Modal - rendered in document body via portal -->
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->

@@ -1,5 +1,6 @@
 import { writable, derived, get } from 'svelte/store';
 import { api } from '../lib/api.js';
+import { WEEK_DAYS } from '../lib/constants.js';
 
 // Store for all members
 export const members = writable([]);
@@ -12,7 +13,7 @@ export const isLoading = writable(false);
 export const error = writable(null);
 
 // Configuration
-export const dayNames = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+export const dayNames = WEEK_DAYS;
 export const slotTypes = ['ouverture', 'fermeture'];
 
 // Derived store for assignments grouped by day and slot

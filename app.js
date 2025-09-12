@@ -35,89 +35,8 @@ class App {
     console.log('AssignmentService created');
     this.absenceService = new AbsenceService(this.db);
     console.log('AbsenceService created');
-    
-    // Consolidate absence periods on startup to ensure data consistency
-    await this.consolidateAbsencePeriods();
   }
 
-  async consolidateAbsencePeriods() {
-    console.log('🔧 Consolidating absence periods on startup...');
-    try {
-      const allAbsences = await this.absenceService.getAllAbsences();
-      const memberIds = [...new Set(allAbsences.map(a => a.member_id))];
-      
-      let totalConsolidated = 0;
-      
-      for (const memberId of memberIds) {
-        const memberAbsences = allAbsences.filter(a => a.member_id === memberId);
-        if (memberAbsences.length <= 1) continue;
-        
-        // Sort absences by start date
-        memberAbsences.sort((a, b) => a.start_date.localeCompare(b.start_date));
-        
-        const consolidated = [];
-        let currentPeriod = { ...memberAbsences[0] };
-        
-        for (let i = 1; i < memberAbsences.length; i++) {
-          const nextAbsence = memberAbsences[i];
-          
-          if (this.absenceService.isOverlappingOrAdjacent(
-            currentPeriod.start_date, 
-            currentPeriod.end_date, 
-            currentPeriod.start_slot, 
-            currentPeriod.end_slot,
-            nextAbsence.start_date, 
-            nextAbsence.end_date, 
-            nextAbsence.start_slot, 
-            nextAbsence.end_slot
-          )) {
-            // Merge with current period
-            const merged = this.absenceService.mergePeriods(currentPeriod, nextAbsence);
-            currentPeriod = merged;
-          } else {
-            // No overlap, save current period and start a new one
-            consolidated.push(currentPeriod);
-            currentPeriod = { ...nextAbsence };
-          }
-        }
-        
-        // Add the last period
-        consolidated.push(currentPeriod);
-        
-        // If we consolidated periods, update the database
-        if (consolidated.length < memberAbsences.length) {
-          // Delete all existing absences for this member
-          for (const absence of memberAbsences) {
-            await this.absenceService.deleteAbsence(absence.id);
-          }
-          
-          // Create new consolidated absences
-          for (const period of consolidated) {
-            await this.absenceService.addAbsence(
-              memberId,
-              period.start_date,
-              period.end_date,
-              period.start_slot,
-              period.end_slot
-            );
-          }
-          
-          const savedPeriods = memberAbsences.length - consolidated.length;
-          totalConsolidated += savedPeriods;
-          console.log(`   📊 Member ${memberId}: ${memberAbsences.length} → ${consolidated.length} periods (saved ${savedPeriods})`);
-        }
-      }
-      
-      if (totalConsolidated > 0) {
-        console.log(`✅ Consolidated ${totalConsolidated} overlapping absence periods`);
-      } else {
-        console.log('✅ No overlapping absence periods found');
-      }
-    } catch (error) {
-      console.error('❌ Error consolidating absence periods:', error.message);
-      // Don't crash the app if consolidation fails
-    }
-  }
 
   setupMiddleware() {
     // Body parsing middleware

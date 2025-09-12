@@ -45,7 +45,7 @@
 
   <!-- Legend Modal -->
   <LegendModal
-    show={$showLegendModal}
+    isOpen={$showLegendModal}
     onClose={() => showLegendModal.set(false)}
   />
 </div>

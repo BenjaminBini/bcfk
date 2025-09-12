@@ -8,7 +8,7 @@
   import RowHeaderCell from "./RowHeaderCell.svelte";
   import AbsenteesCell from "./AbsenteesCell.svelte";
 
-  let { 
+  let {
     weekDays,
     slotSchedule,
     weeklyAbsences,
@@ -19,7 +19,7 @@
     weekNavigationLogic,
     absenceManagement,
     modalManager,
-    onDeleteSpecificAssignment
+    onDeleteSpecificAssignment,
   } = $props();
 
   // State to control the "Aujourd'hui" label animation
@@ -44,7 +44,11 @@
   }
 
   function isMemberAbsentForSlot(memberId, dateIndex, slotType) {
-    return absenceManagement.isMemberAbsentForSlot(memberId, dateIndex, slotType);
+    return absenceManagement.isMemberAbsentForSlot(
+      memberId,
+      dateIndex,
+      slotType
+    );
   }
 
   function getAbsencePeriod(memberId, dayIndex = null) {
@@ -56,31 +60,37 @@
   }
 
   function handleAddMember(dayIndex, slotType) {
-    console.log('🎯 ScheduleGrid.handleAddMember called with:', { dayIndex, slotType });
-    console.log('📋 modalManager available:', !!modalManager);
+    console.log("🎯 ScheduleGrid.handleAddMember called with:", {
+      dayIndex,
+      slotType,
+    });
+    console.log("📋 modalManager available:", !!modalManager);
     modalManager.handleAddMember(dayIndex, slotType);
   }
 
   function handleShowAbsenceDetails(memberName, memberId) {
     // Trouver les données d'absence pour ce membre
-    const absenceData = weeklyAbsences.find((absence) => absence.member_id === memberId);
+    const absenceData = weeklyAbsences.find(
+      (absence) => absence.member_id === memberId
+    );
     modalManager.handleShowAbsenceDetails(memberName, absenceData);
   }
-
 </script>
 
 <div class="block relative">
-  
   <!-- Label grid positioned above main grid -->
   <div class="relative">
-    <div class="grid grid-cols-planning gap-px w-full">
+    <div
+      class="grid gap-px w-full"
+      style="grid-template-columns: min-content repeat(7, 1fr)"
+    >
       <!-- Empty corner cell -->
       <div class="w-14 h-6"></div>
       <!-- Label cells for each day -->
       {#each weekDays as _, dayIndex}
         <div class="flex justify-center h-6">
           {#if isCurrentDay(dayIndex)}
-            <div 
+            <div
               class="hidden md:block px-2 py-1 text-xs font-medium text-blue-100 whitespace-nowrap rounded-t-md border border-b-0 shadow-lg backdrop-blur-sm transition-transform duration-300 ease-out bg-blue-600/90 border-blue-400/50"
               class:translate-y-0={showTodayLabel}
               class:translate-y-7={!showTodayLabel}
@@ -94,7 +104,7 @@
   </div>
 
   <!-- Horizontal scroll container for the table -->
-  <div class="overflow-x-auto relative pb-2 custom-scrollbar">           
+  <div class="overflow-x-auto relative pb-2 custom-scrollbar">
     <div class="min-w-full">
       <WeeklyScheduleGrid>
         <!-- Header row -->
@@ -112,7 +122,7 @@
 
         <!-- Ouverture row -->
         <RowHeader>
-            <RowHeaderCell title="Ouverture" iconName="doorOpen" />
+          <RowHeaderCell title="Ouverture" iconName="doorOpen" />
         </RowHeader>
         {#each weekDays as _, dayIndex}
           <Cell isToday={isCurrentDay(dayIndex)}>
@@ -126,7 +136,7 @@
               {enableAnimations}
               onMarkAbsent={handleMarkAbsent}
               onAddMember={handleAddMember}
-              onDeleteSpecificAssignment={onDeleteSpecificAssignment}
+              {onDeleteSpecificAssignment}
               onShowAbsenceDetails={handleShowAbsenceDetails}
             />
           </Cell>
@@ -134,7 +144,7 @@
 
         <!-- Fermeture row -->
         <RowHeader>
-            <RowHeaderCell title="Fermeture" iconName="lockClosed" />
+          <RowHeaderCell title="Fermeture" iconName="lockClosed" />
         </RowHeader>
         {#each weekDays as _, dayIndex}
           <Cell isToday={isCurrentDay(dayIndex)}>
@@ -148,7 +158,7 @@
               {enableAnimations}
               onMarkAbsent={handleMarkAbsent}
               onAddMember={handleAddMember}
-              onDeleteSpecificAssignment={onDeleteSpecificAssignment}
+              {onDeleteSpecificAssignment}
               onShowAbsenceDetails={handleShowAbsenceDetails}
             />
           </Cell>
@@ -167,7 +177,7 @@
             <AbsenteesCell
               absentMembers={dayAbsenceData.uniqueAbsentMembers}
               {getAbsencePeriod}
-              dayIndex={dayIndex}
+              {dayIndex}
               currentDate={getCurrentWeekDates()[dayIndex]}
               {absenceManagement}
               onShowAbsenceDetails={handleShowAbsenceDetails}

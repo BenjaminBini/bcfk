@@ -1,8 +1,8 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher } from "svelte";
   import AssignmentConfirmModal from "./AssignmentConfirmModal.svelte";
 
-  let { 
+  let {
     showMemberSelectionModal,
     showAssignmentConfirmModal,
     selectedSlot,
@@ -15,19 +15,53 @@
   const dispatch = createEventDispatcher();
 
   function handleAddMember() {
+    console.log("[DEBUG] AssignmentModalManager.handleAddMember called");
+    console.log("[DEBUG] Current state before setting modal:");
+    console.log(
+      "[DEBUG] - showAssignmentConfirmModal (before):",
+      showAssignmentConfirmModal
+    );
+    console.log(
+      "[DEBUG] - selectedMemberForAssignment:",
+      selectedMemberForAssignment
+    );
+    console.log("[DEBUG] - selectedSlot:", selectedSlot);
+
     showAssignmentConfirmModal = true;
+
+    console.log(
+      "[DEBUG] showAssignmentConfirmModal set to:",
+      showAssignmentConfirmModal
+    );
+    console.log("[DEBUG] Modal should now be visible");
   }
 
   function handleAssignmentConfirmed() {
-    if (!selectedMemberForAssignment || !selectedSlot) return;
+    console.log(
+      "[DEBUG] AssignmentModalManager.handleAssignmentConfirmed called"
+    );
+    if (!selectedMemberForAssignment || !selectedSlot) {
+      console.log("[DEBUG] Missing member or slot, aborting");
+      console.log(
+        "[DEBUG] selectedMemberForAssignment:",
+        selectedMemberForAssignment
+      );
+      console.log("[DEBUG] selectedSlot:", selectedSlot);
+      return;
+    }
 
-    dispatch('assignment-confirmed', {
+    console.log("[DEBUG] Dispatching assignment-confirmed event with data:");
+    const eventData = {
       member: selectedMemberForAssignment,
       slotInfo: selectedSlot,
-      assignmentData: {}
-    });
-    
+      assignmentData: {},
+    };
+    console.log("[DEBUG] Event data:", eventData);
+
+    dispatch("assignment-confirmed", eventData);
+    console.log("[DEBUG] assignment-confirmed event dispatched");
     closeAssignmentModal();
+    console.log("[DEBUG] closeAssignmentModal called");
   }
 
   function closeAssignmentModal() {
@@ -39,9 +73,7 @@
   }
 
   // Export functions for parent component
-  export { 
-    handleAddMember
-  };
+  export { handleAddMember };
 </script>
 
 <!-- Assignment Confirmation Modal -->
@@ -49,7 +81,9 @@
   isOpen={showAssignmentConfirmModal}
   members={selectedMemberForAssignment ? [selectedMemberForAssignment] : []}
   dayIndex={selectedSlot?.dayIndex || 0}
-  date={selectedSlot?.date ? new Date(selectedSlot.date).toLocaleDateString("fr-FR") : ""}
+  date={selectedSlot?.date
+    ? new Date(selectedSlot.date).toLocaleDateString("fr-FR")
+    : ""}
   slotType={selectedSlot?.slotType || ""}
   onConfirm={handleAssignmentConfirmed}
   onCancel={handleModalCancel}

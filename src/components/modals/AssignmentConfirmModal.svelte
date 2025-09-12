@@ -1,6 +1,6 @@
 <script>
-  import BaseModal from '../common/BaseModal.svelte';
-  
+  import BaseModal from "../common/BaseModal.svelte";
+
   /**
    * @typedef {Object} Props
    * @property {boolean} [isOpen]
@@ -18,74 +18,103 @@
     members = [],
     dayIndex = 0,
     date = null,
-    slotType = '',
+    slotType = "",
     onConfirm = null,
-    onCancel = null
+    onCancel = null,
   } = $props();
-  
+
   function handleConfirm() {
+    console.log("[DEBUG] AssignmentConfirmModal.handleConfirm called");
+    console.log("[DEBUG] About to call onConfirm with data:", {
+      members,
+      dayIndex,
+      slotType,
+      date,
+    });
     onConfirm?.();
+    console.log("[DEBUG] onConfirm called successfully");
   }
-  
+
   function handleCancel() {
     onCancel?.();
   }
+
+  $effect(() => {
+    console.log("[DEBUG] AssignmentConfirmModal rendered with:", {
+      isOpen,
+      members,
+      dayIndex,
+      date,
+      slotType,
+    });
+    console.log("[DEBUG] AssignmentConfirmModal - members array:", members);
+    console.log(
+      "[DEBUG] AssignmentConfirmModal - members.length:",
+      members?.length
+    );
+    console.log(
+      "[DEBUG] AssignmentConfirmModal - rendering condition:",
+      isOpen && members && members.length > 0
+    );
+  });
 </script>
 
-{#if members && members.length > 0}
-  <BaseModal {isOpen} onClose={handleCancel} variant="success">
-    {#snippet icon()}
-      <div class="flex justify-center items-center w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full">
-        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-        </svg>
-      </div>
-    {/snippet}
+{#if isOpen && members && members.length > 0}
+  <!-- TEMPORARY DEBUG: Simple modal without BaseModal -->
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+  >
+    <div
+      class="bg-slate-800 border border-slate-700 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl"
+    >
+      <h2 class="text-lg font-semibold text-center text-white mb-4">
+        Confirmer l'affectation
+      </h2>
 
-    {#snippet header()}
-      <h2 class="text-lg font-semibold text-white text-center">Confirmer l'affectation</h2>
-    {/snippet}
-
-    {#snippet content()}
-      <div class="text-center">
-        <p class="text-sm text-slate-300">
-          Voulez-vous affecter 
-          <span class="font-medium text-white">
-            {#each members as member, index}
-              {member.first_name}{#if index < members.length - 2},&nbsp;{/if}{#if index == members.length - 2}&nbsp;et&nbsp;{/if}
-            {/each}
-          </span>
-          au <span class="font-medium text-white">{new Date(date).toLocaleDateString('fr-FR', { 
-            day: 'numeric', 
-            month: 'long', 
-            year: 'numeric' 
-          })}</span> 
-          en <span class="font-medium text-white">{slotType}</span> ?
-        </p>
-        <p class="mt-2 text-xs text-slate-400">
-          {#if members.length === 1}
-            Cette affectation ne concerne que cette date précise.
-          {:else}
-            Ces affectations ne concernent que cette date précise.
-          {/if}
+      <div class="space-y-4 mb-6">
+        <p class="text-sm text-center text-slate-300">
+          Voulez-vous affecter
+          <strong class="text-white"
+            >{members[0]?.first_name || members[0]?.full_name}</strong
+          >
+          au créneau
+          <strong class="text-white">{slotType}</strong>
+          du
+          <strong class="text-white">{date}</strong>
+          ?
         </p>
       </div>
-    {/snippet}
 
-    {#snippet actions()}
-      <button 
+      <div class="flex justify-end space-x-3">
+        <button
+          onclick={handleCancel}
+          class="px-4 py-2 text-sm font-medium transition-colors text-slate-400 hover:text-white"
+        >
+          Annuler
+        </button>
+        <button
+          onclick={handleConfirm}
+          class="px-4 py-2 text-sm font-medium text-white transition-all duration-300 rounded-md bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+        >
+          Confirmer
+        </button>
+      </div>
+    </div>
+  </div>
+{:else if isOpen}
+  <!-- Debug: Show empty modal state -->
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+  >
+    <div class="bg-red-500 text-white p-4 rounded-lg">
+      <h3>DEBUG: Empty Modal State</h3>
+      <p>isOpen: {isOpen}</p>
+      <p>members: {JSON.stringify(members)}</p>
+      <p>members.length: {members?.length || "undefined"}</p>
+      <button
         onclick={handleCancel}
-        class="px-4 py-2 text-sm font-medium transition-colors text-slate-400 hover:text-white"
+        class="mt-2 px-3 py-1 bg-white text-red-500 rounded">Close</button
       >
-        Annuler
-      </button>
-      <button 
-        onclick={handleConfirm}
-        class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-md transition-all duration-300 hover:from-emerald-600 hover:to-emerald-700"
-      >
-        Confirmer
-      </button>
-    {/snippet}
-  </BaseModal>
+    </div>
+  </div>
 {/if}
-

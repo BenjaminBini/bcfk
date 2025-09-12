@@ -183,6 +183,38 @@ class AssignmentController {
       next(error);
     }
   }
+
+  // POST /api/assignments/:weekday/:slotType
+  async updateAssignments(req, res, next) {
+    try {
+      const { weekday, slotType } = req.params;
+      const { memberIds } = req.body;
+      
+      if (weekday === undefined || !slotType || !Array.isArray(memberIds)) {
+        return res.status(400).json({ error: 'weekday, slotType, and memberIds array are required' });
+      }
+      
+      // Validate the assignment
+      const validation = this.assignmentService.validateAssignment(
+        parseInt(weekday), 
+        slotType, 
+        memberIds
+      );
+      
+      await this.assignmentService.setRecurringAssignment(
+        parseInt(weekday), 
+        slotType, 
+        memberIds
+      );
+      
+      res.json({ 
+        success: true, 
+        warnings: validation.warnings || []
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = AssignmentController;

@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { assignmentActions, assignments, members, isLoading, error } from '../stores/assignments.js';
+  import { WEEK_DAYS } from '../lib/constants.js';
   import MemberSelector from '../components/members/MemberSelector.svelte';
   import WeeklyScheduleGrid from '../components/table/WeeklyScheduleGrid.svelte';
   import ColumnHeader from '../components/table/ColumnHeader.svelte';
@@ -17,7 +18,7 @@
   });
 
 
-  const weekDays = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+  const weekDays = WEEK_DAYS;
 
   let showMemberSelector = $state(false);
   let selectedSlot = $state(null);
@@ -37,91 +38,14 @@
     selectedDay = null;
   }
 
-  async function assignMembers(memberIds) {
+  async function assignMembers(event) {
     try {
+      const memberIds = event.detail.memberIds;
       console.log('Assigning members:', { memberIds, selectedDay, selectedSlot });
       
-      const optimisticAssignments = [];
-      const apiCalls = [];
-      
-      // Process each member
+      // Use the store actions for each member
       for (const memberId of memberIds) {
-        // Find the member details
-        const member = $members.find(m => m.id === memberId);
-        if (!member) continue;
-
-        // Create optimistic assignment
-        const optimisticAssignment = {
-          id: Date.now() + Math.random(), // Temporary ID
-          weekday: selectedDay,
-          slot_type: selectedSlot,
-          member_id: memberId,
-          first_name: member.first_name
-        };
-        
-        optimisticAssignments.push(optimisticAssignment);
-        
-        // Create API call promise
-        const apiCall = fetch('/api/assignments', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            weekday: selectedDay,
-            slot_type: selectedSlot,
-            member_id: memberId
-          })
-        }).then(async response => {
-          if (response.ok) {
-            const newAssignment = await response.json();
-            newAssignment.first_name = member.first_name;
-            return { success: true, optimistic: optimisticAssignment, real: newAssignment };
-          } else {
-            return { success: false, optimistic: optimisticAssignment };
-          }
-        });
-        
-        apiCalls.push(apiCall);
-      }
-
-      // Update local state immediately (optimistic update)
-      assignments.update(current => [...current, ...optimisticAssignments]);
-
-      // Wait for all API calls to complete
-      const results = await Promise.all(apiCalls);
-      
-      // Process results
-      const successfulAssignments = [];
-      const failedAssignments = [];
-      
-      results.forEach(result => {
-        if (result.success) {
-          successfulAssignments.push(result);
-        } else {
-          failedAssignments.push(result.optimistic);
-        }
-      });
-      
-      // Update assignments: replace successful optimistic with real data, remove failed ones
-      assignments.update(current => {
-        let updated = current;
-        
-        // Replace successful optimistic assignments with real data
-        successfulAssignments.forEach(({ optimistic, real }) => {
-          updated = updated.map(a => a.id === optimistic.id ? real : a);
-        });
-        
-        // Remove failed assignments
-        failedAssignments.forEach(failed => {
-          updated = updated.filter(a => a.id !== failed.id);
-        });
-        
-        return updated;
-      });
-      
-      if (failedAssignments.length > 0) {
-        console.error(`Failed to assign ${failedAssignments.length} members`);
+        await assignmentActions.addMemberToSlot(selectedDay, selectedSlot, memberId);
       }
       
       closeMemberSelector();
@@ -224,13 +148,13 @@
 </div>
 
 <MemberSelector 
-  show={showMemberSelector}
+  isOpen={showMemberSelector}
   members={$members}
   assignments={$assignments}
   selectedDay={selectedDay}
   selectedSlot={selectedSlot}
-  on:select={(event) => assignMembers(event.detail.memberIds)}
-  on:close={closeMemberSelector}
+  onSelect={assignMembers}
+  onClose={closeMemberSelector}
 />
 
 <style>
