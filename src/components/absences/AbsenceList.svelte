@@ -25,8 +25,8 @@
 </script>
 
 <ContentWrapper {isLoading} {error}>
-  <div class="overflow-hidden bg-gradient-to-br rounded-2xl border shadow-2xl backdrop-blur-xl from-slate-800/90 via-slate-900/95 to-slate-800/90 border-slate-700/50">
-    <div class="px-6 py-4 bg-gradient-to-r border-b backdrop-blur-sm border-slate-700/50 from-slate-800/80 to-slate-900/80">
+  <div class="overflow-hidden border shadow-2xl bg-gradient-to-br rounded-2xl backdrop-blur-xl from-slate-800/90 via-slate-900/95 to-slate-800/90 border-slate-700/50">
+    <div class="px-6 py-4 border-b bg-gradient-to-r backdrop-blur-sm border-slate-700/50 from-slate-800/80 to-slate-900/80">
       <h3 class="text-lg font-medium text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-200">
         Liste des Absences
       </h3>
@@ -41,7 +41,7 @@
       <div class="hidden overflow-x-auto md:block">
         <table class="min-w-full divide-y divide-slate-700/50">
           <TableHeader columns={tableColumns} />
-          <tbody class="bg-gradient-to-br divide-y backdrop-blur-sm from-slate-800/50 to-slate-700/60 divide-slate-700/50">
+          <tbody class="divide-y bg-gradient-to-br backdrop-blur-sm from-slate-800/50 to-slate-700/60 divide-slate-700/50">
             {#each absences as absence (absence.id)}
               <AbsenceTableRow 
                 {absence}

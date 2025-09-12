@@ -1,9 +1,7 @@
 <script>
-  import AbsenceConfirmModal from "../modals/AbsenceConfirmModal.svelte";
-  import SlotAbsenceModal from "../modals/SlotAbsenceModal.svelte";
-  import AbsenceDetailsModal from "../modals/AbsenceDetailsModal.svelte";
+  import AbsenceModalManager from "../modals/AbsenceModalManager.svelte";
+  import AssignmentModalManager from "../modals/AssignmentModalManager.svelte";
   import MemberSelector from "../members/MemberSelector.svelte";
-  import AssignmentConfirmModal from "../modals/AssignmentConfirmModal.svelte";
 
   let { 
     weekNavigationLogic,
@@ -12,115 +10,119 @@
     assignments
   } = $props();
 
-  // Modal state for absence confirmation
+  // Shared state for modal operations
+  let selectedMember = $state(null);
+  let selectedSlot = $state(null);
+  let selectedAbsence = $state(null);
+  let isLoadingAbsence = $state(false);
+  let isLoadingAssignment = $state(false);
+
+  // Sub-manager modal states
   let showAbsenceModal = $state(false);
   let showSlotAbsenceModal = $state(false);
-  let selectedMemberId = null;
-  let selectedMemberName = $state("");
-  let selectedDayIndex = $state(0);
-  let selectedSlotType = $state("");
-  let isSubmittingAbsence = $state(false);
-
-  // Modal state for absence details
   let showAbsenceDetailsModal = $state(false);
-  let absenceDetailsMemberName = $state("");
-  let absenceDetailsData = $state(null);
-
-  // Modal state for member assignment
   let showMemberSelectionModal = $state(false);
   let showAssignmentConfirmModal = $state(false);
-  let selectedMembersForAssignment = $state([]);
-  let selectedDayForAssignment = $state(0);
-  let selectedSlotForAssignment = $state("");
+
+  // Component references
+  let absenceModalManager = $state();
+  let assignmentModalManager = $state();
 
   function handleMarkAbsent(memberId, memberName, dayIndex, slotType = null) {
-    selectedMemberId = memberId;
-    selectedMemberName = memberName;
-    selectedDayIndex = dayIndex;
-    selectedSlotType = slotType;
+    const weekDates = weekNavigationLogic?.getCurrentWeekDates?.();
+    if (!weekDates) return;
+
+    selectedMember = { id: memberId, name: memberName };
+    selectedSlot = {
+      dayIndex,
+      slotType,
+      date: weekDates[dayIndex].toISOString().split("T")[0]
+    };
     
-    // If we have a specific slot, show the slot-specific modal
-    // Otherwise use the old general modal
     if (slotType) {
-      showSlotAbsenceModal = true;
+      absenceModalManager?.handleShowSlotAbsence?.();
     } else {
-      showAbsenceModal = true;
+      absenceModalManager?.handleMarkAbsent?.();
     }
   }
 
-  function closeAbsenceModal() {
-    showAbsenceModal = false;
-    selectedMemberId = null;
-    selectedMemberName = "";
-    selectedDayIndex = 0;
-  }
-
-  function closeSlotAbsenceModal() {
-    showSlotAbsenceModal = false;
-    isSubmittingAbsence = false;
-    selectedMemberId = null;
-    selectedMemberName = "";
-    selectedDayIndex = 0;
-    selectedSlotType = "";
-  }
-
-  async function confirmAbsence() {
-    if (!selectedMemberId) return;
-
-    const weekDates = weekNavigationLogic?.getCurrentWeekDates?.();
-    if (!weekDates) return;
-
-    const selectedDate = weekDates[selectedDayIndex].toISOString().split("T")[0];
-
-    await absenceManagement?.createAbsence?.(selectedMemberId, selectedDate, selectedMemberName);
-    closeAbsenceModal();
-  }
-
-  async function confirmSlotAbsence(choice) {
-    if (!selectedMemberId || !selectedSlotType) return;
-
-    const weekDates = weekNavigationLogic?.getCurrentWeekDates?.();
-    if (!weekDates) return;
-
-    const selectedDate = weekDates[selectedDayIndex].toISOString().split("T")[0];
+  async function handleAbsenceConfirmed(event) {
+    const { memberId, slotInfo, absenceData } = event.detail;
     
-    isSubmittingAbsence = true;
+    isLoadingAbsence = true;
+    try {
+      await absenceManagement?.createAbsence?.(memberId, slotInfo.date, selectedMember?.name);
+      await absenceManagement?.loadWeeklyAbsences?.();
+    } catch (error) {
+      console.error('Error creating absence:', error);
+    } finally {
+      isLoadingAbsence = false;
+    }
+  }
+
+  async function handleSlotAbsenceConfirmed(event) {
+    const { slotInfo, absenceData } = event.detail;
+    const { choice } = absenceData;
     
+    if (!selectedMember || !slotInfo.slotType) return;
+    
+    isLoadingAbsence = true;
     try {
       if (choice === 'slot') {
-        // Create absence for just this slot (same start and end date/slot)
-        await absenceManagement?.createAbsence?.(selectedMemberId, selectedDate, selectedMemberName, selectedSlotType, selectedSlotType);
+        await absenceManagement?.createAbsence?.(selectedMember.id, slotInfo.date, selectedMember.name, slotInfo.slotType, slotInfo.slotType);
       } else if (choice === 'both') {
-        // Create absence for the full day (ouverture to fermeture)
-        await absenceManagement?.createAbsence?.(selectedMemberId, selectedDate, selectedMemberName, 'ouverture', 'fermeture');
+        await absenceManagement?.createAbsence?.(selectedMember.id, slotInfo.date, selectedMember.name, 'ouverture', 'fermeture');
       }
-      closeSlotAbsenceModal();
+      await absenceManagement?.loadWeeklyAbsences?.();
     } catch (error) {
       console.error('Error creating slot absence:', error);
-      isSubmittingAbsence = false;
+    } finally {
+      isLoadingAbsence = false;
     }
   }
 
-  // Handle adding member to slot
   function handleShowAbsenceDetails(memberName, absenceData) {
-    absenceDetailsMemberName = memberName;
-    absenceDetailsData = absenceData;
-    showAbsenceDetailsModal = true;
+    absenceModalManager?.handleShowAbsenceDetails?.(absenceData);
   }
 
-  function closeAbsenceDetailsModal() {
-    showAbsenceDetailsModal = false;
-    absenceDetailsMemberName = "";
-    absenceDetailsData = null;
+  async function handleAbsenceEdited(event) {
+    const { absence, newData } = event.detail;
+    isLoadingAbsence = true;
+    try {
+      // Handle absence editing logic here
+      await absenceManagement?.loadWeeklyAbsences?.();
+    } catch (error) {
+      console.error('Error editing absence:', error);
+    } finally {
+      isLoadingAbsence = false;
+    }
+  }
+
+  async function handleAbsenceDeleted(event) {
+    const { absence } = event.detail;
+    isLoadingAbsence = true;
+    try {
+      // Handle absence deletion logic here
+      await absenceManagement?.loadWeeklyAbsences?.();
+    } catch (error) {
+      console.error('Error deleting absence:', error);
+    } finally {
+      isLoadingAbsence = false;
+    }
   }
 
   function handleAddMember(dayIndex, slotType) {
-    selectedDayForAssignment = dayIndex;
-    selectedSlotForAssignment = slotType;
+    const weekDates = weekNavigationLogic?.getCurrentWeekDates?.();
+    if (!weekDates) return;
+
+    selectedSlot = {
+      dayIndex,
+      slotType,
+      date: weekDates[dayIndex].toISOString().split("T")[0]
+    };
     showMemberSelectionModal = true;
   }
 
-  // Handle member selection from modal
   function handleMemberSelected(event) {
     const { memberIds } = event.detail;
 
@@ -131,73 +133,60 @@
       );
 
       if (selectedMembers.length > 0) {
-        selectedMembersForAssignment = selectedMembers;
         showMemberSelectionModal = false;
-        showAssignmentConfirmModal = true;
+        // Set the first member as selectedMember for assignment modal
+        selectedMember = selectedMembers[0];
+        assignmentModalManager?.handleAddMember?.();
       }
     }
   }
 
-  // Handle assignment confirmation
-  async function handleAssignmentConfirmed() {
-    const success = await assignmentManagement?.createAssignments?.(
-      selectedMembersForAssignment, 
-      selectedDayForAssignment, 
-      selectedSlotForAssignment
-    );
-
-    if (success) {
-      showAssignmentConfirmModal = false;
-      selectedMembersForAssignment = [];
-      selectedDayForAssignment = 0;
-      selectedSlotForAssignment = "";
+  async function handleAssignmentConfirmed(event) {
+    const { member, slotInfo, assignmentData } = event.detail;
+    
+    isLoadingAssignment = true;
+    try {
+      const success = await assignmentManagement?.createAssignments?.(
+        [member], 
+        slotInfo.dayIndex, 
+        slotInfo.slotType
+      );
+      
+      if (success) {
+        await assignmentManagement?.loadSpecificAssignments?.();
+      }
+    } catch (error) {
+      console.error('Error creating assignment:', error);
+    } finally {
+      isLoadingAssignment = false;
     }
   }
 
-  // Handle modal cancellation
   function handleModalCancel() {
     showMemberSelectionModal = false;
-    showAssignmentConfirmModal = false;
-    selectedMembersForAssignment = [];
-    selectedDayForAssignment = 0;
-    selectedSlotForAssignment = "";
+    selectedMember = null;
+    selectedSlot = null;
   }
 
   // Export the handler functions
   export { handleMarkAbsent, handleAddMember, handleShowAbsenceDetails };
 </script>
 
-<!-- Absence Confirmation Modal -->
-<AbsenceConfirmModal
-  isOpen={showAbsenceModal}
-  memberName={selectedMemberName}
-  date={selectedDayIndex >= 0
-    ? weekNavigationLogic?.getCurrentWeekDates?.()?.[selectedDayIndex]?.toLocaleDateString("fr-FR") || ""
-    : ""}
-  dayIndex={selectedDayIndex}
-  on:confirm={confirmAbsence}
-  on:cancel={closeAbsenceModal}
-/>
-
-<!-- Slot-Specific Absence Modal -->
-<SlotAbsenceModal
-  isOpen={showSlotAbsenceModal}
-  memberName={selectedMemberName}
-  slotType={selectedSlotType}
-  date={selectedDayIndex >= 0
-    ? weekNavigationLogic?.getCurrentWeekDates?.()?.[selectedDayIndex]?.toISOString().split("T")[0] || ""
-    : ""}
-  isSubmitting={isSubmittingAbsence}
-  onClose={closeSlotAbsenceModal}
-  onConfirm={confirmSlotAbsence}
-/>
-
-<!-- Absence Details Modal -->
-<AbsenceDetailsModal
-  show={showAbsenceDetailsModal}
-  memberName={absenceDetailsMemberName}
-  absenceData={absenceDetailsData}
-  on:close={closeAbsenceDetailsModal}
+<!-- Absence Modal Manager -->
+<AbsenceModalManager
+  bind:this={absenceModalManager}
+  bind:showAbsenceModal
+  bind:showSlotAbsenceModal
+  bind:showAbsenceDetailsModal
+  bind:selectedMember
+  bind:selectedSlot
+  bind:selectedAbsence
+  bind:isLoadingAbsence
+  members={assignmentManagement?.allMembers || []}
+  onabsence-confirmed={handleAbsenceConfirmed}
+  onslot-absence-confirmed={handleSlotAbsenceConfirmed}
+  onabsence-edited={handleAbsenceEdited}
+  onabsence-deleted={handleAbsenceDeleted}
 />
 
 <!-- Member Selection Modal -->
@@ -205,25 +194,24 @@
   show={showMemberSelectionModal}
   members={assignmentManagement?.allMembers || []}
   {assignments}
-  selectedDay={selectedDayForAssignment}
-  selectedSlot={selectedSlotForAssignment}
-  absentMembers={showMemberSelectionModal
-    ? absenceManagement?.getAbsentMembersForDate?.(selectedDayForAssignment) || []
+  selectedDay={selectedSlot?.dayIndex || 0}
+  selectedSlot={selectedSlot?.slotType || ""}
+  absentMembers={showMemberSelectionModal && selectedSlot
+    ? absenceManagement?.getAbsentMembersForDate?.(selectedSlot.dayIndex) || []
     : []}
   specificAssignments={[]}
   on:select={handleMemberSelected}
   on:close={handleModalCancel}
 />
 
-<!-- Assignment Confirmation Modal -->
-<AssignmentConfirmModal
-  isOpen={showAssignmentConfirmModal}
-  members={selectedMembersForAssignment}
-  dayIndex={selectedDayForAssignment}
-  date={selectedDayForAssignment >= 0
-    ? weekNavigationLogic?.getCurrentWeekDates?.()?.[selectedDayForAssignment]?.toLocaleDateString("fr-FR") || ""
-    : ""}
-  slotType={selectedSlotForAssignment}
-  onConfirm={handleAssignmentConfirmed}
-  onCancel={handleModalCancel}
+<!-- Assignment Modal Manager -->
+<AssignmentModalManager
+  bind:this={assignmentModalManager}
+  bind:showMemberSelectionModal
+  bind:showAssignmentConfirmModal
+  bind:selectedSlot
+  bind:selectedMemberForAssignment={selectedMember}
+  bind:isLoadingAssignment
+  members={assignmentManagement?.allMembers || []}
+  onassignment-confirmed={handleAssignmentConfirmed}
 />
