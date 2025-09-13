@@ -229,7 +229,7 @@
               absences={member.absences}
               {formatPeriod}
               onDelete={handleDelete}
-              on:addAbsence={handleAddAbsence}
+              onaddabsence={handleAddAbsence}
             />
           {/each}
         </div>
@@ -242,8 +242,8 @@
         isOpen={isModalOpen}
         member={selectedMember}
         {isSubmitting}
-        on:submit={handleFormSubmit}
-        on:close={handleCloseModal}
+        onsubmit={handleFormSubmit}
+        onclose={handleCloseModal}
       />
     {/if}
   </div>

@@ -1,5 +1,4 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
   import { fly, fade } from 'svelte/transition';
   
   /**
@@ -7,16 +6,20 @@
    * @property {boolean} [show]
    * @property {string} [memberName]
    * @property {any} [absenceData]
+   * @property {function} [onclose] - Callback for close action
+   * @property {function} [onedit] - Callback for edit action
+   * @property {function} [ondelete] - Callback for delete action
    */
 
   /** @type {Props} */
   let {
     show = false,
     memberName = '',
-    absenceData = null
+    absenceData = null,
+    onclose,
+    onedit,
+    ondelete
   } = $props();
-  
-  const dispatch = createEventDispatcher();
 
   // Fonction pour formater les dates selon les règles demandées avec HTML pour highlight
   function formatAbsencePeriod(startDateStr, endDateStr, startSlot = null, endSlot = null) {
@@ -96,7 +99,7 @@
   );
   
   function close() {
-    dispatch('close');
+    onclose?.();
   }
   
   function handleModalClick(event) {

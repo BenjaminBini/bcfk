@@ -1,5 +1,4 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
   import AbsenceConfirmModal from "./AbsenceConfirmModal.svelte";
   import SlotAbsenceModal from "./SlotAbsenceModal.svelte";
   import AbsenceDetailsModal from "./AbsenceDetailsModal.svelte";
@@ -13,10 +12,12 @@
     selectedAbsence,
     isLoadingAbsence,
     members,
+    onabsenceconfirmed,
+    onslotabsenceconfirmed,
+    onabsenceedited,
+    onabsencedeleted,
     ...restProps
   } = $props();
-
-  const dispatch = createEventDispatcher();
 
   let absenceDetailsMemberName = $state("");
   let absenceDetailsData = $state(null);
@@ -54,7 +55,7 @@
   async function confirmAbsence() {
     if (!selectedMember || !selectedSlot) return;
 
-    dispatch('absence-confirmed', {
+    onabsenceconfirmed?.({
       memberId: selectedMember.id,
       slotInfo: selectedSlot,
       absenceData: {}
@@ -66,7 +67,7 @@
   async function confirmSlotAbsence(choice) {
     if (!selectedMember || !selectedSlot) return;
     
-    dispatch('slot-absence-confirmed', {
+    onslotabsenceconfirmed?.({
       slotInfo: selectedSlot,
       absenceData: { choice }
     });
@@ -75,11 +76,11 @@
   }
 
   function handleAbsenceEdit(event) {
-    dispatch('absence-edited', event.detail);
+    onabsenceedited?.(event.detail);
   }
 
   function handleAbsenceDelete(event) {
-    dispatch('absence-deleted', event.detail);
+    onabsencedeleted?.(event.detail);
   }
 
   // Export functions for parent component
@@ -96,8 +97,8 @@
   memberName={selectedMember?.name || ""}
   date={selectedSlot?.date ? new Date(selectedSlot.date).toLocaleDateString("fr-FR") : ""}
   dayIndex={selectedSlot?.dayIndex || 0}
-  on:confirm={confirmAbsence}
-  on:cancel={closeAbsenceModal}
+  onconfirm={confirmAbsence}
+  oncancel={closeAbsenceModal}
 />
 
 <!-- Slot-Specific Absence Modal -->
@@ -113,10 +114,10 @@
 
 <!-- Absence Details Modal -->
 <AbsenceDetailsModal
-  isOpen={showAbsenceDetailsModal}
+  show={showAbsenceDetailsModal}
   memberName={absenceDetailsMemberName}
   absenceData={absenceDetailsData}
-  on:close={closeAbsenceDetailsModal}
-  on:edit={handleAbsenceEdit}
-  on:delete={handleAbsenceDelete}
+  onclose={closeAbsenceDetailsModal}
+  onedit={handleAbsenceEdit}
+  ondelete={handleAbsenceDelete}
 />

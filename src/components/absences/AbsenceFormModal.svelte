@@ -1,5 +1,4 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
   import { fly, fade } from 'svelte/transition';
   import FormField from '../common/FormField.svelte';
   import SelectField from '../common/SelectField.svelte';
@@ -12,12 +11,12 @@
    * @property {boolean} isOpen - Whether modal is open
    * @property {Object} member - The member to add absence for
    * @property {boolean} [isSubmitting] - Whether form is submitting
+   * @property {function} [onsubmit] - Callback for form submission
+   * @property {function} [onclose] - Callback for modal close
    */
 
   /** @type {Props} */
-  let { isOpen, member, isSubmitting = false } = $props();
-
-  const dispatch = createEventDispatcher();
+  let { isOpen, member, isSubmitting = false, onsubmit, onclose } = $props();
 
   // Form state
   const today = new Date().toISOString().split('T')[0];
@@ -38,7 +37,7 @@
     
     event.preventDefault();
     
-    dispatch('submit', {
+    onsubmit?.({
       selectedMember: member.id,
       startDate,
       endDate,
@@ -54,7 +53,7 @@
   }
 
   function handleClose() {
-    dispatch('close');
+    onclose?.();
   }
 
   function handleBackdropClick(event) {

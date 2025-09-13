@@ -1,5 +1,4 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
   import BaseModal from '../common/BaseModal.svelte';
   
   /**
@@ -8,6 +7,8 @@
    * @property {string} [memberName]
    * @property {string} [date]
    * @property {number} [dayIndex]
+   * @property {function} [onconfirm] - Callback for confirm action
+   * @property {function} [oncancel] - Callback for cancel action
    */
 
   /** @type {Props} */
@@ -15,21 +16,21 @@
     isOpen = false,
     memberName = '',
     date = '',
-    dayIndex = 0
+    dayIndex = 0,
+    onconfirm,
+    oncancel
   } = $props();
-  
-  const dispatch = createEventDispatcher();
   
   // Convert dayIndex to day name
   const dayNames = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
   let dayName = $derived(dayNames[dayIndex] || 'Jour inconnu');
   
   function confirm() {
-    dispatch('confirm');
+    onconfirm?.();
   }
   
   function cancel() {
-    dispatch('cancel');
+    oncancel?.();
   }
 </script>
 

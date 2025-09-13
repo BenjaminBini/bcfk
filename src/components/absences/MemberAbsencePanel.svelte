@@ -1,5 +1,4 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
   import AbsenceCard from './AbsenceCard.svelte';
 
   /**
@@ -9,15 +8,14 @@
    * @property {Array} absences - List of absences for this member
    * @property {function} formatPeriod - Function to format date periods
    * @property {function} onDelete - Delete handler function
+   * @property {function} [onaddabsence] - Callback for add absence action
    */
 
   /** @type {Props} */
-  let { member, absences, formatPeriod, onDelete } = $props();
-
-  const dispatch = createEventDispatcher();
+  let { member, absences, formatPeriod, onDelete, onaddabsence } = $props();
 
   function handleAddAbsence() {
-    dispatch('addAbsence', { memberId: member.id });
+    onaddabsence?.({ memberId: member.id });
   }
 </script>
 

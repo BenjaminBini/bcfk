@@ -279,10 +279,10 @@
   bind:selectedAbsence
   bind:isLoadingAbsence
   members={assignmentManagement?.allMembers || []}
-  on:absence-confirmed={handleAbsenceConfirmed}
-  on:slot-absence-confirmed={handleSlotAbsenceConfirmed}
-  on:absence-edited={handleAbsenceEdited}
-  on:absence-deleted={handleAbsenceDeleted}
+  onabsenceconfirmed={handleAbsenceConfirmed}
+  onslotabsenceconfirmed={handleSlotAbsenceConfirmed}
+  onabsenceedited={handleAbsenceEdited}
+  onabsencedeleted={handleAbsenceDeleted}
 />
 
 <!-- Member Selection Modal -->
@@ -309,5 +309,5 @@
   bind:selectedMemberForAssignment={selectedMember}
   bind:isLoadingAssignment
   members={assignmentManagement?.allMembers || []}
-  on:assignment-confirmed={handleAssignmentConfirmed}
+  onassignmentconfirmed={handleAssignmentConfirmed}
 />
