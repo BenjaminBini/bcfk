@@ -63,11 +63,9 @@
       : presentMembersCount <= 1
   );
   let warningText = $derived(
-    slotType === "ouverture"
-      ? "Créneau vide"
-      : presentMembersCount === 0
-        ? "Créneau vide"
-        : "Fermeture avec un seul membre"
+    (slotType === presentMembersCount) === 0
+      ? "Aucun inscrit"
+      : "Un seul inscrit"
   );
 </script>
 
