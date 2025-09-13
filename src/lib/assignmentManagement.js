@@ -3,7 +3,7 @@ import { showToast } from "../stores/toast.js";
 
 export function createAssignmentManagement(weekNavigationLogic) {
   let specificAssignments = writable([]);
-  let allMembers = $state([]);
+  let allMembers = [];
 
   async function loadSpecificAssignments() {
     const weekDates = weekNavigationLogic.getCurrentWeekDates();

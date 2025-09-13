@@ -10,11 +10,10 @@ import {
 } from '../stores/weeklyAbsences.js';
 
 export function createAbsenceManagement(weekNavigationLogic) {
-  let currentAbsences = $state([]);
+  let currentAbsences = [];
 
-  $effect(() => {
-    weeklyAbsences.subscribe(value => currentAbsences = value)();
-  });
+  // Subscribe to weekly absences store
+  weeklyAbsences.subscribe(value => currentAbsences = value);
 
   async function loadWeeklyAbsences() {
     return await loadWeeklyAbsencesStore(weekNavigationLogic);

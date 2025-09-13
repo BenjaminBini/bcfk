@@ -279,10 +279,10 @@
   bind:selectedAbsence
   bind:isLoadingAbsence
   members={assignmentManagement?.allMembers || []}
-  onabsence-confirmed={handleAbsenceConfirmed}
-  onslot-absence-confirmed={handleSlotAbsenceConfirmed}
-  onabsence-edited={handleAbsenceEdited}
-  onabsence-deleted={handleAbsenceDeleted}
+  on:absence-confirmed={handleAbsenceConfirmed}
+  on:slot-absence-confirmed={handleSlotAbsenceConfirmed}
+  on:absence-edited={handleAbsenceEdited}
+  on:absence-deleted={handleAbsenceDeleted}
 />
 
 <!-- Member Selection Modal -->
