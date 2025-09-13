@@ -1,13 +1,10 @@
-<script>
-  import { writable } from "svelte/store";
-  import { showToast } from "../../stores/toast.js";
+import { writable } from "svelte/store";
+import { showToast } from "../stores/toast.js";
 
-  let { weekNavigationLogic } = $props();
-
+export function createAssignmentManagement(weekNavigationLogic) {
   let specificAssignments = writable([]);
   let allMembers = $state([]);
 
-  // Load specific assignments for specific dates
   async function loadSpecificAssignments() {
     const weekDates = weekNavigationLogic.getCurrentWeekDates();
     const startDate = `${weekDates[0].getFullYear()}-${String(weekDates[0].getMonth() + 1).padStart(2, '0')}-${String(weekDates[0].getDate()).padStart(2, '0')}`;
@@ -27,7 +24,6 @@
     }
   }
 
-  // Load all members for assignment selection
   async function loadAllMembers() {
     try {
       const response = await fetch("/api/members");
@@ -39,7 +35,6 @@
     }
   }
 
-  // Handle assignment confirmation
   async function createAssignments(membersToAssign, dayToAssign, slotToAssign) {
     if (!membersToAssign || membersToAssign.length === 0) {
       console.error("selectedMembersForAssignment is empty");
@@ -53,7 +48,6 @@
       let successCount = 0;
       let errorCount = 0;
 
-      // Create assignments for all selected members
       for (const member of membersToAssign) {
         if (!member.first_name) {
           console.error("Member missing first_name", member);
@@ -89,10 +83,8 @@
         }
       }
 
-      // Reload specific assignments to reflect the changes
       await loadSpecificAssignments();
 
-      // Show appropriate toast message
       if (successCount > 0 && errorCount === 0) {
         if (successCount === 1) {
           showToast(
@@ -122,7 +114,6 @@
     }
   }
 
-  // Handle deleting specific assignment
   async function deleteSpecificAssignment(assignmentId, memberName) {
     try {
       const response = await fetch(
@@ -152,13 +143,12 @@
     }
   }
 
-  // Export functions and data
-  export { 
-    specificAssignments, 
-    allMembers, 
-    loadSpecificAssignments, 
-    loadAllMembers, 
-    createAssignments, 
-    deleteSpecificAssignment 
+  return {
+    specificAssignments,
+    get allMembers() { return allMembers; },
+    loadSpecificAssignments,
+    loadAllMembers,
+    createAssignments,
+    deleteSpecificAssignment
   };
-</script>
+}

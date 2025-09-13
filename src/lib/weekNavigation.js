@@ -1,5 +1,8 @@
-<script>
-  let { currentWeekOffset = $bindable(0), navigationDirection = $bindable('next'), isNavigating = $bindable(false), onWeekChange } = $props();
+export function createWeekNavigation() {
+  let currentWeekOffset = $state(0);
+  let navigationDirection = $state('next');
+  let isNavigating = $state(false);
+  let onWeekChange = null;
 
   function getCurrentWeek() {
     const now = new Date();
@@ -61,6 +64,18 @@
     }, 300);
   }
 
-  // Export the functions and computed values
-  export { getCurrentWeek, getCurrentWeekDates, isCurrentDay, goToPreviousWeek, goToNextWeek };
-</script>
+  return {
+    get currentWeekOffset() { return currentWeekOffset; },
+    set currentWeekOffset(value) { currentWeekOffset = value; },
+    get navigationDirection() { return navigationDirection; },
+    set navigationDirection(value) { navigationDirection = value; },
+    get isNavigating() { return isNavigating; },
+    set isNavigating(value) { isNavigating = value; },
+    setOnWeekChange: (callback) => { onWeekChange = callback; },
+    getCurrentWeek,
+    getCurrentWeekDates,
+    isCurrentDay,
+    goToPreviousWeek,
+    goToNextWeek
+  };
+}

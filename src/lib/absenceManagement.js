@@ -1,27 +1,24 @@
-<script>
-  import { isMemberAbsent, isMemberAbsentForSlot } from '../../lib/absence/absenceChecker.js';
-  import { formatDate, getAbsencePeriod } from '../../lib/absence/absenceUtils.js';
-  import { getAbsentScheduledMembers, getOtherAbsentMembers } from '../../lib/absence/absenceQueries.js';
-  import { createAbsence } from '../../lib/absence/absenceCreator.js';
-  import { 
-    weeklyAbsences, 
-    loadWeeklyAbsences as loadWeeklyAbsencesStore,
-    getAbsentMembersForDate as getAbsentMembersForDateStore,
-    getAbsentMembersForDateWithSlots as getAbsentMembersForDateWithSlotsStore
-  } from '../../stores/weeklyAbsences.js';
+import { isMemberAbsent, isMemberAbsentForSlot } from './absence/absenceChecker.js';
+import { formatDate, getAbsencePeriod } from './absence/absenceUtils.js';
+import { getAbsentScheduledMembers, getOtherAbsentMembers } from './absence/absenceQueries.js';
+import { createAbsence } from './absence/absenceCreator.js';
+import { 
+  weeklyAbsences, 
+  loadWeeklyAbsences as loadWeeklyAbsencesStore,
+  getAbsentMembersForDate as getAbsentMembersForDateStore,
+  getAbsentMembersForDateWithSlots as getAbsentMembersForDateWithSlotsStore
+} from '../stores/weeklyAbsences.js';
 
-  let { weekNavigationLogic } = $props();
-
-  // Load absences for the current week
-  async function loadWeeklyAbsences() {
-    return await loadWeeklyAbsencesStore(weekNavigationLogic);
-  }
-
-  // Get current absences array for pure functions
+export function createAbsenceManagement(weekNavigationLogic) {
   let currentAbsences = $state([]);
+
   $effect(() => {
     weeklyAbsences.subscribe(value => currentAbsences = value)();
   });
+
+  async function loadWeeklyAbsences() {
+    return await loadWeeklyAbsencesStore(weekNavigationLogic);
+  }
 
   function getAbsentMembersForDate(dateIndex) {
     return getAbsentMembersForDateStore(dateIndex, weekNavigationLogic);
@@ -35,7 +32,6 @@
     return await createAbsence(memberId, selectedDate, memberName, startSlot, endSlot, loadWeeklyAbsences);
   }
 
-  // Wrapper functions that use pure functions with current state
   function checkMemberAbsent(memberId, dateIndex) {
     return isMemberAbsent(memberId, dateIndex, currentAbsences, weekNavigationLogic);
   }
@@ -62,21 +58,17 @@
     return getOtherAbsentMembers(dateIndex, slotSchedule, currentAbsences, weekNavigationLogic);
   }
 
-
-  // Export functions and store
-  export { 
-    weeklyAbsences, 
-    loadWeeklyAbsences, 
-    checkMemberAbsent as isMemberAbsent,
-    checkMemberAbsentForSlot as isMemberAbsentForSlot, 
-    getFormattedAbsencePeriod as getAbsencePeriod, 
+  return {
+    weeklyAbsences,
+    loadWeeklyAbsences,
+    isMemberAbsent: checkMemberAbsent,
+    isMemberAbsentForSlot: checkMemberAbsentForSlot,
+    getAbsencePeriod: getFormattedAbsencePeriod,
     getAbsentMembersForDate,
     getAbsentMembersForDateWithSlots,
-    queryAbsentScheduledMembers as getAbsentScheduledMembers,
-    queryOtherAbsentMembers as getOtherAbsentMembers,
-    createAbsenceWrapper as createAbsence,
+    getAbsentScheduledMembers: queryAbsentScheduledMembers,
+    getOtherAbsentMembers: queryOtherAbsentMembers,
+    createAbsence: createAbsenceWrapper,
     formatDate
   };
-</script>
-
-<!-- No child components needed - using pure JS modules and stores -->
+}
