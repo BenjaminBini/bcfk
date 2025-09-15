@@ -1,32 +1,50 @@
 <script>
   import { onMount } from "svelte";
-  import {
-    absences,
-    isLoading,
-    error,
-    absenceActions,
-  } from "../stores/absences.js";
+  import { absenceService } from "../lib/absenceService.js";
   import { members, assignmentActions } from "../stores/assignments.js";
   import { showToast } from "../stores/toast.js";
   import PageHeader from "../components/layout/PageHeader.svelte";
   import MemberAbsencePanel from "../components/absences/MemberAbsencePanel.svelte";
   import AbsenceFormModal from "../components/absences/AbsenceFormModal.svelte";
 
-  onMount(async () => {
-    // Load both absences and members data
-    await Promise.all([
-      absenceActions.loadAbsences(),
-      assignmentActions.loadData(),
-    ]);
-  });
-
+  let absences = $state([]);
+  let allMembers = $state([]);
+  let isLoading = $state(false);
+  let error = $state(null);
   let isSubmitting = $state(false);
   let isModalOpen = $state(false);
   let selectedMember = $state(null);
 
+  onMount(async () => {
+    await loadData();
+  });
+
+  async function loadData() {
+    isLoading = true;
+    error = null;
+    try {
+      // Load both absences and members data
+      const [absencesData] = await Promise.all([
+        absenceService.getAbsences(),
+        assignmentActions.loadData()
+      ]);
+      absences = absencesData;
+      // Subscribe to members store to get the data
+      const unsubscribe = members.subscribe(value => {
+        allMembers = value;
+      });
+      // Clean up subscription (though it will persist for the component lifecycle)
+    } catch (err) {
+      console.error("Error loading data:", err);
+      error = "Failed to load data";
+    } finally {
+      isLoading = false;
+    }
+  }
+
   function handleAddAbsence(event) {
     const memberId = event.detail.memberId;
-    selectedMember = $members.find((m) => m.id === memberId);
+    selectedMember = allMembers.find((m) => m.id === memberId);
     isModalOpen = true;
   }
 
@@ -95,7 +113,7 @@
           ? selectedMember
           : parseInt(selectedMember);
 
-      await absenceActions.createAbsence(
+      await absenceService.createAbsence(
         memberId,
         startDate,
         endDate,
@@ -103,7 +121,7 @@
         endSlot
       );
       // Reload absences to reflect any merge
-      await absenceActions.loadAbsences();
+      await loadData();
       showToast("Absence ajoutée avec succès", "success");
 
       if (resetForm && typeof resetForm === "function") {
@@ -120,7 +138,8 @@
   async function handleDelete(absenceId) {
     if (confirm("Êtes-vous sûr de vouloir supprimer cette absence ?")) {
       try {
-        await absenceActions.deleteAbsence(absenceId);
+        await absenceService.deleteAbsence(absenceId);
+        await loadData(); // Reload data after deletion
         showToast("Absence supprimée avec succès", "success");
       } catch (err) {
         showToast("Erreur lors de la suppression de l'absence", "error");
@@ -186,9 +205,9 @@
 
   // Group absences by member
   let membersWithAbsences = $derived(
-    $members.map((member) => ({
+    allMembers.map((member) => ({
       ...member,
-      absences: $absences.filter((absence) => absence.member_id === member.id),
+      absences: absences.filter((absence) => absence.member_id === member.id),
     }))
   );
 </script>
@@ -203,17 +222,17 @@
 
     <!-- Content -->
     <div class="mt-4 md:mt-8">
-      {#if $isLoading}
+      {#if isLoading}
         <div class="flex items-center justify-center py-12">
           <div
             class="w-8 h-8 border-2 border-blue-500 rounded-full animate-spin border-t-transparent"
           ></div>
         </div>
-      {:else if $error}
+      {:else if error}
         <div
           class="p-6 text-center border shadow-xl bg-gradient-to-br rounded-2xl from-red-900/50 to-red-800/50 border-red-700/50"
         >
-          <p class="text-red-300">{$error}</p>
+          <p class="text-red-300">{error}</p>
         </div>
       {:else if membersWithAbsences.length === 0}
         <div

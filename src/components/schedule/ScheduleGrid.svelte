@@ -1,4 +1,5 @@
 <script>
+  import { getContext } from "svelte";
   import WeeklyScheduleGrid from "../table/WeeklyScheduleGrid.svelte";
   import ColumnHeader from "../table/ColumnHeader.svelte";
   import RowHeader from "../table/RowHeader.svelte";
@@ -10,17 +11,17 @@
 
   let {
     weekDays,
-    slotSchedule,
-    weeklyAbsences,
     absenceData,
     currentWeekOffset,
     navigationDirection,
     enableAnimations,
     weekNavigationLogic,
-    absenceManagement,
     modalManager,
     onDeleteSpecificAssignment,
   } = $props();
+
+  // Get contexts
+  const unifiedScheduleContext = getContext("unifiedSchedule");
 
   // State to control the "Aujourd'hui" label animation
   let showTodayLabel = $state(false);
@@ -43,17 +44,7 @@
     return weekNavigationLogic.getCurrentWeekDates();
   }
 
-  function isMemberAbsentForSlot(memberId, dateIndex, slotType) {
-    return absenceManagement.isMemberAbsentForSlot(
-      memberId,
-      dateIndex,
-      slotType
-    );
-  }
 
-  function getAbsencePeriod(memberId, dayIndex = null) {
-    return absenceManagement.getAbsencePeriod(memberId, dayIndex);
-  }
 
   function handleMarkAbsent(memberId, memberName, dayIndex, slotType = null) {
     modalManager.handleMarkAbsent(memberId, memberName, dayIndex, slotType);
@@ -68,30 +59,50 @@
     modalManager.handleAddMember(dayIndex, slotType);
   }
 
-  function handleShowAbsenceDetails(memberName, memberId) {
-    // Trouver les données d'absence pour ce membre
-    const absenceData = weeklyAbsences.find(
-      (absence) => absence.member_id === memberId
-    );
-    modalManager.handleShowAbsenceDetails(memberName, absenceData);
+  function handleShowAbsenceDetails(memberObject) {
+    // Pass the complete member object to the modal manager
+    modalManager.handleShowAbsenceDetails(memberObject);
+  }
+
+  function getSlotMembersForDay(dayIndex, slotType) {
+    const rawScheduleData = unifiedScheduleContext.scheduleData;
+    if (!rawScheduleData?.schedule) {
+      return { presentAssignedMembers: [], absentAssignedMembers: [], occasionalPresentMembers: [] };
+    }
+
+    // The new API returns exactly 7 days for the current week
+    const currentWeekData = rawScheduleData.schedule;
+    const dayData = currentWeekData[dayIndex];
+
+    if (!dayData?.[slotType]) {
+      return { presentAssignedMembers: [], absentAssignedMembers: [], occasionalPresentMembers: [] };
+    }
+
+    const slotData = dayData[slotType];
+
+    return {
+      presentAssignedMembers: slotData.presentAssignedMembers,
+      absentAssignedMembers: slotData.absentAssignedMembers,
+      occasionalPresentMembers: slotData.occasionalPresentMembers
+    };
   }
 </script>
 
-<div class="block relative">
+<div class="relative block" id="schedule-grid-container">
   <!-- Label grid positioned above main grid -->
   <div class="relative">
     <div
-      class="grid gap-px w-full"
+      class="grid w-full gap-px"
       style="grid-template-columns: min-content repeat(7, 1fr)"
     >
       <!-- Empty corner cell -->
-      <div class="w-14 h-6"></div>
+      <div class="h-6 w-14"></div>
       <!-- Label cells for each day -->
       {#each weekDays as _, dayIndex}
         <div class="flex justify-center h-6">
           {#if isCurrentDay(dayIndex)}
             <div
-              class="hidden md:block px-2 py-1 text-xs font-medium text-blue-100 whitespace-nowrap rounded-t-md border border-b-0 shadow-lg backdrop-blur-sm transition-transform duration-300 ease-out bg-blue-600/90 border-blue-400/50"
+              class="hidden px-2 py-1 text-xs font-medium text-blue-100 transition-transform duration-300 ease-out border border-b-0 shadow-lg md:block whitespace-nowrap rounded-t-md backdrop-blur-sm bg-blue-600/90 border-blue-400/50"
               class:translate-y-0={showTodayLabel}
               class:translate-y-7={!showTodayLabel}
             >
@@ -104,7 +115,7 @@
   </div>
 
   <!-- Horizontal scroll container for the table -->
-  <div class="overflow-x-auto relative pb-2 custom-scrollbar">
+  <div class="relative pb-2 overflow-x-auto custom-scrollbar">
     <div class="min-w-full">
       <WeeklyScheduleGrid>
         <!-- Header row -->
@@ -115,7 +126,7 @@
               {day}
               date={getCurrentWeekDates()[dayIndex]}
               {navigationDirection}
-              dateKey={currentWeekOffset}
+              dateKey={`week-${currentWeekOffset || 0}-day-${dayIndex}`}
             />
           </ColumnHeader>
         {/each}
@@ -124,16 +135,18 @@
         <RowHeader>
           <RowHeaderCell title="Ouverture" iconName="doorOpen" />
         </RowHeader>
-        {#each weekDays as _, dayIndex}
+        {#each weekDays as _, dayIndex ('ouverture-' + dayIndex)}
+          {@const daySlotMembers = getSlotMembersForDay(dayIndex, 'ouverture')}
           <Cell isToday={isCurrentDay(dayIndex)}>
             <SlotCell
-              assignments={slotSchedule}
+              presentAssignedMembers={daySlotMembers.presentAssignedMembers}
+              absentAssignedMembers={daySlotMembers.absentAssignedMembers}
+              occasionalPresentMembers={daySlotMembers.occasionalPresentMembers}
               slotType="ouverture"
               {dayIndex}
-              {weeklyAbsences}
-              isMemberAbsent={isMemberAbsentForSlot}
-              {getAbsencePeriod}
+              {weekNavigationLogic}
               {enableAnimations}
+              animationDelay={dayIndex * 75}
               onMarkAbsent={handleMarkAbsent}
               onAddMember={handleAddMember}
               {onDeleteSpecificAssignment}
@@ -146,16 +159,18 @@
         <RowHeader>
           <RowHeaderCell title="Fermeture" iconName="lockClosed" />
         </RowHeader>
-        {#each weekDays as _, dayIndex}
+        {#each weekDays as _, dayIndex ('fermeture-' + dayIndex)}
+          {@const daySlotMembers = getSlotMembersForDay(dayIndex, 'fermeture')}
           <Cell isToday={isCurrentDay(dayIndex)}>
             <SlotCell
-              assignments={slotSchedule}
+              presentAssignedMembers={daySlotMembers.presentAssignedMembers}
+              absentAssignedMembers={daySlotMembers.absentAssignedMembers}
+              occasionalPresentMembers={daySlotMembers.occasionalPresentMembers}
               slotType="fermeture"
               {dayIndex}
-              {weeklyAbsences}
-              isMemberAbsent={isMemberAbsentForSlot}
-              {getAbsencePeriod}
+              {weekNavigationLogic}
               {enableAnimations}
+              animationDelay={dayIndex * 75}
               onMarkAbsent={handleMarkAbsent}
               onAddMember={handleAddMember}
               {onDeleteSpecificAssignment}
@@ -176,10 +191,9 @@
           <Cell isToday={isCurrentDay(dayIndex)}>
             <AbsenteesCell
               absentMembers={dayAbsenceData.uniqueAbsentMembers}
-              {getAbsencePeriod}
+              {weekNavigationLogic}
               {dayIndex}
               currentDate={getCurrentWeekDates()[dayIndex]}
-              {absenceManagement}
               onShowAbsenceDetails={handleShowAbsenceDetails}
             />
           </Cell>
@@ -190,7 +204,7 @@
 </div>
 
 <style>
-  .custom-scrollbar {
+  .custom-scrollbar { 
     /* Firefox */
     scrollbar-width: thin;
     scrollbar-color: rgb(100 116 139 / 0.7) rgb(71 85 105 / 0.3);

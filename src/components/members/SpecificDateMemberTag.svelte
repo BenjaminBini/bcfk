@@ -11,7 +11,8 @@
    * @property {any} [onDelete]
    * @property {string} [memberName]
    * @property {string} [slotType]
-   * @property {string} [date]
+   * @property {number} [dayIndex]
+   * @property {any} [weekNavigationLogic]
    */
 
   /** @type {Props} */
@@ -22,10 +23,28 @@
     onDelete = null,
     memberName = '',
     slotType = '',
-    date = ''
+    dayIndex = 0,
+    weekNavigationLogic = null,
+    enableColorTransitions = true,
+    animationDuration = 'duration-500'
   } = $props();
   
   let showConfirmModal = $state(false);
+
+  // Calculate the current date for this day index
+  function getCurrentDateForDay() {
+    if (!weekNavigationLogic?.getCurrentWeekDates) return null;
+    const weekDates = weekNavigationLogic.getCurrentWeekDates();
+    if (!weekDates || dayIndex >= weekDates.length) return null;
+    const date = weekDates[dayIndex];
+    // Convert Date object to YYYY-MM-DD format
+    if (date instanceof Date) {
+      return date.toISOString().split('T')[0];
+    }
+    return date; // Already a string
+  }
+
+  let currentDate = $derived(getCurrentDateForDay());
   
   function handleButtonClick() {
     // Small delay to let user see the slide-out button animation
@@ -71,7 +90,7 @@
   
 </script>
 
-<MemberTag 
+<MemberTag
   {text}
   tooltipText={memberTagTooltip}
   showButton={showDeleteButton}
@@ -83,9 +102,12 @@
   onClick={handleButtonClick}
   tagGradient="from-emerald-600 to-emerald-700"
   tagTextColor="text-white"
-  tagShadowColor="shadow-emerald-600/25"
-  tagHoverShadowColor="group-hover:shadow-emerald-600/40"
+  tagBorderColor="border-emerald-400/30"
+  tagHoverBorderColor="hover:border-emerald-300/50 hover:shadow-lg shadow-emerald-400/30"
+  tagFocusRing="active:ring-2 active:ring-emerald-400/50 active:ring-offset-2 active:ring-offset-transparent"
   customClasses="items-center"
+  {enableColorTransitions}
+  {animationDuration}
 >
 
 </MemberTag>
@@ -101,9 +123,9 @@
     onclick={(e) => e.target === e.currentTarget && cancelDelete()}
     transition:fade={{ duration: 200 }}
   >
-    <div class="p-6 mx-4 w-full max-w-md bg-gradient-to-br rounded-2xl border shadow-2xl backdrop-blur-xl from-slate-800/95 via-slate-900/98 to-slate-800/95 border-slate-700/50" transition:fly={{ y: 50, duration: 300 }}>
+    <div class="w-full max-w-md p-6 mx-4 border shadow-2xl bg-gradient-to-br rounded-2xl backdrop-blur-xl from-slate-800/95 via-slate-900/98 to-slate-800/95 border-slate-700/50" transition:fly={{ y: 50, duration: 300 }}>
       <div class="flex items-center mb-4 space-x-3">
-        <div class="flex flex-shrink-0 justify-center items-center w-10 h-10 rounded-full bg-red-500/20">
+        <div class="flex items-center justify-center flex-shrink-0 w-10 h-10 rounded-full bg-red-500/20">
           <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
           </svg>
@@ -112,10 +134,10 @@
       </div>
       
       <div class="mb-6 text-slate-300">
-        <p>Êtes-vous sûr de vouloir supprimer l'affectation de <span class="font-semibold text-white">{memberName || (text || 'Membre inconnu')}</span> pour le <span class="font-semibold text-white">{date ? new Date(date).toLocaleDateString('fr-FR', { 
-        day: 'numeric', 
-        month: 'long', 
-        year: 'numeric' 
+        <p>Êtes-vous sûr de vouloir supprimer l'affectation de <span class="font-semibold text-white">{memberName || (text || 'Membre inconnu')}</span> pour le <span class="font-semibold text-white">{currentDate ? new Date(currentDate).toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
       }) : 'Date non spécifiée'}</span> en <span class="font-semibold text-white">{slotType === 'ouverture' ? 'ouverture' : 'fermeture'}</span> ?</p>
       </div>
       

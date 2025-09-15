@@ -1,64 +1,6 @@
 {
-  "version": "0.2.0",
   "configurations": [
-    {
-      "name": "Debug Node.js App",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceFolder}/server.js",
-      "env": {
-        "NODE_ENV": "development"
-      },
-      "console": "integratedTerminal",
-      "restart": true,
-      "runtimeArgs": ["--inspect"],
-      "skipFiles": [
-        "<node_internals>/**"
-      ]
-    },
-    {
-      "name": "Debug Node.js App (nodemon)",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceFolder}/node_modules/nodemon/bin/nodemon.js",
-      "args": ["server.js"],
-      "env": {
-        "NODE_ENV": "development"
-      },
-      "console": "integratedTerminal",
-      "restart": true,
-      "runtimeArgs": ["--inspect"],
-      "skipFiles": [
-        "<node_internals>/**"
-      ]
-    },
-    {
-      "name": "Attach to Node.js Process",
-      "type": "node",
-      "request": "attach",
-      "port": 9229,
-      "restart": true,
-      "localRoot": "${workspaceFolder}",
-      "remoteRoot": ".",
-      "skipFiles": [
-        "<node_internals>/**"
-      ]
-    },
-    {
-      "name": "Debug Tests",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceFolder}/node_modules/.bin/jest",
-      "args": ["--runInBand"],
-      "env": {
-        "NODE_ENV": "test"
-      },
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "disableOptimisticBPs": true,
-      "skipFiles": [
-        "<node_internals>/**"
-      ]
-    }
+
+
   ]
-}
+}  

@@ -30,9 +30,18 @@
     showSlotAbsenceModal = true;
   }
 
-  function handleShowAbsenceDetails(absenceData) {
+  function handleShowAbsenceDetails(memberObject) {
+    if (!memberObject || !memberObject.absenceDetails) {
+      console.warn("handleShowAbsenceDetails called with invalid member object:", memberObject);
+      return;
+    }
+
+    // Extract member name and absence details from the complete member object
+    const memberName = memberObject.first_name + (memberObject.last_name ? ` ${memberObject.last_name}` : '');
+    const absenceData = memberObject.absenceDetails;
+
     selectedAbsence = absenceData;
-    absenceDetailsMemberName = absenceData.member_name || "";
+    absenceDetailsMemberName = memberName;
     absenceDetailsData = absenceData;
     showAbsenceDetailsModal = true;
   }
@@ -56,22 +65,26 @@
     if (!selectedMember || !selectedSlot) return;
 
     onabsenceconfirmed?.({
-      memberId: selectedMember.id,
-      slotInfo: selectedSlot,
-      absenceData: {}
+      detail: {
+        memberId: selectedMember.id,
+        slotInfo: selectedSlot,
+        absenceData: {}
+      }
     });
-    
+
     closeAbsenceModal();
   }
 
   async function confirmSlotAbsence(choice) {
     if (!selectedMember || !selectedSlot) return;
-    
+
     onslotabsenceconfirmed?.({
-      slotInfo: selectedSlot,
-      absenceData: { choice }
+      detail: {
+        slotInfo: selectedSlot,
+        absenceData: { choice }
+      }
     });
-    
+
     closeSlotAbsenceModal();
   }
 

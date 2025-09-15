@@ -18,9 +18,10 @@
   } = $props();
   
   // Check if this is today
-  let isToday = $derived(date ? 
+  let isToday = $derived(date ?
     date.toDateString() === (new Date()).toDateString() : false
   );
+
   
 </script>
 
@@ -34,7 +35,7 @@
       <div class="relative w-full">
         {#key dateKey}
           <div 
-            class="flex absolute inset-0 justify-center items-center text-xs md:text-sm"
+            class="absolute inset-0 flex items-center justify-center text-xs md:text-sm"
             class:text-gray-300={!isToday} 
             class:text-blue-100={isToday}
             in:fly={{ 

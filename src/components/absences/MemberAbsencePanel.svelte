@@ -15,7 +15,11 @@
   let { member, absences, formatPeriod, onDelete, onaddabsence } = $props();
 
   function handleAddAbsence() {
-    onaddabsence?.({ memberId: member.id });
+    // Create a proper event-like object
+    const event = {
+      detail: { memberId: member.id }
+    };
+    onaddabsence?.(event);
   }
 </script>
 

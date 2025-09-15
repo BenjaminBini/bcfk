@@ -11,6 +11,7 @@
    * @property {any} [onPreviousWeek]
    * @property {any} [onNextWeek]
    * @property {boolean} [showWeekNavigation]
+   * @property {boolean} [isLoading]
    */
 
   /** @type {Props} */
@@ -23,12 +24,43 @@
     endDate = null,
     onPreviousWeek = null,
     onNextWeek = null,
-    showWeekNavigation = false
+    showWeekNavigation = false,
+    isLoading = false
   } = $props();
   
   let isNavigating = $state(false);
   let navigationDirection = $state('next'); // 'next' or 'previous'
-  
+  let showLoader = $state(false);
+  let loaderTimeout = null;
+
+  // Watch for loading state changes and conditionally show loader after 300ms
+  $effect(() => {
+    if (isLoading) {
+      // Clear any existing timeout
+      if (loaderTimeout) {
+        clearTimeout(loaderTimeout);
+      }
+      // Show loader only after 300ms delay
+      loaderTimeout = setTimeout(() => {
+        showLoader = true;
+      }, 300);
+    } else {
+      // Clear timeout and hide loader immediately when loading stops
+      if (loaderTimeout) {
+        clearTimeout(loaderTimeout);
+        loaderTimeout = null;
+      }
+      showLoader = false;
+    }
+
+    // Cleanup function
+    return () => {
+      if (loaderTimeout) {
+        clearTimeout(loaderTimeout);
+      }
+    };
+  });
+
   function handlePreviousWeek() {
     if (onPreviousWeek && !isNavigating) {
       isNavigating = true;
@@ -78,7 +110,7 @@
             <button
               aria-label="Semaine précédente"
               onclick={handlePreviousWeek}
-              disabled={isNavigating}
+              disabled={isNavigating || isLoading}
               class="flex justify-center items-center w-8 h-8 rounded-lg transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-700/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
               title="Semaine précédente"
             >
@@ -123,11 +155,18 @@
               {/if}
             </div>
           </div>
-          
+
+          <!-- Conditional Loader (shows after 300ms delay) -->
+          {#if showLoader}
+            <div class="flex items-center ml-2">
+              <div class="animate-spin w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full"></div>
+            </div>
+          {/if}
+
           {#if showWeekNavigation && onNextWeek}
             <button
               onclick={handleNextWeek}
-              disabled={isNavigating}
+              disabled={isNavigating || isLoading}
               class="flex justify-center items-center w-8 h-8 rounded-lg transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-700/50 focus:outline-none focus:ring-4 focus:ring-indigo-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
               title="Semaine suivante"
               aria-label="Semaine suivante"

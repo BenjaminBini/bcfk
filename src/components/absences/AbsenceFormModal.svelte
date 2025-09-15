@@ -38,16 +38,18 @@
     event.preventDefault();
     
     onsubmit?.({
-      selectedMember: member.id,
-      startDate,
-      endDate,
-      startSlot,
-      endSlot,
-      resetForm: () => {
-        startDate = today;
-        endDate = today;
-        startSlot = 'ouverture';
-        endSlot = 'fermeture';
+      detail: {
+        selectedMember: member.id,
+        startDate,
+        endDate,
+        startSlot,
+        endSlot,
+        resetForm: () => {
+          startDate = today;
+          endDate = today;
+          startSlot = 'ouverture';
+          endSlot = 'fermeture';
+        }
       }
     });
   }
@@ -87,7 +89,8 @@
     tabindex="0"
   >
     <!-- Modal content -->
-    <div 
+    <div
+      data-testid="absence-form-modal"
       class="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-gradient-to-br rounded-2xl border shadow-2xl backdrop-blur-xl from-slate-800/95 via-slate-900/98 to-slate-800/95 border-slate-700/50"
       transition:fly={{ y: 20, duration: 300 }}
       role="document"

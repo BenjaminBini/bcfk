@@ -93,64 +93,6 @@ class AbsenceController {
     }
   }
 
-  // GET /api/absences/date-range?start=YYYY-MM-DD&end=YYYY-MM-DD
-  async getAbsencesForDateRange(req, res, next) {
-    try {
-      const { start, end } = req.query;
-      
-      if (!start || !end) {
-        return res.status(400).json({ 
-          error: 'start and end date query parameters are required' 
-        });
-      }
-      
-      const absences = await this.absenceService.getAbsencesForWeek(start, end);
-      res.json(absences);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  // GET /api/absences/date/:date
-  async getAbsentMembersForDate(req, res, next) {
-    try {
-      const { date } = req.params;
-      
-      if (!date) {
-        return res.status(400).json({ error: 'Date is required' });
-      }
-      
-      const absentMembers = await this.absenceService.getAbsentMembersForDate(date);
-      res.json(absentMembers);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-
-  // GET /api/absences/check/:memberId/:date/:slot - Check if member is absent for specific slot
-  async checkMemberAbsentForSlot(req, res, next) {
-    try {
-      const { memberId, date, slot } = req.params;
-      
-      if (!memberId || !date || !slot) {
-        return res.status(400).json({ 
-          error: 'memberId, date, and slot are required' 
-        });
-      }
-
-      if (!['ouverture', 'fermeture'].includes(slot)) {
-        return res.status(400).json({ 
-          error: 'slot must be either "ouverture" or "fermeture"' 
-        });
-      }
-      
-      const isAbsent = await this.absenceService.isMemberAbsentForSpecificSlot(parseInt(memberId), date, slot);
-      res.json({ isAbsent });
-    } catch (error) {
-      next(error);
-    }
-  }
 }
 
 module.exports = AbsenceController;

@@ -13,6 +13,7 @@
    * @property {any} [assignments]
    * @property {any} [selectedDay]
    * @property {any} [selectedSlot]
+   * @property {string} [selectedDate]
    * @property {any} [absentMembers]
    * @property {any} [specificAssignments]
    * @property {any} [onSelect]
@@ -26,6 +27,7 @@
     assignments = [],
     selectedDay = null,
     selectedSlot = null,
+    selectedDate = "",
     absentMembers = [],
     specificAssignments = [],
     onSelect = null,
@@ -33,14 +35,14 @@
   } = $props();
   let filterText = $state('');
   let selectedMembers = $state(new Set());
-  
   // Get categorized and filtered members
   let allFilteredMembers = $derived(
     getCategorizedMembers({
-      members, 
+      members,
       assignments,
       selectedDay,
       selectedSlot,
+      selectedDate,
       absentMembers,
       specificAssignments,
       filterText

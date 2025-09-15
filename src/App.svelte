@@ -5,8 +5,10 @@
   import AssignmentsPage from "./pages/AssignmentsPage.svelte";
   import AbsencesPage from "./pages/AbsencesPage.svelte";
   import AuditLogsPage from "./pages/AuditLogsPage.svelte";
+  import TestUnifiedPage from "./pages/TestUnifiedPage.svelte";
   import NavigationBar from "./components/navigation/NavigationBar.svelte";
   import LegendModal from "./components/modals/LegendModal.svelte";
+  import Toast from "./components/common/Toast.svelte";
   import { showLegendModal } from "./stores/legend.js";
 
   const routes = {
@@ -14,6 +16,7 @@
     "/assignments": AssignmentsPage,
     "/absences": AbsencesPage,
     "/audit-logs": AuditLogsPage,
+    "/test": TestUnifiedPage,
   };
 
   const navigationItems = [
@@ -48,4 +51,7 @@
     isOpen={$showLegendModal}
     onClose={() => showLegendModal.set(false)}
   />
+
+  <!-- Toast Notifications -->
+  <Toast />
 </div>

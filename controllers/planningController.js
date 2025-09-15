@@ -1,4 +1,4 @@
-const { asyncHandler } = require('../middleware/errorHandler');
+const { asyncHandler } = require("../middleware/errorHandler");
 
 class PlanningController {
   constructor(planningService, auditService = null) {
@@ -6,6 +6,94 @@ class PlanningController {
     this.auditService = auditService;
   }
 
+  // GET /api/weekly-schedule - Simple endpoint for weekly schedule data with date range parameters
+  async getWeeklySchedule(req, res, next) {
+    try {
+      const { start, end } = req.query;
+
+      if (!start || !end) {
+        return res
+          .status(400)
+          .json({ error: "start and end date parameters are required" });
+      }
+
+      // Validate date range (max 7 days)
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+      const daysDiff =
+        Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+
+      if (daysDiff > 7) {
+        return res
+          .status(400)
+          .json({ error: "Date range cannot exceed 7 days" });
+      }
+
+      // Get computed schedule data from planning service
+      const scheduleData = await this.planningService.getComputedWeeklySchedule(
+        start,
+        end,
+        0 // weekOffset not needed for simple date range query
+      );
+
+      res.json(scheduleData);
+    } catch (error) {
+      console.error("Error in getWeeklySchedule:", error);
+      next(error);
+    }
+  }
+
+  // GET /api/weekly-data/:weekOffset - Unified endpoint for all computed schedule data
+  async getUnifiedWeeklyData(req, res, next) {
+    try {
+      const { weekOffset = 0 } = req.params;
+      const offset = parseInt(weekOffset);
+
+      // Calculate date range for 3 weeks (previous, current, next)
+      const now = new Date();
+      const baseDate = new Date(now);
+      baseDate.setDate(now.getDate() + offset * 7);
+
+      // Get start of the week (Monday) for the base week
+      const dayOfWeek = baseDate.getDay();
+      const startOfBaseWeek = new Date(baseDate);
+      startOfBaseWeek.setDate(
+        baseDate.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1)
+      );
+
+      // Calculate dates for 3 weeks (previous week to next week)
+      const startDate = new Date(startOfBaseWeek);
+      startDate.setDate(startOfBaseWeek.getDate() - 7); // Previous week
+
+      const endDate = new Date(startOfBaseWeek);
+      endDate.setDate(startOfBaseWeek.getDate() + 13); // Next week end
+
+      const formatDate = (date) => {
+        return (
+          date.getFullYear() +
+          "-" +
+          String(date.getMonth() + 1).padStart(2, "0") +
+          "-" +
+          String(date.getDate()).padStart(2, "0")
+        );
+      };
+
+      const startDateStr = formatDate(startDate);
+      const endDateStr = formatDate(endDate);
+
+      // Get computed schedule data from planning service
+      const scheduleData = await this.planningService.getComputedWeeklySchedule(
+        startDateStr,
+        endDateStr,
+        offset
+      );
+
+      res.json(scheduleData);
+    } catch (error) {
+      console.error("Error in getUnifiedWeeklyData:", error);
+      next(error);
+    }
+  }
 
   // GET /api/specific-assignments
   async getSpecificAssignments(req, res, next) {
@@ -55,10 +143,13 @@ class PlanningController {
           null,
           result
         );
-        
+
         // Get complete assignment data with member info for audit log
-        const completeAssignmentData = await this.auditService.getEntityData("specific_assignment", result.id);
-        
+        const completeAssignmentData = await this.auditService.getEntityData(
+          "specific_assignment",
+          result.id
+        );
+
         await this.auditService.logAction(
           "CREATE",
           "specific_assignment",

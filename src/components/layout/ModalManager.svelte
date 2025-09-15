@@ -1,14 +1,14 @@
 <script>
+  import { getContext } from "svelte";
   import AbsenceModalManager from "../modals/AbsenceModalManager.svelte";
   import AssignmentModalManager from "../modals/AssignmentModalManager.svelte";
   import MemberSelector from "../members/MemberSelector.svelte";
+  import { absenceService } from "../../lib/absenceService.js";
 
-  let {
-    weekNavigationLogic,
-    absenceManagement,
-    assignmentManagement,
-    assignments,
-  } = $props();
+  // Get unified schedule context for data refresh
+  const unifiedScheduleContext = getContext("unifiedSchedule");
+
+  let { weekNavigationLogic, assignmentActions, allMembers, allAssignments } = $props();
 
   // Shared state for modal operations
   let selectedMember = $state(null);
@@ -51,12 +51,14 @@
 
     isLoadingAbsence = true;
     try {
-      await absenceManagement?.createAbsence?.(
+      await absenceService.createAbsence(
         memberId,
         slotInfo.date,
-        selectedMember?.name
+        slotInfo.date, // startDate and endDate are the same for single day absence
+        "ouverture",
+        "fermeture"
       );
-      await absenceManagement?.loadWeeklyAbsences?.();
+      console.log("Absence created successfully");
     } catch (error) {
       console.error("Error creating absence:", error);
     } finally {
@@ -73,23 +75,28 @@
     isLoadingAbsence = true;
     try {
       if (choice === "slot") {
-        await absenceManagement?.createAbsence?.(
+        await absenceService.createAbsence(
           selectedMember.id,
           slotInfo.date,
-          selectedMember.name,
+          slotInfo.date, // startDate and endDate are the same for single day absence
           slotInfo.slotType,
           slotInfo.slotType
         );
       } else if (choice === "both") {
-        await absenceManagement?.createAbsence?.(
+        await absenceService.createAbsence(
           selectedMember.id,
           slotInfo.date,
-          selectedMember.name,
+          slotInfo.date, // startDate and endDate are the same for single day absence
           "ouverture",
           "fermeture"
         );
       }
-      await absenceManagement?.loadWeeklyAbsences?.();
+      console.log("Slot absence created successfully");
+
+      // Refresh the schedule data to show the new absence
+      if (unifiedScheduleContext?.refreshCurrentWeek) {
+        await unifiedScheduleContext.refreshCurrentWeek();
+      }
     } catch (error) {
       console.error("Error creating slot absence:", error);
     } finally {
@@ -97,16 +104,17 @@
     }
   }
 
-  function handleShowAbsenceDetails(memberName, absenceData) {
-    absenceModalManager?.handleShowAbsenceDetails?.(absenceData);
+  function handleShowAbsenceDetails(memberObject) {
+    // Pass the complete member object to the absence modal manager
+    absenceModalManager?.handleShowAbsenceDetails?.(memberObject);
   }
 
   async function handleAbsenceEdited(event) {
     const { absence, newData } = event.detail;
     isLoadingAbsence = true;
     try {
-      // Handle absence editing logic here
-      await absenceManagement?.loadWeeklyAbsences?.();
+      // Handle absence editing logic here - for now just log
+      console.log("Absence edited:", absence, newData);
     } catch (error) {
       console.error("Error editing absence:", error);
     } finally {
@@ -118,8 +126,8 @@
     const { absence } = event.detail;
     isLoadingAbsence = true;
     try {
-      // Handle absence deletion logic here
-      await absenceManagement?.loadWeeklyAbsences?.();
+      await absenceService.deleteAbsence(absence.id);
+      console.log("Absence deleted successfully");
     } catch (error) {
       console.error("Error deleting absence:", error);
     } finally {
@@ -159,7 +167,6 @@
       memberIds
     );
     if (memberIds.length > 0) {
-      const allMembers = assignmentManagement?.allMembers || [];
       console.log("[DEBUG] allMembers available:", allMembers.length);
       const selectedMembers = allMembers.filter((m) =>
         memberIds.includes(m.id)
@@ -204,44 +211,44 @@
       assignmentData,
     });
     console.log(
-      "[DEBUG] assignmentManagement available:",
-      !!assignmentManagement
+      "[DEBUG] assignmentActions available:",
+      !!assignmentActions
     );
     console.log(
-      "[DEBUG] assignmentManagement.createAssignments available:",
-      !!assignmentManagement?.createAssignments
+      "[DEBUG] assignmentActions.createAssignments available:",
+      !!assignmentActions?.createAssignments
     );
 
     isLoadingAssignment = true;
     let errorOccurred = false;
     try {
-      console.log("[DEBUG] Calling assignmentManagement.createAssignments...");
-      const success = await assignmentManagement?.createAssignments?.(
-        [member],
-        slotInfo.dayIndex,
+      console.log("[DEBUG] Calling assignmentActions.createSpecificAssignment...");
+      const result = await assignmentActions?.createSpecificAssignment?.(
+        member.id,
+        slotInfo.date,
         slotInfo.slotType
       );
       console.log(
-        "[DEBUG] assignmentManagement.createAssignments result:",
-        success
+        "[DEBUG] assignmentActions.createSpecificAssignment result:",
+        result
       );
-      if (success) {
+      if (result && result.success) {
         console.log(
-          "[DEBUG] Assignment creation successful, loading updated data..."
+          "[DEBUG] Specific assignment creation successful"
         );
-        await assignmentManagement?.loadSpecificAssignments?.();
-        console.log(
-          "[DEBUG] assignmentManagement.loadSpecificAssignments called"
-        );
+        // Refresh the schedule data to show the new assignment
+        if (unifiedScheduleContext?.refreshCurrentWeek) {
+          await unifiedScheduleContext.refreshCurrentWeek();
+        }
       } else {
         errorOccurred = true;
         console.log(
-          "[DEBUG] Assignment creation failed, modal will close and error will show"
+          "[DEBUG] Specific assignment creation failed, modal will close and error will show"
         );
       }
     } catch (error) {
       errorOccurred = true;
-      console.error("[DEBUG] Error creating assignment:", error);
+      console.error("[DEBUG] Error creating specific assignment:", error);
     } finally {
       isLoadingAssignment = false;
       // Always close modal and reset state
@@ -264,6 +271,22 @@
     selectedSlot = null;
   }
 
+  // Get current date's specific assignments for member filtering
+  let currentDateSpecificAssignments = $derived(() => {
+    if (!selectedSlot?.date || !unifiedScheduleContext?.getDataForDate) {
+      return [];
+    }
+
+    const dateData = unifiedScheduleContext.getDataForDate(selectedSlot.date);
+    if (!dateData) return [];
+
+    const slotData = dateData[selectedSlot.slotType];
+    if (!slotData) return [];
+
+    // Extract specific assignments (occasionalPresentMembers) for this date/slot
+    return slotData.occasionalPresentMembers || [];
+  });
+
   // Export the handler functions
   export { handleMarkAbsent, handleAddMember, handleShowAbsenceDetails };
 </script>
@@ -278,7 +301,7 @@
   bind:selectedSlot
   bind:selectedAbsence
   bind:isLoadingAbsence
-  members={assignmentManagement?.allMembers || []}
+  members={allMembers || []}
   onabsenceconfirmed={handleAbsenceConfirmed}
   onslotabsenceconfirmed={handleSlotAbsenceConfirmed}
   onabsenceedited={handleAbsenceEdited}
@@ -288,14 +311,13 @@
 <!-- Member Selection Modal -->
 <MemberSelector
   isOpen={showMemberSelectionModal}
-  members={assignmentManagement?.allMembers || []}
-  {assignments}
+  members={allMembers || []}
+  assignments={allAssignments}
   selectedDay={selectedSlot?.dayIndex || 0}
   selectedSlot={selectedSlot?.slotType || ""}
-  absentMembers={showMemberSelectionModal && selectedSlot
-    ? absenceManagement?.getAbsentMembersForDate?.(selectedSlot.dayIndex) || []
-    : []}
-  specificAssignments={[]}
+  selectedDate={selectedSlot?.date || ""}
+  absentMembers={[]}
+  specificAssignments={currentDateSpecificAssignments}
   onSelect={handleMemberSelected}
   onClose={handleModalCancel}
 />
@@ -308,6 +330,6 @@
   bind:selectedSlot
   bind:selectedMemberForAssignment={selectedMember}
   bind:isLoadingAssignment
-  members={assignmentManagement?.allMembers || []}
-  onassignmentconfirmed={handleAssignmentConfirmed}
+  members={allMembers || []}
+  on:assignment-confirmed={handleAssignmentConfirmed}
 />

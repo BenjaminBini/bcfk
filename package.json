@@ -6,13 +6,20 @@
   "scripts": {
     "start": "node server.js",
     "dev": "concurrently --kill-others-on-fail --kill-others \"nodemon server.js\" \"vite\"",
-    "dev:server": "nodemon server.js",
+    "dev:server": "nodemon --inspect server.js",
     "dev:svelte": "vite",
     "build": "vite build",
     "seed": "node seed-real.js",
     "sync": "node sync-to-remote.js",
     "sync:dry-run": "node sync-to-remote.js --dry-run",
-    "cleanup": "lsof -ti:3001 | xargs kill -9 || true"
+    "cleanup": "lsof -ti:3001 | xargs kill -9 || true",
+    "test": "playwright test",
+    "test:absence": "playwright test tests/absence-system.spec.js",
+    "test:absence-api": "playwright test tests/absence-api.spec.js",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:report": "playwright show-report"
   },
   "dependencies": {
     "@playwright/test": "^1.55.0",

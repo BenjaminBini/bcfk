@@ -23,6 +23,7 @@
 </script>
 
 <div
+  data-testid="absence-item"
   class="p-4 border rounded-lg bg-gradient-to-br backdrop-blur-sm from-slate-700/60 to-slate-600/60 border-slate-600/50"
 >
   <div class="flex items-center justify-between">

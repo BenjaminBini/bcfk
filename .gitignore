@@ -6,5 +6,6 @@ server.log
 scripts/testing
 logs
 database.db
-playwright-report 
-playwright.config.js
+playwright-report
+test-data/
+test-results/

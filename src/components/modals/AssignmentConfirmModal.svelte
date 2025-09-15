@@ -24,39 +24,13 @@
   } = $props();
 
   function handleConfirm() {
-    console.log("[DEBUG] AssignmentConfirmModal.handleConfirm called");
-    console.log("[DEBUG] About to call onConfirm with data:", {
-      members,
-      dayIndex,
-      slotType,
-      date,
-    });
     onConfirm?.();
-    console.log("[DEBUG] onConfirm called successfully");
   }
 
   function handleCancel() {
     onCancel?.();
   }
 
-  $effect(() => {
-    console.log("[DEBUG] AssignmentConfirmModal rendered with:", {
-      isOpen,
-      members,
-      dayIndex,
-      date,
-      slotType,
-    });
-    console.log("[DEBUG] AssignmentConfirmModal - members array:", members);
-    console.log(
-      "[DEBUG] AssignmentConfirmModal - members.length:",
-      members?.length
-    );
-    console.log(
-      "[DEBUG] AssignmentConfirmModal - rendering condition:",
-      isOpen && members && members.length > 0
-    );
-  });
 </script>
 
 {#if isOpen && members && members.length > 0}
@@ -65,13 +39,13 @@
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
   >
     <div
-      class="bg-slate-800 border border-slate-700 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl"
+      class="w-full max-w-md p-6 mx-4 border shadow-2xl bg-slate-800 border-slate-700 rounded-2xl"
     >
-      <h2 class="text-lg font-semibold text-center text-white mb-4">
+      <h2 class="mb-4 text-lg font-semibold text-center text-white">
         Confirmer l'affectation
       </h2>
 
-      <div class="space-y-4 mb-6">
+      <div class="mb-6 space-y-4">
         <p class="text-sm text-center text-slate-300">
           Voulez-vous affecter
           <strong class="text-white"
@@ -106,14 +80,14 @@
   <div
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
   >
-    <div class="bg-red-500 text-white p-4 rounded-lg">
+    <div class="p-4 text-white bg-red-500 rounded-lg">
       <h3>DEBUG: Empty Modal State</h3>
       <p>isOpen: {isOpen}</p>
       <p>members: {JSON.stringify(members)}</p>
       <p>members.length: {members?.length || "undefined"}</p>
       <button
         onclick={handleCancel}
-        class="mt-2 px-3 py-1 bg-white text-red-500 rounded">Close</button
+        class="px-3 py-1 mt-2 text-red-500 bg-white rounded">Close</button
       >
     </div>
   </div>

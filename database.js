@@ -3,17 +3,28 @@ const path = require('path');
 const fs = require('fs');
 
 class Database {
-  constructor() {
-    // Use data directory for database persistence in Docker
-    const dataDir = path.join(__dirname, 'data');
-    
-    // Ensure data directory exists
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
+  constructor(dbPath = null) {
+    // Determine database path based on environment
+    if (dbPath) {
+      // Custom path provided (for testing)
+      this.dbPath = dbPath;
+    } else if (process.env.NODE_ENV === 'test') {
+      // Test environment - use test database
+      const testDataDir = path.join(__dirname, 'test-data');
+      if (!fs.existsSync(testDataDir)) {
+        fs.mkdirSync(testDataDir, { recursive: true });
+      }
+      this.dbPath = path.join(testDataDir, 'planning-test.db');
+    } else {
+      // Production/development environment - use regular database
+      const dataDir = path.join(__dirname, 'data');
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+      }
+      this.dbPath = path.join(dataDir, 'planning.db');
     }
-    
-    const dbPath = path.join(dataDir, 'planning.db');
-    this.db = new sqlite3.Database(dbPath);
+
+    this.db = new sqlite3.Database(this.dbPath);
     this.init();
   }
 

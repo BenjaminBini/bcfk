@@ -36,7 +36,6 @@ function createRoutes(planningService, assignmentService, memberService, absence
   router.get('/api/members', asyncHandler(assignmentController.getMembers.bind(assignmentController)));
   router.get('/api/assignment-data', asyncHandler(assignmentController.getAssignmentData.bind(assignmentController)));
   console.log('Basic API routes registered');
-  router.get('/api/specific-assignments', asyncHandler(planningController.getSpecificAssignments.bind(planningController)));
   router.post('/api/specific-assignments', audit.createAssignment, asyncHandler(planningController.createSpecificAssignment.bind(planningController)));
   router.delete('/api/specific-assignments/:id', audit.deleteAssignment, asyncHandler(planningController.deleteSpecificAssignment.bind(planningController)));
   
@@ -49,9 +48,12 @@ function createRoutes(planningService, assignmentService, memberService, absence
   router.get('/api/absences', asyncHandler(absenceController.getAbsences.bind(absenceController)));
   router.post('/api/absences', audit.createAbsence, asyncHandler(absenceController.createAbsence.bind(absenceController)));
   router.delete('/api/absences/:id', audit.deleteAbsence, asyncHandler(absenceController.deleteAbsence.bind(absenceController)));
-  router.get('/api/absences/date-range', asyncHandler(absenceController.getAbsencesForDateRange.bind(absenceController)));
-  router.get('/api/absences/date/:date', asyncHandler(absenceController.getAbsentMembersForDate.bind(absenceController)));
-  router.get('/api/absences/check/:memberId/:date/:slot', asyncHandler(absenceController.checkMemberAbsentForSlot.bind(absenceController)));
+
+  // Unified weekly data endpoint - fetches all schedule data for 3 weeks
+  router.get('/api/weekly-data/:weekOffset', asyncHandler(planningController.getUnifiedWeeklyData.bind(planningController)));
+
+  // Simple weekly schedule endpoint - fetches schedule data for a specific date range (max 7 days)
+  router.get('/api/weekly-schedule', asyncHandler(planningController.getWeeklySchedule.bind(planningController)));
 
   // Audit logs API routes
   router.get('/api/audit-logs', asyncHandler(async (req, res) => {

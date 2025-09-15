@@ -18,7 +18,7 @@
   }
 </script>
 
-<div class="flex flex-col flex-wrap gap-4 justify-center items-center w-full h-full">
+<div class="flex flex-col flex-wrap items-center justify-center w-full h-full gap-4">
   {#each assignments.filter(a => a.weekday === dayIndex && a.slot_type === slotType) as assignment (assignment.id)}
     <MemberTag 
       text={assignment.first_name}
@@ -35,7 +35,7 @@
   <!-- Add button moved into same flex container -->
   <button 
     type="button"
-    class="flex justify-center items-center w-6 h-6 bg-gradient-to-br rounded-full border shadow-lg backdrop-blur-sm transition-all duration-300 from-slate-600/80 to-slate-700/80 hover:from-slate-500/90 hover:to-slate-600/90 focus:outline-none focus:ring-2 focus:ring-slate-500/50 shadow-slate-500/25 hover:shadow-slate-500/40 hover:scale-110 border-slate-400/30"
+    class="flex items-center justify-center w-6 h-6 transition-all duration-300 border rounded-full shadow-lg bg-gradient-to-br backdrop-blur-sm from-slate-600/80 to-slate-700/80 hover:from-slate-500/90 hover:to-slate-600/90 focus:outline-none focus:ring-2 focus:ring-slate-500/50 shadow-slate-500/25 hover:shadow-slate-500/40 hover:scale-110 border-slate-400/30"
     onclick={() => onAdd(dayIndex, slotType)}
   >
     <span class="sr-only">Ajouter membre</span>

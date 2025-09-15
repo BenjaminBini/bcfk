@@ -1,5 +1,8 @@
 <script>
+  import { createEventDispatcher } from "svelte";
   import AssignmentConfirmModal from "./AssignmentConfirmModal.svelte";
+
+  const dispatch = createEventDispatcher();
 
   let {
     showMemberSelectionModal,
@@ -8,7 +11,6 @@
     selectedMemberForAssignment,
     isLoadingAssignment,
     members,
-    onassignmentconfirmed,
     ...restProps
   } = $props();
 
@@ -48,7 +50,7 @@
       return;
     }
 
-    console.log("[DEBUG] Calling assignment-confirmed callback with data:");
+    console.log("[DEBUG] Dispatching assignment-confirmed event with data:");
     const eventData = {
       member: selectedMemberForAssignment,
       slotInfo: selectedSlot,
@@ -56,8 +58,8 @@
     };
     console.log("[DEBUG] Event data:", eventData);
 
-    onassignmentconfirmed?.(eventData);
-    console.log("[DEBUG] assignment-confirmed callback called");
+    dispatch("assignment-confirmed", eventData);
+    console.log("[DEBUG] assignment-confirmed event dispatched");
     closeAssignmentModal();
     console.log("[DEBUG] closeAssignmentModal called");
   }

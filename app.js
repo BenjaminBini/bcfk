@@ -29,12 +29,12 @@ class App {
     console.log('AuditService created');
     this.memberService = new MemberService(this.db);
     console.log('MemberService created');
-    this.planningService = new PlanningService(this.db, this.memberService);
+    this.absenceService = new AbsenceService(this.db);
+    console.log('AbsenceService created');
+    this.planningService = new PlanningService(this.db, this.memberService, this.absenceService);
     console.log('PlanningService created');
     this.assignmentService = new AssignmentService(this.db, this.memberService);
     console.log('AssignmentService created');
-    this.absenceService = new AbsenceService(this.db);
-    console.log('AbsenceService created');
   }
 
 

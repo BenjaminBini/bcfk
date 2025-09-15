@@ -1,5 +1,5 @@
 <script>
-  import AbsentMemberTag from "../members/AbsentMemberTag.svelte";
+  import AbsenceMemberTag from "../absences/AbsenceMemberTag.svelte";
   import RecurrentMemberTag from "../members/RecurrentMemberTag.svelte";
   import SpecificDateMemberTag from "../members/SpecificDateMemberTag.svelte";
   import AddMemberButton from "../members/AddMemberButton.svelte";
@@ -16,7 +16,7 @@
   </LegendItem>
   
   <LegendItem description="Absent">
-    <AbsentMemberTag text="Christian" tooltip="Absent" />
+    <AbsenceMemberTag member={{ first_name: "Christian" }} absencePeriod="" />
   </LegendItem>
   
   <LegendItem description="Présence ponctuelle">

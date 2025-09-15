@@ -95,7 +95,7 @@
   }
 
   let formattedPeriod = $derived(
-    absenceData ? formatAbsencePeriod(absenceData.start_date, absenceData.end_date, absenceData.start_slot, absenceData.end_slot) : { text: '', date: '' }
+    absenceData ? formatAbsencePeriod(absenceData.startDate || absenceData.start_date, absenceData.endDate || absenceData.end_date, absenceData.startSlot || absenceData.start_slot, absenceData.endSlot || absenceData.end_slot) : { text: '', date: '' }
   );
   
   function close() {
