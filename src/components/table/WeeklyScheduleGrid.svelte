@@ -1,15 +1,9 @@
 <script>
-  /**
-   * @typedef {Object} Props
-   * @property {import('svelte').Snippet} [children]
-   */
-
-  /** @type {Props} */
   let { children } = $props();
 </script>
 
 <div
-  class="overflow-auto relative rounded-2xl border shadow-2xl backdrop-blur-xl border-slate-700/50"
+  class="relative overflow-auto border shadow-2xl rounded-2xl backdrop-blur-xl border-slate-700/50"
 >
   <!-- Grid layout -->
   <div

@@ -1,144 +1,82 @@
 <script>
-  import Icon from "../common/Icon.svelte";
-  import AbsenceGroup from "../absences/AbsenceGroup.svelte";
-  import { getAbsencePeriod } from "../../lib/absence/absenceUtils.js";
-  import { getContext } from "svelte";
-
+  // Props
   let {
-    dayIndex = null,
-    currentDate = null,
-    weekNavigationLogic,
-    onShowAbsenceDetails = null,
+    fullDayAbsent = [],
+    ouvertureOnlyAbsent = [],
+    fermetureOnlyAbsent = []
   } = $props();
 
-  let slotAbsentMembers = $state([]);
+  // Calculate total absences
+  const totalAbsences = $derived(() =>
+    fullDayAbsent.length + ouvertureOnlyAbsent.length + fermetureOnlyAbsent.length
+  );
 
-  let unifiedScheduleContext = getContext("unifiedSchedule");
-
-  function getAbsencePeriodForMember(memberId, dayIndex) {
-    // For now, return empty since this is mostly used for period display which we can implement later
-    return [];
-  }
-
-  // Computed absence groups
-  let absenceGroups = $derived({
-    fullDay: slotAbsentMembers.filter(
-      (member) => member?.absence_slots === "both"
-    ),
-    ouvertureOnly: slotAbsentMembers.filter(
-      (member) => member?.absence_slots === "ouverture"
-    ),
-    fermetureOnly: slotAbsentMembers.filter(
-      (member) => member?.absence_slots === "fermeture"
-    ),
-  });
-
-  // Load absent members from unified context data
-  $effect(() => {
-    if (dayIndex === null || !currentDate) {
-      slotAbsentMembers = [];
-      return;
-    }
-
-    try {
-      const rawScheduleData = unifiedScheduleContext.scheduleData;
-      if (!rawScheduleData?.schedule) {
-        slotAbsentMembers = [];
-        return;
-      }
-
-      // Get the current week data (unified context provides 7-day array directly)
-      const currentWeekData = rawScheduleData.schedule;
-      const dayData = currentWeekData[dayIndex];
-
-      if (!dayData?.allAbsentMembers) {
-        slotAbsentMembers = [];
-        return;
-      }
-
-      // Transform unified absence data to the format expected by AbsenceGroup components
-      const absentMembers = [];
-
-      // Add full day absences
-      dayData.allAbsentMembers.fullDay.forEach(member => {
-        absentMembers.push({
-          ...member,
-          absence_slots: 'both',
-          // Fields are now consistent with API format
-          first_name: member.first_name,
-          last_name: member.last_name,
-          member_id: member.memberId
-        });
-      });
-
-      // Add ouverture only absences
-      dayData.allAbsentMembers.ouvertureOnly.forEach(member => {
-        absentMembers.push({
-          ...member,
-          absence_slots: 'ouverture',
-          // Fields are now consistent with API format
-          first_name: member.first_name,
-          last_name: member.last_name,
-          member_id: member.memberId
-        });
-      });
-
-      // Add fermeture only absences
-      dayData.allAbsentMembers.fermetureOnly.forEach(member => {
-        absentMembers.push({
-          ...member,
-          absence_slots: 'fermeture',
-          // Fields are now consistent with API format
-          first_name: member.first_name,
-          last_name: member.last_name,
-          member_id: member.memberId
-        });
-      });
-
-      slotAbsentMembers = absentMembers;
-    } catch (error) {
-      console.error(
-        `Error loading absence data for dayIndex ${dayIndex}:`,
-        error
-      );
-      slotAbsentMembers = [];
-    }
-  });
+  // Check if we have any absences
+  const hasAbsences = $derived(() => totalAbsences > 0);
 </script>
 
-{#if slotAbsentMembers.length > 0}
-  <div
-    class="inset-0 flex flex-col justify-center h-full py-4 space-y-4 text-slate-300 from-amber-500/10 to-orange-500/10"
-  >
-    <AbsenceGroup
-      title="Toute la journée"
-      members={absenceGroups.fullDay}
-      getAbsencePeriod={getAbsencePeriodForMember}
-      {dayIndex}
-      {onShowAbsenceDetails}
-    />
+<div class="relative flex flex-col w-full h-full px-2 py-4 min-h-30">
+  {#if hasAbsences}
+    <div class="flex flex-col justify-center h-full space-y-3">
 
-    <AbsenceGroup
-      title="Ouverture uniquement"
-      members={absenceGroups.ouvertureOnly}
-      getAbsencePeriod={getAbsencePeriodForMember}
-      {dayIndex}
-      {onShowAbsenceDetails}
-    />
+      <!-- Full day absences -->
+      {#if fullDayAbsent.length > 0}
+        <div class="space-y-1">
+          <div class="text-xs font-medium text-orange-300 opacity-75">Toute la journée</div>
+          <div class="flex flex-wrap gap-1">
+            {#each fullDayAbsent as member}
+              <div
+                class="px-2 py-1 bg-orange-600/60 text-orange-200 rounded text-xs font-medium opacity-75"
+                title="Absent toute la journée"
+              >
+                {member.first_name}
+              </div>
+            {/each}
+          </div>
+        </div>
+      {/if}
 
-    <AbsenceGroup
-      title="Fermeture uniquement"
-      members={absenceGroups.fermetureOnly}
-      getAbsencePeriod={getAbsencePeriodForMember}
-      {dayIndex}
-      {onShowAbsenceDetails}
-    />
-  </div>
-{:else}
-  <div
-    class="absolute inset-0 flex items-center justify-center bg-gradient-to-r backdrop-blur-sm text-slate-300 from-emerald-500/10 to-teal-500/10"
-  >
-    <Icon name="success" size="w-5 h-5" className="mr-2 text-emerald-400" />
-    <span class="text-xs">Aucune absence</span>
-  </div>
-{/if}
+      <!-- Ouverture only absences -->
+      {#if ouvertureOnlyAbsent.length > 0}
+        <div class="space-y-1">
+          <div class="text-xs font-medium text-red-300 opacity-75">Ouverture uniquement</div>
+          <div class="flex flex-wrap gap-1">
+            {#each ouvertureOnlyAbsent as member}
+              <div
+                class="px-2 py-1 bg-red-600/60 text-red-200 rounded text-xs font-medium opacity-75"
+                title="Absent à l'ouverture uniquement"
+              >
+                {member.first_name}
+              </div>
+            {/each}
+          </div>
+        </div>
+      {/if}
+
+      <!-- Fermeture only absences -->
+      {#if fermetureOnlyAbsent.length > 0}
+        <div class="space-y-1">
+          <div class="text-xs font-medium text-pink-300 opacity-75">Fermeture uniquement</div>
+          <div class="flex flex-wrap gap-1">
+            {#each fermetureOnlyAbsent as member}
+              <div
+                class="px-2 py-1 bg-pink-600/60 text-pink-200 rounded text-xs font-medium opacity-75"
+                title="Absent à la fermeture uniquement"
+              >
+                {member.first_name}
+              </div>
+            {/each}
+          </div>
+        </div>
+      {/if}
+    </div>
+  {:else}
+    <!-- No absences -->
+    <div class="flex items-center justify-center h-full bg-gradient-to-r from-emerald-500/10 to-teal-500/10 backdrop-blur-sm rounded">
+      <div class="flex items-center space-x-2">
+        <div class="w-4 h-4 bg-emerald-400 rounded-full opacity-60"></div>
+        <span class="text-xs text-emerald-300 opacity-75">Aucune absence</span>
+      </div>
+    </div>
+  {/if}
+</div>

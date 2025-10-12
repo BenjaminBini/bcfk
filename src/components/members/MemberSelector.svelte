@@ -1,6 +1,5 @@
 <script>
   import { fly, fade } from 'svelte/transition';
-  import { getCategorizedMembers } from '../../lib/memberCategorizer.js';
   import { gradients } from '../../lib/designTokens.js';
   import MemberFilter from './MemberFilter.svelte';
   import MemberList from './MemberList.svelte';
@@ -15,7 +14,8 @@
    * @property {any} [selectedSlot]
    * @property {string} [selectedDate]
    * @property {any} [absentMembers]
-   * @property {any} [specificAssignments]
+   * @property {any} [presentAssignedMembers]
+   * @property {any} [occasionalPresentMembers]
    * @property {any} [onSelect]
    * @property {any} [onClose]
    */
@@ -29,25 +29,62 @@
     selectedSlot = null,
     selectedDate = "",
     absentMembers = [],
-    specificAssignments = [],
+    presentAssignedMembers = [],
+    occasionalPresentMembers = [],
     onSelect = null,
     onClose = null
   } = $props();
+
+  console.log('[DEBUG] MemberSelector component rendered/props changed');
+  console.log('[DEBUG] isOpen:', isOpen);
+  console.log('[DEBUG] members.length:', members.length);
+  console.log('[DEBUG] absentMembers:', absentMembers);
+  console.log('[DEBUG] presentAssignedMembers:', presentAssignedMembers);
+  console.log('[DEBUG] occasionalPresentMembers:', occasionalPresentMembers);
   let filterText = $state('');
   let selectedMembers = $state(new Set());
-  // Get categorized and filtered members
-  let allFilteredMembers = $derived(
-    getCategorizedMembers({
-      members,
-      assignments,
-      selectedDay,
-      selectedSlot,
-      selectedDate,
-      absentMembers,
-      specificAssignments,
-      filterText
-    })
-  );
+  // Get filtered members with status based on passed arrays
+  let allFilteredMembers = $derived(() => {
+    console.log('[DEBUG] MemberSelector allFilteredMembers derivation running');
+    console.log('[DEBUG] Total members:', members.length);
+    console.log('[DEBUG] absentMembers:', absentMembers);
+    console.log('[DEBUG] presentAssignedMembers:', presentAssignedMembers);
+    console.log('[DEBUG] occasionalPresentMembers:', occasionalPresentMembers);
+
+    // Create sets of member IDs that should be disabled
+    const absentMemberIds = new Set((absentMembers || []).map(m => m.member_id));
+    const presentAssignedMemberIds = new Set((presentAssignedMembers || []).map(m => m.memberId || m.member_id || m.id));
+    const occasionalPresentMemberIds = new Set((occasionalPresentMembers || []).map(m => m.memberId || m.member_id || m.id));
+
+    console.log('[DEBUG] absentMemberIds:', Array.from(absentMemberIds));
+    console.log('[DEBUG] presentAssignedMemberIds:', Array.from(presentAssignedMemberIds));
+    console.log('[DEBUG] occasionalPresentMemberIds:', Array.from(occasionalPresentMemberIds));
+
+    // Filter members by search text first (simple inline filtering)
+    const filteredByText = filterText.trim() === '' ? members :
+      members.filter(member => {
+        const fullName = `${member.first_name} ${member.last_name || ''}`.toLowerCase();
+        return fullName.includes(filterText.toLowerCase());
+      });
+    console.log('[DEBUG] filteredByText:', filteredByText.length);
+
+    // Add status to each member
+    const result = filteredByText.map(member => {
+      let status = "available";
+
+      if (absentMemberIds.has(member.id)) {
+        status = "absent";
+      } else if (presentAssignedMemberIds.has(member.id) || occasionalPresentMemberIds.has(member.id)) {
+        status = "assigned";
+      }
+
+      return { ...member, status };
+    });
+
+    console.log('[DEBUG] Final result:', result.length, 'members');
+    console.log('[DEBUG] Available members:', result.filter(m => m.status === 'available').length);
+    return result;
+  });
   
   function handleMemberToggle() {
     // Member toggle is handled by MemberList component

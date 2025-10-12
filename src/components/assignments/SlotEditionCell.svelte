@@ -1,44 +1,47 @@
 <script>
-  import MemberTag from '../members/MemberTag.svelte';
-  import Icon from '../common/Icon.svelte';
-  
-  let {
-    assignments,
-    slotType,
-    dayIndex,
-    onRemove,
-    onAdd
-  } = $props();
+  let { assignments = [], slotType, dayIndex, onRemove, onAdd } = $props();
 
-  function handleRemove(assignmentId) {
-    // Small delay to let user see the slide-out button animation
-    setTimeout(() => {
-      onRemove(assignmentId);
-    }, 200);
+  // Get assignments for this slot
+  const slotAssignments = $derived(() => {
+    return assignments.filter(a => a.weekday === dayIndex && a.slot_type === slotType);
+  });
+
+  // Handle remove member
+  function handleRemove(memberId) {
+    onRemove?.(dayIndex, slotType, memberId);
+  }
+
+  // Handle add member
+  function handleAdd() {
+    onAdd?.(dayIndex, slotType);
   }
 </script>
 
-<div class="flex flex-col flex-wrap items-center justify-center w-full h-full gap-4">
-  {#each assignments.filter(a => a.weekday === dayIndex && a.slot_type === slotType) as assignment (assignment.id)}
-    <MemberTag 
-      text={assignment.first_name}
-      showButton={true}
-      buttonGradient="from-red-400/100 to-red-700"
-      buttonHoverGradient="hover:from-red-400/90 hover:to-red-500/90"
-      buttonRing="focus:ring-red-500/50"
-      buttonIcon="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"
-      buttonTooltip="Supprimer"
-      onClick={() => handleRemove(assignment.id)}
-    />
-  {/each}
-  
-  <!-- Add button moved into same flex container -->
-  <button 
-    type="button"
-    class="flex items-center justify-center w-6 h-6 transition-all duration-300 border rounded-full shadow-lg bg-gradient-to-br backdrop-blur-sm from-slate-600/80 to-slate-700/80 hover:from-slate-500/90 hover:to-slate-600/90 focus:outline-none focus:ring-2 focus:ring-slate-500/50 shadow-slate-500/25 hover:shadow-slate-500/40 hover:scale-110 border-slate-400/30"
-    onclick={() => onAdd(dayIndex, slotType)}
-  >
-    <span class="sr-only">Ajouter membre</span>
-    <Icon name="plus" size="w-3 h-3" className="text-white" />
-  </button>
+<div class="relative flex flex-col w-full h-full px-2 py-4 min-h-30">
+  <div class="flex items-center justify-center flex-1">
+    <div class="flex flex-wrap gap-1 justify-center">
+
+      <!-- Assigned members -->
+      {#each slotAssignments as assignment}
+        <div
+          class="px-2 py-1 bg-green-600/80 text-green-100 rounded text-xs font-medium cursor-pointer hover:bg-red-600/80 hover:text-red-100 transition-colors group relative"
+          onclick={() => handleRemove(assignment.member_id)}
+          title="Cliquer pour supprimer"
+        >
+          {assignment.member_name || assignment.display_name}
+          <div class="absolute top-0 right-0 w-2 h-2 bg-red-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        </div>
+      {/each}
+
+      <!-- Add member button -->
+      <button
+        type="button"
+        onclick={handleAdd}
+        class="px-2 py-1 bg-white/10 text-white/60 hover:bg-white/20 hover:text-white/80 rounded text-xs font-medium border border-white/20 hover:border-white/30 transition-all duration-200"
+        title="Ajouter un membre"
+      >
+        +
+      </button>
+    </div>
+  </div>
 </div>
