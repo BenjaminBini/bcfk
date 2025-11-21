@@ -1,0 +1,120 @@
+name: Test Database Backup
+
+# This is a test version that runs on the feature branch
+# Delete this file after testing, the main backup-database.yml will run on master
+
+on:
+  push:
+    branches: [ claude/add-members-crud-screen-016kNmYqQ7VN5PKhqUn4mj81 ]
+    paths:
+      - '.github/workflows/backup-database-test.yml'
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Set backup timestamp
+      id: timestamp
+      run: |
+        TIMESTAMP=$(date +'%Y%m%d_%H%M%S')
+        echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+        echo "date=$(date +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_OUTPUT
+
+    - name: Backup database from VPS
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        script: |
+          echo "Starting database backup..."
+
+          # Get the Docker container ID for the bcfk service
+          CONTAINER_ID=$(docker ps -q -f name=bcfk-bcfk-1 || docker ps -q -f name=bcfk_bcfk_1)
+
+          if [ -z "$CONTAINER_ID" ]; then
+            echo "Error: BCFK container not found"
+            exit 1
+          fi
+
+          echo "Found container: $CONTAINER_ID"
+
+          # Create backup directory if it doesn't exist
+          mkdir -p /tmp/bcfk-backups
+
+          # Copy database from container to host
+          docker cp $CONTAINER_ID:/app/data/planning.db /tmp/bcfk-backups/planning-${{ steps.timestamp.outputs.timestamp }}.db
+
+          # Verify backup was created
+          if [ ! -f "/tmp/bcfk-backups/planning-${{ steps.timestamp.outputs.timestamp }}.db" ]; then
+            echo "Error: Backup file was not created"
+            exit 1
+          fi
+
+          # Get file size for verification
+          ls -lh /tmp/bcfk-backups/planning-${{ steps.timestamp.outputs.timestamp }}.db
+
+          echo "Database backup completed successfully"
+
+    - name: Download backup from VPS
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        source: "/tmp/bcfk-backups/planning-${{ steps.timestamp.outputs.timestamp }}.db"
+        target: "."
+        strip_components: 2
+
+    - name: Verify downloaded backup
+      run: |
+        BACKUP_FILE="planning-${{ steps.timestamp.outputs.timestamp }}.db"
+
+        if [ ! -f "$BACKUP_FILE" ]; then
+          echo "Error: Backup file not found after download"
+          exit 1
+        fi
+
+        # Check file size (should be > 0 bytes)
+        FILE_SIZE=$(stat -f%z "$BACKUP_FILE" 2>/dev/null || stat -c%s "$BACKUP_FILE" 2>/dev/null)
+
+        if [ "$FILE_SIZE" -eq 0 ]; then
+          echo "Error: Backup file is empty"
+          exit 1
+        fi
+
+        echo "Backup file size: $FILE_SIZE bytes"
+
+        # Verify it's a valid SQLite database
+        if command -v sqlite3 &> /dev/null; then
+          sqlite3 "$BACKUP_FILE" "SELECT count(*) FROM sqlite_master;" > /dev/null
+          echo "SQLite database integrity check passed"
+        fi
+
+    - name: Upload backup as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: bcfk-database-backup-test-${{ steps.timestamp.outputs.timestamp }}
+        path: planning-${{ steps.timestamp.outputs.timestamp }}.db
+        retention-days: 7
+        if-no-files-found: error
+
+    - name: Cleanup VPS temporary files
+      if: always()
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        script: |
+          # Keep only the last 7 days of local backups on VPS
+          find /tmp/bcfk-backups -name "planning-*.db" -type f -mtime +7 -delete
+          echo "VPS cleanup completed"
+
+    - name: Test successful
+      run: |
+        echo "✅ Backup test completed successfully!"
+        echo "The main workflow (backup-database.yml) will run automatically on master branch."
+        echo "You can delete backup-database-test.yml after verifying this works."
