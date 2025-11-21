@@ -99,6 +99,63 @@ class AssignmentController {
     }
   }
 
+  // GET /api/members/:id
+  async getMemberById(req, res, next) {
+    try {
+      const { id } = req.params;
+      const member = await this.memberService.getMemberById(parseInt(id));
+
+      if (!member) {
+        return res.status(404).json({ error: 'Member not found' });
+      }
+
+      res.json(member);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // PUT /api/members/:id
+  async updateMember(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { name } = req.body;
+
+      if (!name) {
+        return res.status(400).json({ error: 'Name is required' });
+      }
+
+      // Get old data before update for audit log
+      let oldData = null;
+      if (this.auditService) {
+        oldData = await this.auditService.getEntityData('member', parseInt(id));
+      }
+
+      const member = await this.memberService.updateMemberFromFullName(parseInt(id), name);
+
+      // Log the update action
+      if (this.auditService && oldData) {
+        const userInfo = this.auditService.extractUserInfo(req);
+        const completeMemberData = await this.auditService.getEntityData('member', parseInt(id));
+        const rollbackData = this.auditService.generateRollbackData('UPDATE', 'member', oldData, completeMemberData);
+
+        await this.auditService.logAction(
+          'UPDATE',
+          'member',
+          parseInt(id),
+          oldData,
+          completeMemberData || member,
+          userInfo,
+          rollbackData
+        );
+      }
+
+      res.json(member);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // GET /api/assignment-data
   async getAssignmentData(req, res, next) {
     try {

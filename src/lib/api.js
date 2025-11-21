@@ -55,4 +55,22 @@ export const api = {
     });
     return handleResponse(response);
   },
+
+  // Get a single member by ID
+  async getMemberById(id) {
+    const response = await fetch(`${API_BASE}/members/${id}`);
+    return handleResponse(response);
+  },
+
+  // Update an existing member
+  async updateMember(id, memberData) {
+    const response = await fetch(`${API_BASE}/members/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(memberData),
+    });
+    return handleResponse(response);
+  },
 };

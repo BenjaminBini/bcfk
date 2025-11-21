@@ -63,6 +63,22 @@ docker-compose up -d
 npm run sync
 ```
 
+## 💾 Sauvegardes
+
+La base de données est automatiquement sauvegardée quotidiennement via GitHub Actions.
+
+```bash
+# Restaurer une sauvegarde
+./scripts/restore-backup.sh planning-20250121_020000.db
+```
+
+**Documentation complète:** [`docs/DATABASE_BACKUP.md`](docs/DATABASE_BACKUP.md)
+
+- Sauvegardes quotidiennes automatiques (2h00 UTC)
+- Rétention de 30 jours
+- Déclenchement manuel possible
+- Script de restauration inclus
+
 ## 📚 Scripts Utiles
 
 ```bash

@@ -137,6 +137,14 @@ class Database {
     this.db.run('INSERT INTO members (first_name, last_name) VALUES (?, ?)', [firstName, lastName || ''], callback);
   }
 
+  getMemberById(id, callback) {
+    this.db.get('SELECT *, (first_name || CASE WHEN last_name != "" THEN " " || last_name ELSE "" END) as full_name FROM members WHERE id = ?', [id], callback);
+  }
+
+  updateMember(id, firstName, lastName, callback) {
+    this.db.run('UPDATE members SET first_name = ?, last_name = ? WHERE id = ?', [firstName, lastName || '', id], callback);
+  }
+
   // Recurring assignments methods
   getRecurringAssignments(callback) {
     this.db.all(`
