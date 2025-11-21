@@ -30,21 +30,55 @@ jobs:
         key: ${{ secrets.VPS_SSH_KEY }}
         script: |
           echo "Starting database backup..."
+          echo "======================================"
 
-          # Get the Docker container ID for the bcfk service
-          CONTAINER_ID=$(docker ps -q -f name=bcfk-bcfk-1 || docker ps -q -f name=bcfk_bcfk_1)
+          # Show all running containers for debugging
+          echo "Running containers:"
+          docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}"
+          echo "======================================"
+
+          # Try multiple naming patterns for the container
+          CONTAINER_ID=$(docker ps -q -f name=bcfk-bcfk-1)
+          if [ -z "$CONTAINER_ID" ]; then
+            CONTAINER_ID=$(docker ps -q -f name=bcfk_bcfk_1)
+          fi
+          if [ -z "$CONTAINER_ID" ]; then
+            CONTAINER_ID=$(docker ps -q -f name=data-bcfk-1)
+          fi
+          if [ -z "$CONTAINER_ID" ]; then
+            CONTAINER_ID=$(docker ps -q -f name=data_bcfk_1)
+          fi
+          # Fallback: try to find any container with "bcfk" in the name
+          if [ -z "$CONTAINER_ID" ]; then
+            CONTAINER_ID=$(docker ps -q -f name=bcfk | head -1)
+          fi
 
           if [ -z "$CONTAINER_ID" ]; then
-            echo "Error: BCFK container not found"
+            echo "Error: BCFK container not found!"
+            echo "Please check the container name in the output above."
             exit 1
           fi
 
           echo "Found container: $CONTAINER_ID"
+          CONTAINER_NAME=$(docker ps --filter id=$CONTAINER_ID --format "{{.Names}}")
+          echo "Container name: $CONTAINER_NAME"
+
+          # Verify database exists in container
+          echo "Checking if database exists in container..."
+          if ! docker exec $CONTAINER_ID test -f /app/data/planning.db; then
+            echo "Error: Database file /app/data/planning.db not found in container!"
+            echo "Contents of /app/data/ directory:"
+            docker exec $CONTAINER_ID ls -lah /app/data/ || echo "Could not list directory"
+            exit 1
+          fi
+
+          echo "Database file found in container"
 
           # Create backup directory if it doesn't exist
           mkdir -p /tmp/bcfk-backups
 
           # Copy database from container to host
+          echo "Copying database from container to host..."
           docker cp $CONTAINER_ID:/app/data/planning.db /tmp/bcfk-backups/planning-${{ steps.timestamp.outputs.timestamp }}.db
 
           # Verify backup was created
@@ -54,9 +88,11 @@ jobs:
           fi
 
           # Get file size for verification
+          echo "Backup file created successfully:"
           ls -lh /tmp/bcfk-backups/planning-${{ steps.timestamp.outputs.timestamp }}.db
 
-          echo "Database backup completed successfully"
+          echo "======================================"
+          echo "Database backup completed successfully!"
 
     - name: Download backup from VPS
       run: |

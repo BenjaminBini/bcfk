@@ -33,15 +33,37 @@ jobs:
         script: |
           echo "Starting database backup..."
 
-          # Get the Docker container ID for the bcfk service
-          CONTAINER_ID=$(docker ps -q -f name=bcfk-bcfk-1 || docker ps -q -f name=bcfk_bcfk_1)
+          # Try multiple naming patterns for the container
+          CONTAINER_ID=$(docker ps -q -f name=bcfk-bcfk-1)
+          if [ -z "$CONTAINER_ID" ]; then
+            CONTAINER_ID=$(docker ps -q -f name=bcfk_bcfk_1)
+          fi
+          if [ -z "$CONTAINER_ID" ]; then
+            CONTAINER_ID=$(docker ps -q -f name=data-bcfk-1)
+          fi
+          if [ -z "$CONTAINER_ID" ]; then
+            CONTAINER_ID=$(docker ps -q -f name=data_bcfk_1)
+          fi
+          # Fallback: try to find any container with "bcfk" in the name
+          if [ -z "$CONTAINER_ID" ]; then
+            CONTAINER_ID=$(docker ps -q -f name=bcfk | head -1)
+          fi
 
           if [ -z "$CONTAINER_ID" ]; then
-            echo "Error: BCFK container not found"
+            echo "Error: BCFK container not found!"
+            echo "Running containers:"
+            docker ps --format "table {{.Names}}\t{{.Image}}"
             exit 1
           fi
 
           echo "Found container: $CONTAINER_ID"
+
+          # Verify database exists in container
+          if ! docker exec $CONTAINER_ID test -f /app/data/planning.db; then
+            echo "Error: Database file /app/data/planning.db not found in container!"
+            docker exec $CONTAINER_ID ls -lah /app/data/ || echo "Could not list directory"
+            exit 1
+          fi
 
           # Create backup directory if it doesn't exist
           mkdir -p /tmp/bcfk-backups
