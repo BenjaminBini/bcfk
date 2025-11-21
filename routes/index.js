@@ -34,6 +34,8 @@ function createRoutes(planningService, assignmentService, memberService, absence
   console.log('Registering API routes...');
   router.post('/api/members', audit.createMember, asyncHandler(assignmentController.addMember.bind(assignmentController)));
   router.get('/api/members', asyncHandler(assignmentController.getMembers.bind(assignmentController)));
+  router.get('/api/members/:id', asyncHandler(assignmentController.getMemberById.bind(assignmentController)));
+  router.put('/api/members/:id', audit.updateMember, asyncHandler(assignmentController.updateMember.bind(assignmentController)));
   router.get('/api/assignment-data', asyncHandler(assignmentController.getAssignmentData.bind(assignmentController)));
   console.log('Basic API routes registered');
   router.post('/api/specific-assignments', audit.createAssignment, asyncHandler(planningController.createSpecificAssignment.bind(planningController)));

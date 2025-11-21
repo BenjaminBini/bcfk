@@ -4,6 +4,7 @@
   import HomePage from "./pages/HomePage.svelte";
   import AssignmentsPage from "./pages/AssignmentsPage.svelte";
   import AbsencesPage from "./pages/AbsencesPage.svelte";
+  import MembersPage from "./pages/MembersPage.svelte";
   import AuditLogsPage from "./pages/AuditLogsPage.svelte";
   import TestUnifiedPage from "./pages/TestUnifiedPage.svelte";
   import NavigationBar from "./components/navigation/NavigationBar.svelte";
@@ -15,6 +16,7 @@
     "/": HomePage,
     "/assignments": AssignmentsPage,
     "/absences": AbsencesPage,
+    "/members": MembersPage,
     "/audit-logs": AuditLogsPage,
     "/test": TestUnifiedPage,
   };
@@ -23,6 +25,7 @@
     { href: "/", label: "📅 Planning" },
     { href: "/assignments", label: "🔁 Affectations hebdomadaires" },
     { href: "/absences", label: "✈️ Absences" },
+    { href: "/members", label: "👥 Membres" },
     { href: "/audit-logs", label: "📋 Historique" },
   ];
 
