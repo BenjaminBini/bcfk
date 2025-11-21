@@ -90,6 +90,8 @@ export const assignmentActions = {
               weekday,
               slot_type: slotType,
               member_id: id,
+              first_name: member.first_name,
+              last_name: member.last_name || '',
               member_name: member.first_name,
               display_name: member.display_name || member.first_name,
             });
@@ -149,6 +151,8 @@ export const assignmentActions = {
               weekday,
               slot_type: slotType,
               member_id: id,
+              first_name: member.first_name,
+              last_name: member.last_name || '',
               member_name: member.first_name,
               display_name: member.display_name || member.first_name,
             });
