@@ -49,7 +49,7 @@ export function getCategorizedMembers({
 
   // For specific assignments, we need to filter by the exact date and slot type
   // specificAssignments from unifiedScheduleContext are already filtered for the current date/slot
-  const currentSpecificAssignments = specificAssignments() || [];
+  const currentSpecificAssignments = specificAssignments || [];
   const assignedMemberIds = new Set([
     ...currentAssignments.map((a) => a.member_id),
     ...(Array.isArray(currentSpecificAssignments)
