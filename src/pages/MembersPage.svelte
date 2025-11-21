@@ -6,7 +6,6 @@
   import ContentWrapper from "../components/layout/ContentWrapper.svelte";
   import MemberFormModal from "../components/members/MemberFormModal.svelte";
   import Icon from "../components/common/Icon.svelte";
-  import { icons } from "../lib/icons.js";
 
   let members = $state([]);
   let isLoading = $state(false);
@@ -87,7 +86,7 @@
         onclick={handleAddMember}
         class="inline-flex items-center px-4 py-2 text-sm font-medium text-white transition-colors bg-indigo-600 border border-transparent rounded-lg shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
       >
-        <Icon icon={icons.plus} className="w-5 h-5 mr-2" />
+        <Icon name="plus" size="w-5 h-5" className="mr-2" />
         Ajouter un membre
       </button>
     </div>
@@ -102,7 +101,7 @@
               onclick={handleAddMember}
               class="inline-flex items-center px-4 py-2 mt-4 text-sm font-medium text-white transition-colors bg-indigo-600 border border-transparent rounded-lg shadow-sm hover:bg-indigo-700"
             >
-              <Icon icon={icons.plus} className="w-5 h-5 mr-2" />
+              <Icon name="plus" size="w-5 h-5" className="mr-2" />
               Ajouter le premier membre
             </button>
           </div>
@@ -155,7 +154,7 @@
                         onclick={() => handleEditMember(member)}
                         class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-indigo-400 transition-colors rounded-lg hover:text-indigo-300 hover:bg-slate-700/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                       >
-                        <Icon icon={icons.pencil} className="w-4 h-4 mr-1.5" />
+                        <Icon name="pencil" size="w-4 h-4" className="mr-1.5" />
                         Modifier
                       </button>
                     </td>

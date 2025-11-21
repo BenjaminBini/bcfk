@@ -3,7 +3,6 @@
   import FormField from '../common/FormField.svelte';
   import SubmitButton from '../common/SubmitButton.svelte';
   import Icon from '../common/Icon.svelte';
-  import { icons } from '../../lib/icons.js';
 
   /**
    * Modal component for member form (create/edit)
@@ -84,7 +83,7 @@
         class="text-slate-400 transition-colors rounded-lg hover:text-slate-200 hover:bg-slate-700/50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         aria-label="Fermer"
       >
-        <Icon icon={icons.close} className="w-5 h-5" />
+        <Icon name="close" size="w-5 h-5" />
       </button>
     </div>
 
