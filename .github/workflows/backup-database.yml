@@ -1,0 +1,154 @@
+name: Backup Database from VPS
+
+on:
+  schedule:
+    # Run daily at 2:00 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      retention_days:
+        description: 'Number of days to retain backup'
+        required: false
+        default: '30'
+        type: number
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Set backup timestamp
+      id: timestamp
+      run: |
+        TIMESTAMP=$(date +'%Y%m%d_%H%M%S')
+        echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+        echo "date=$(date +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_OUTPUT
+
+    - name: Backup database from VPS
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        script: |
+          echo "Starting database backup..."
+
+          # Get the Docker container ID for the bcfk service
+          CONTAINER_ID=$(docker ps -q -f name=bcfk-bcfk-1 || docker ps -q -f name=bcfk_bcfk_1)
+
+          if [ -z "$CONTAINER_ID" ]; then
+            echo "Error: BCFK container not found"
+            exit 1
+          fi
+
+          echo "Found container: $CONTAINER_ID"
+
+          # Create backup directory if it doesn't exist
+          mkdir -p /tmp/bcfk-backups
+
+          # Copy database from container to host
+          docker cp $CONTAINER_ID:/app/data/planning.db /tmp/bcfk-backups/planning-${{ steps.timestamp.outputs.timestamp }}.db
+
+          # Verify backup was created
+          if [ ! -f "/tmp/bcfk-backups/planning-${{ steps.timestamp.outputs.timestamp }}.db" ]; then
+            echo "Error: Backup file was not created"
+            exit 1
+          fi
+
+          # Get file size for verification
+          ls -lh /tmp/bcfk-backups/planning-${{ steps.timestamp.outputs.timestamp }}.db
+
+          echo "Database backup completed successfully"
+
+    - name: Download backup from VPS
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        source: "/tmp/bcfk-backups/planning-${{ steps.timestamp.outputs.timestamp }}.db"
+        target: "."
+        strip_components: 2
+
+    - name: Verify downloaded backup
+      run: |
+        BACKUP_FILE="planning-${{ steps.timestamp.outputs.timestamp }}.db"
+
+        if [ ! -f "$BACKUP_FILE" ]; then
+          echo "Error: Backup file not found after download"
+          exit 1
+        fi
+
+        # Check file size (should be > 0 bytes)
+        FILE_SIZE=$(stat -f%z "$BACKUP_FILE" 2>/dev/null || stat -c%s "$BACKUP_FILE" 2>/dev/null)
+
+        if [ "$FILE_SIZE" -eq 0 ]; then
+          echo "Error: Backup file is empty"
+          exit 1
+        fi
+
+        echo "Backup file size: $FILE_SIZE bytes"
+
+        # Verify it's a valid SQLite database
+        if command -v sqlite3 &> /dev/null; then
+          sqlite3 "$BACKUP_FILE" "SELECT count(*) FROM sqlite_master;" > /dev/null
+          echo "SQLite database integrity check passed"
+        fi
+
+    - name: Upload backup as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: bcfk-database-backup-${{ steps.timestamp.outputs.timestamp }}
+        path: planning-${{ steps.timestamp.outputs.timestamp }}.db
+        retention-days: ${{ github.event.inputs.retention_days || 30 }}
+        if-no-files-found: error
+
+    - name: Cleanup VPS temporary files
+      if: always()
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        script: |
+          # Keep only the last 7 days of local backups on VPS
+          find /tmp/bcfk-backups -name "planning-*.db" -type f -mtime +7 -delete
+
+          echo "VPS cleanup completed"
+
+    - name: Create backup summary
+      if: success()
+      run: |
+        cat << EOF > backup-summary.txt
+        BCFK Database Backup Summary
+        ============================
+
+        Timestamp: ${{ steps.timestamp.outputs.date }}
+        Backup File: planning-${{ steps.timestamp.outputs.timestamp }}.db
+        Status: SUCCESS
+
+        To restore this backup:
+        1. Download the artifact from this workflow run
+        2. Stop the Docker container: docker compose down
+        3. Copy the backup to the VPS data volume
+        4. Restart the container: docker compose up -d
+
+        Or use the restore script:
+        ./scripts/restore-backup.sh planning-${{ steps.timestamp.outputs.timestamp }}.db
+        EOF
+
+        cat backup-summary.txt
+
+    - name: Upload backup summary
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: backup-summary-${{ steps.timestamp.outputs.timestamp }}
+        path: backup-summary.txt
+        retention-days: 90
+
+    - name: Notify on failure
+      if: failure()
+      run: |
+        echo "::error::Database backup failed! Check the workflow logs for details."
+        echo "Timestamp: ${{ steps.timestamp.outputs.date }}"

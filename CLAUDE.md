@@ -153,3 +153,35 @@ Frontend builds to `public/dist/` directory. Production setup serves static file
 - **Responsive Design**: Mobile-optimized interface with touch-friendly interactions
 - **Data Synchronization**: Sync between local development and remote production
 - **Docker Ready**: Containerized deployment with persistent data storage
+- **Automated Backups**: Daily database backups via GitHub Actions with 30-day retention
+
+## Database Backup & Restore
+
+The application includes automated database backup via GitHub Actions:
+
+### Backup System
+- **Automated**: Daily backups at 2:00 AM UTC via `.github/workflows/backup-database.yml`
+- **Storage**: GitHub Actions Artifacts (30-day retention)
+- **Manual Trigger**: Can be triggered manually from GitHub Actions UI
+- **Local VPS**: Keeps last 7 days of backups on VPS in `/tmp/bcfk-backups`
+
+### Restore Process
+```bash
+# Local restore using provided script
+./scripts/restore-backup.sh planning-20250121_020000.db
+```
+
+### Key Files
+- `.github/workflows/backup-database.yml` - Automated backup workflow
+- `scripts/restore-backup.sh` - Database restore script
+- `docs/DATABASE_BACKUP.md` - Complete backup/restore documentation
+
+### Backup Workflow Steps
+1. SSH into VPS and locate running container
+2. Copy database from Docker volume to host
+3. Download backup to GitHub Actions runner
+4. Verify SQLite integrity
+5. Upload as artifact with configurable retention
+6. Clean up old VPS backups (7-day rolling window)
+
+For detailed backup/restore procedures, see `docs/DATABASE_BACKUP.md`.

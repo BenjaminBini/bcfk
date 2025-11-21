@@ -9,3 +9,8 @@ database.db
 playwright-report
 test-data/
 test-results/
+
+# Database backups
+planning-*.db
+*-before-restore-*.db
+backup-summary.txt
