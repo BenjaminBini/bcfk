@@ -61,14 +61,25 @@ jobs:
           echo "Database backup completed successfully"
 
     - name: Download backup from VPS
-      uses: appleboy/scp-action@v0.1.4
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USERNAME }}
-        key: ${{ secrets.VPS_SSH_KEY }}
-        source: "/tmp/bcfk-backups/planning-${{ steps.timestamp.outputs.timestamp }}.db"
-        target: "."
-        strip_components: 2
+      run: |
+        # Setup SSH key
+        mkdir -p ~/.ssh
+        echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/vps_key
+        chmod 600 ~/.ssh/vps_key
+
+        # Add VPS to known hosts to avoid prompt
+        ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+
+        # Download the backup using scp
+        scp -i ~/.ssh/vps_key \
+          -o StrictHostKeyChecking=no \
+          ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:/tmp/bcfk-backups/planning-${{ steps.timestamp.outputs.timestamp }}.db \
+          ./planning-${{ steps.timestamp.outputs.timestamp }}.db
+
+        # Cleanup SSH key
+        rm -f ~/.ssh/vps_key
+
+        echo "Backup downloaded successfully"
 
     - name: Verify downloaded backup
       run: |
