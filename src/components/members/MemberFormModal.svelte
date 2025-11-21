@@ -93,11 +93,20 @@
         <FormField
           label="Nom complet"
           id="member-name"
-          placeholder="Prénom Nom"
-          bind:value={name}
           required={true}
-          helperText="Entrez le prénom et le nom (optionnel) séparés par un espace"
-        />
+        >
+          <input
+            type="text"
+            id="member-name"
+            bind:value={name}
+            placeholder="Prénom Nom"
+            required
+            class="block w-full px-3 py-2 text-sm transition-colors border rounded-lg bg-slate-700/50 border-slate-600 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          />
+          <p class="mt-1 text-xs text-slate-400">
+            Entrez le prénom et le nom (optionnel) séparés par un espace
+          </p>
+        </FormField>
 
         <div class="flex justify-end gap-3 pt-4">
           <button
