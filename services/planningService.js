@@ -124,17 +124,35 @@ class PlanningService {
           if (absence.start_date > date || absence.end_date < date)
             return false;
 
-          // If slot specified, check slot coverage
+          // If slot specified, check slot coverage using proper logic
           if (slot) {
-            if (!absence.start_slot || !absence.end_slot) return true; // Full day absence
-            if (slot === "ouverture" && absence.start_slot === "ouverture")
+            const targetSlotOrder = { 'ouverture': 1, 'fermeture': 2 };
+            const targetSlot = targetSlotOrder[slot];
+
+            // Multi-day absence (covers all slots) - absence spans multiple days
+            if (absence.start_date < date && absence.end_date > date) {
               return true;
-            if (
-              slot === "fermeture" &&
-              (absence.end_slot === "fermeture" ||
-                absence.start_slot === "ouverture")
-            )
-              return true;
+            }
+
+            // Single day absence - check slot range coverage
+            if (absence.start_date === date && absence.end_date === date) {
+              const startSlotOrder = targetSlotOrder[absence.start_slot] || 1;
+              const endSlotOrder = targetSlotOrder[absence.end_slot] || 2;
+              return startSlotOrder <= targetSlot && endSlotOrder >= targetSlot;
+            }
+
+            // Absence starts on this date - check if slot is covered from start
+            if (absence.start_date === date && absence.end_date > date) {
+              const startSlotOrder = targetSlotOrder[absence.start_slot] || 1;
+              return startSlotOrder <= targetSlot;
+            }
+
+            // Absence ends on this date - check if slot is covered until end
+            if (absence.start_date < date && absence.end_date === date) {
+              const endSlotOrder = targetSlotOrder[absence.end_slot] || 2;
+              return endSlotOrder >= targetSlot;
+            }
+
             return false;
           }
           return true;
