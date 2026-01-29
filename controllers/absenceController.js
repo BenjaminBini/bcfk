@@ -6,10 +6,11 @@ class AbsenceController {
     this.auditService = auditService;
   }
 
-  // GET /api/absences
+  // GET /api/absences?fromDate=YYYY-MM-DD
   async getAbsences(req, res, next) {
     try {
-      const absences = await this.absenceService.getAbsences();
+      const { fromDate } = req.query;
+      const absences = await this.absenceService.getAbsences(fromDate);
       res.json(absences);
     } catch (error) {
       next(error);

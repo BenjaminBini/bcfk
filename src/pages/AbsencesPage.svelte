@@ -19,13 +19,28 @@
     await loadData();
   });
 
+  // Helper function to get Monday of the current week
+  function getCurrentWeekMonday() {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // If Sunday, go back 6 days
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - daysFromMonday);
+    // Format as YYYY-MM-DD
+    return monday.toISOString().split('T')[0];
+  }
+
   async function loadData() {
     isLoading = true;
     error = null;
     try {
+      // Get current week's Monday to filter absences
+      const currentWeekMonday = getCurrentWeekMonday();
+
       // Load both absences and members data
+      // Only load absences ending on or after current week's Monday
       const [absencesData] = await Promise.all([
-        absenceService.getAbsences(),
+        absenceService.getAbsences(currentWeekMonday),
         assignmentActions.loadData()
       ]);
       absences = absencesData;

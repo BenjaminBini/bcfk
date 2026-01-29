@@ -23,10 +23,14 @@ async function handleResponse(response) {
 
 export const absenceService = {
   /**
-   * Get all absences
+   * Get absences, optionally filtered by fromDate (only absences ending on or after this date)
+   * @param {string} fromDate - Optional date in YYYY-MM-DD format
    */
-  async getAbsences() {
-    const response = await fetch(`${API_BASE}/absences`);
+  async getAbsences(fromDate = null) {
+    const url = fromDate
+      ? `${API_BASE}/absences?fromDate=${encodeURIComponent(fromDate)}`
+      : `${API_BASE}/absences`;
+    const response = await fetch(url);
     return handleResponse(response);
   },
 
