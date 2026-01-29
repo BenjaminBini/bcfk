@@ -6,7 +6,6 @@
   import PageHeader from "../components/layout/PageHeader.svelte";
   import MemberAbsencePanel from "../components/absences/MemberAbsencePanel.svelte";
   import AbsenceFormModal from "../components/absences/AbsenceFormModal.svelte";
-  import SelectField from "../components/common/SelectField.svelte";
 
   let absences = $state([]);
   let allMembers = $state([]);
@@ -16,10 +15,6 @@
   let isModalOpen = $state(false);
   let selectedMember = $state(null);
 
-  // Filter and search state
-  let searchQuery = $state("");
-  let sortBy = $state("name"); // name, absenceCount
-  let showOnlyWithAbsences = $state(false);
 
   onMount(async () => {
     await loadData();
@@ -232,62 +227,6 @@
     }))
   );
 
-  // Filter and sort members
-  let filteredMembers = $derived(() => {
-    let filtered = membersWithAbsences;
-
-    // Apply search filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (member) =>
-          member.first_name.toLowerCase().includes(query) ||
-          (member.last_name && member.last_name.toLowerCase().includes(query))
-      );
-    }
-
-    // Filter by absence presence
-    if (showOnlyWithAbsences) {
-      filtered = filtered.filter((member) => member.absences.length > 0);
-    }
-
-    // Sort
-    if (sortBy === "name") {
-      filtered = [...filtered].sort((a, b) =>
-        a.first_name.localeCompare(b.first_name)
-      );
-    } else if (sortBy === "absenceCount") {
-      filtered = [...filtered].sort(
-        (a, b) => b.absences.length - a.absences.length
-      );
-    }
-
-    return filtered;
-  });
-
-  // Statistics
-  let stats = $derived(() => {
-    const totalAbsences = absences.length;
-    const membersWithAbsencesCount = membersWithAbsences.filter(
-      (m) => m.absences.length > 0
-    ).length;
-
-    // Count upcoming/current absences (today or future)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const upcomingAbsences = absences.filter((absence) => {
-      const endDate = new Date(absence.end_date);
-      endDate.setHours(0, 0, 0, 0);
-      return endDate >= today;
-    }).length;
-
-    return {
-      total: totalAbsences,
-      membersWithAbsences: membersWithAbsencesCount,
-      upcoming: upcomingAbsences,
-    };
-  });
-
   function handleGlobalAddAbsence() {
     selectedMember = null; // No pre-selection
     isModalOpen = true;
@@ -310,100 +249,6 @@
       </button>
     </div>
 
-    <!-- Statistics Cards -->
-    {#if !isLoading && !error}
-      <div class="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-3">
-        <!-- Total Absences -->
-        <div class="p-4 border shadow-lg bg-gradient-to-br rounded-xl from-slate-800/90 to-slate-900/90 border-slate-700/50">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-slate-400">Total d'absences</p>
-              <p class="text-2xl font-bold text-white">{stats().total}</p>
-            </div>
-            <div class="p-3 rounded-lg bg-blue-500/20">
-              <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <!-- Members with Absences -->
-        <div class="p-4 border shadow-lg bg-gradient-to-br rounded-xl from-slate-800/90 to-slate-900/90 border-slate-700/50">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-slate-400">Membres absents</p>
-              <p class="text-2xl font-bold text-white">{stats().membersWithAbsences}</p>
-            </div>
-            <div class="p-3 rounded-lg bg-purple-500/20">
-              <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <!-- Upcoming Absences -->
-        <div class="p-4 border shadow-lg bg-gradient-to-br rounded-xl from-slate-800/90 to-slate-900/90 border-slate-700/50">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-slate-400">En cours / à venir</p>
-              <p class="text-2xl font-bold text-white">{stats().upcoming}</p>
-            </div>
-            <div class="p-3 rounded-lg bg-amber-500/20">
-              <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Filters and Search -->
-      <div class="p-4 mb-6 border shadow-lg bg-gradient-to-br rounded-xl from-slate-800/90 to-slate-900/90 border-slate-700/50">
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <!-- Search -->
-          <div class="md:col-span-2">
-            <label for="search" class="block mb-2 text-sm font-medium text-slate-300">
-              Rechercher un membre
-            </label>
-            <input
-              id="search"
-              type="text"
-              bind:value={searchQuery}
-              placeholder="Nom du membre..."
-              class="w-full px-3 py-2 text-sm text-white transition-all duration-300 border rounded-lg bg-gradient-to-r from-slate-700/80 to-slate-600/80 border-slate-600/50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50"
-            />
-          </div>
-
-          <!-- Sort By -->
-          <div>
-            <label for="sortBy" class="block mb-2 text-sm font-medium text-slate-300">
-              Trier par
-            </label>
-            <SelectField id="sortBy" bind:value={sortBy}>
-              <option value="name">Nom</option>
-              <option value="absenceCount">Nombre d'absences</option>
-            </SelectField>
-          </div>
-        </div>
-
-        <!-- Filter Toggle -->
-        <div class="flex items-center mt-4">
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              bind:checked={showOnlyWithAbsences}
-              class="sr-only peer"
-            />
-            <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            <span class="ml-3 text-sm font-medium text-slate-300">
-              Afficher uniquement les membres avec absences
-            </span>
-          </label>
-        </div>
-      </div>
-    {/if}
 
     <!-- Content -->
     <div class="mt-4 md:mt-8">
@@ -425,32 +270,9 @@
         >
           <p class="text-slate-400">Aucun membre trouvé</p>
         </div>
-      {:else if filteredMembers().length === 0}
-        <div
-          class="p-12 text-center border shadow-xl bg-gradient-to-br rounded-2xl from-slate-800/50 to-slate-700/50 border-slate-600/50"
-        >
-          <p class="text-slate-400">
-            {#if searchQuery.trim()}
-              Aucun membre ne correspond à votre recherche
-            {:else}
-              Aucun membre avec absences enregistrées
-            {/if}
-          </p>
-          {#if showOnlyWithAbsences || searchQuery.trim()}
-            <button
-              onclick={() => {
-                searchQuery = "";
-                showOnlyWithAbsences = false;
-              }}
-              class="px-4 py-2 mt-4 text-sm font-medium text-white transition-colors duration-200 bg-blue-600 rounded-lg hover:bg-blue-500"
-            >
-              Réinitialiser les filtres
-            </button>
-          {/if}
-        </div>
       {:else}
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
-          {#each filteredMembers() as member (member.id)}
+          {#each membersWithAbsences as member (member.id)}
             <MemberAbsencePanel
               {member}
               absences={member.absences}
