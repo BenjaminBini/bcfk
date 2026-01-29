@@ -9,42 +9,52 @@
    * Modal component for absence form
    * @typedef {Object} Props
    * @property {boolean} isOpen - Whether modal is open
-   * @property {Object} member - The member to add absence for
+   * @property {Object} [member] - The member to add absence for (optional, for pre-selection)
+   * @property {Array} [members] - List of all members (required if member not pre-selected)
    * @property {boolean} [isSubmitting] - Whether form is submitting
    * @property {function} [onsubmit] - Callback for form submission
    * @property {function} [onclose] - Callback for modal close
    */
 
   /** @type {Props} */
-  let { isOpen, member, isSubmitting = false, onsubmit, onclose } = $props();
+  let { isOpen, member = null, members = [], isSubmitting = false, onsubmit, onclose } = $props();
 
   // Form state
   const today = new Date().toISOString().split('T')[0];
+  let selectedMemberId = $state(member?.id || '');
   let startDate = $state(today);
   let endDate = $state(today);
   let startSlot = $state('ouverture');
   let endSlot = $state('fermeture');
 
+  // Update selectedMemberId when member prop changes
+  $effect(() => {
+    if (member && member.id) {
+      selectedMemberId = member.id;
+    }
+  });
+
   function handleSubmit(event) {
     // Validate that we have the required data
-    if (!member || !member.id) {
+    if (!selectedMemberId) {
       return;
     }
-    
+
     if (!startDate || !endDate) {
       return;
     }
-    
+
     event.preventDefault();
-    
+
     onsubmit?.({
       detail: {
-        selectedMember: member.id,
+        selectedMember: selectedMemberId,
         startDate,
         endDate,
         startSlot,
         endSlot,
         resetForm: () => {
+          selectedMemberId = member?.id || '';
           startDate = today;
           endDate = today;
           startSlot = 'ouverture';
@@ -98,7 +108,11 @@
       <!-- Modal header -->
       <div class="flex items-center justify-between px-6 py-4 bg-gradient-to-r border-b backdrop-blur-sm border-slate-700/50 from-slate-800/80 to-slate-900/80">
         <h2 id="modal-title" class="text-lg font-medium text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-200">
-          Ajouter une Absence - {member.first_name} {member.last_name}
+          {#if member}
+            Ajouter une Absence - {member.first_name} {member.last_name}
+          {:else}
+            Ajouter une Absence
+          {/if}
         </h2>
         <button
           onclick={handleClose}
@@ -110,10 +124,25 @@
           </svg>
         </button>
       </div>
-      
+
       <!-- Modal body -->
       <div class="p-6">
         <form onsubmit={handleSubmit} class="space-y-4">
+          <!-- Member Selection (if not pre-selected) -->
+          {#if !member && members.length > 0}
+            <FormField label="Membre" id="memberId" required>
+              <SelectField
+                id="memberId"
+                bind:value={selectedMemberId}
+                required
+                placeholder="Sélectionner un membre..."
+              >
+                {#each members as m (m.id)}
+                  <option value={m.id}>{m.first_name} {m.last_name || ''}</option>
+                {/each}
+              </SelectField>
+            </FormField>
+          {/if}
           <!-- Start Date/Time Group -->
           <div class="p-3 rounded-lg bg-slate-700/30 border border-slate-600/30">
             <h5 class="mb-3 text-xs font-medium text-slate-300 uppercase tracking-wide">
