@@ -24,58 +24,40 @@
 
 <div
   data-testid="absence-item"
-  class="p-4 border rounded-lg bg-gradient-to-br backdrop-blur-sm from-slate-700/60 to-slate-600/60 border-slate-600/50"
+  class="p-2 border rounded-lg bg-gradient-to-br backdrop-blur-sm from-slate-700/60 to-slate-600/60 border-slate-600/50"
 >
-  <div class="flex items-center justify-between">
-    <div class="flex items-center space-x-3">
+  <div class="flex items-center justify-between gap-2">
+    <div class="flex items-center flex-1 min-w-0 space-x-2">
       {#if !hideMemberInfo}
         <Avatar firstName={absence.first_name} />
       {/if}
-      <div>
+      <div class="flex-1 min-w-0">
         {#if !hideMemberInfo}
-          <div class="text-sm font-medium text-slate-100">
+          <div class="text-xs font-medium truncate text-slate-100">
             {absence.member_name}
           </div>
         {/if}
         {#if formatPeriod(absence)}
           {@const period = formatPeriod(absence)}
-          <div
-            class="{hideMemberInfo
-              ? 'text-sm'
-              : 'text-xs'} flex flex-col items-end text-right"
-          >
-            <div class="flex flex-row items-center justify-end gap-2">
+          <div class="text-xs">
+            <div class="flex flex-row flex-wrap items-center gap-1">
               <span class="text-slate-400">{period.prefix}</span>
-              <span
-                class="font-semibold text-slate-100"
-                style="min-width: 10ch; display: inline-block; text-align: right;"
-                >{period.startDate}</span
-              >
-              <span
-                class="inline-block px-2 py-0.5 rounded bg-slate-600 text-xs text-amber-300 font-semibold align-middle {period.startSlot
-                  ? ''
-                  : 'invisible'}"
-              >
-                {period.startSlot ? period.startSlot : "ouverture"}
-              </span>
-            </div>
-            {#if period.endDate}
-              <div class="flex flex-row items-center justify-end gap-2 mt-1">
-                <span class="text-slate-400">au</span>
-                <span
-                  class="font-semibold text-slate-100"
-                  style="min-width: 10ch; display: inline-block; text-align: right;"
-                  >{period.endDate}</span
-                >
-                <span
-                  class="inline-block px-2 py-0.5 rounded bg-slate-600 text-xs text-amber-300 font-semibold align-middle {period.endSlot
-                    ? ''
-                    : 'invisible'}"
-                >
-                  {period.endSlot ? period.endSlot : "ouverture"}
+              <span class="font-semibold text-slate-100">{period.startDate}</span>
+              {#if period.startSlot}
+                <span class="inline-block px-1.5 py-0.5 rounded bg-slate-600 text-[10px] text-amber-300 font-semibold">
+                  {period.startSlot}
                 </span>
-              </div>
-            {/if}
+              {/if}
+              {#if period.endDate}
+                <span class="text-slate-400">au</span>
+                <span class="font-semibold text-slate-100">{period.endDate}</span>
+                {#if period.endSlot}
+                  <span class="inline-block px-1.5 py-0.5 rounded bg-slate-600 text-[10px] text-amber-300 font-semibold">
+                    {period.endSlot}
+                  </span>
+                {/if}
+              {/if}
+            </div>
           </div>
         {/if}
       </div>

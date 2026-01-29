@@ -219,11 +219,13 @@
     };
   }
 
-  // Group absences by member
+  // Group absences by member and sort chronologically (earliest first)
   let membersWithAbsences = $derived(
     allMembers.map((member) => ({
       ...member,
-      absences: absences.filter((absence) => absence.member_id === member.id),
+      absences: absences
+        .filter((absence) => absence.member_id === member.id)
+        .sort((a, b) => new Date(a.start_date) - new Date(b.start_date)),
     }))
   );
 
@@ -271,7 +273,7 @@
           <p class="text-slate-400">Aucun membre trouvé</p>
         </div>
       {:else}
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
+        <div class="grid grid-cols-1 gap-3 md:gap-4 lg:grid-cols-2 xl:grid-cols-3">
           {#each membersWithAbsences as member (member.id)}
             <MemberAbsencePanel
               {member}

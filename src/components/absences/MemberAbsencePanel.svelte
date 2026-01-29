@@ -40,26 +40,26 @@
 
 <div class="overflow-hidden bg-gradient-to-br rounded-2xl border shadow-2xl backdrop-blur-xl from-slate-800/90 via-slate-900/95 to-slate-800/90 border-slate-700/50">
   <!-- Panel header with member name and add button -->
-  <div class="flex items-center justify-between px-6 py-4 bg-gradient-to-r border-b backdrop-blur-sm border-slate-700/50 from-slate-800/80 to-slate-900/80">
-    <h3 class="text-lg font-medium text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-200">
+  <div class="flex items-center justify-between px-3 py-2 bg-gradient-to-r border-b backdrop-blur-sm border-slate-700/50 from-slate-800/80 to-slate-900/80 md:px-4 md:py-3">
+    <h3 class="text-base font-medium text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-200 md:text-lg">
       {member.first_name} {member.last_name}
     </h3>
     <button
       onclick={handleAddAbsence}
-      class="px-3 py-2 text-sm font-medium text-white transition-all duration-200 bg-gradient-to-r rounded-lg shadow-lg from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 hover:shadow-xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+      class="px-2 py-1.5 text-xs font-medium text-white transition-all duration-200 bg-gradient-to-r rounded-lg shadow-lg from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 hover:shadow-xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500/50 md:px-3 md:py-2 md:text-sm"
     >
       + Absence
     </button>
   </div>
-  
+
   <!-- Absences list for this member -->
-  <div class="p-4">
+  <div class="p-2 md:p-3">
     {#if absences.length === 0}
-      <div class="py-8 text-center">
-        <p class="text-slate-400">Aucune absence enregistrée</p>
+      <div class="py-6 text-center md:py-8">
+        <p class="text-sm text-slate-400">Aucune absence enregistrée</p>
       </div>
     {:else}
-      <div class="space-y-3">
+      <div class="space-y-1.5">
         {#each displayedAbsences as absence (absence.id)}
           <AbsenceCard
             {absence}
@@ -73,7 +73,7 @@
       {#if hasMoreAbsences}
         <button
           onclick={toggleExpanded}
-          class="w-full px-3 py-2 mt-3 text-sm font-medium transition-all duration-200 rounded-lg text-slate-300 bg-slate-700/50 hover:bg-slate-600/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+          class="w-full px-2 py-1.5 mt-2 text-xs font-medium transition-all duration-200 rounded-lg text-slate-300 bg-slate-700/50 hover:bg-slate-600/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 md:text-sm"
         >
           {#if isExpanded}
             Afficher moins
