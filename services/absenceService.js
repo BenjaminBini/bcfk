@@ -4,11 +4,21 @@ class AbsenceService {
   constructor(database) {
     this.db = database;
     // Convert callback-based methods to promise-based
-    this.getAllAbsences = promisify(this.db.getAllAbsences.bind(this.db));
+    // Note: getAllAbsences needs special handling due to optional parameter
     this.addAbsence = promisify(this.db.addAbsence.bind(this.db));
     this.deleteAbsence = promisify(this.db.deleteAbsence.bind(this.db));
     this.getAbsencesForDateRange = promisify(this.db.getAbsencesForDateRange.bind(this.db));
     this.isMemberAbsentForSlot = promisify(this.db.isMemberAbsentForSlot.bind(this.db));
+  }
+
+  // Custom promisified version of getAllAbsences to handle optional fromDate parameter
+  getAllAbsences(fromDate = null) {
+    return new Promise((resolve, reject) => {
+      this.db.getAllAbsences(fromDate, (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
   }
 
   async createAbsence(memberId, startDate, endDate, startSlot = 'ouverture', endSlot = 'fermeture') {
@@ -198,9 +208,9 @@ class AbsenceService {
     };
   }
 
-  async getAbsences() {
+  async getAbsences(fromDate = null) {
     try {
-      const absences = await this.getAllAbsences();
+      const absences = await this.getAllAbsences(fromDate);
       return absences;
     } catch (error) {
       throw new Error(`Failed to fetch absences: ${error.message}`);

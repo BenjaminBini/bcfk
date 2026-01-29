@@ -277,14 +277,29 @@ class Database {
   }
 
   // Absences methods
-  getAllAbsences(callback) {
-    this.db.all(`
+  getAllAbsences(fromDate = null, callback) {
+    // Handle case where fromDate is not provided (callback is second argument)
+    if (typeof fromDate === 'function') {
+      callback = fromDate;
+      fromDate = null;
+    }
+
+    let query = `
       SELECT a.*, m.first_name, m.last_name,
              (m.first_name || CASE WHEN m.last_name != "" THEN " " || m.last_name ELSE "" END) as member_name
       FROM absences a
       JOIN members m ON a.member_id = m.id
-      ORDER BY a.start_date DESC, m.first_name, m.last_name
-    `, callback);
+    `;
+
+    const params = [];
+    if (fromDate) {
+      query += ' WHERE a.end_date >= ?';
+      params.push(fromDate);
+    }
+
+    query += ' ORDER BY a.start_date DESC, m.first_name, m.last_name';
+
+    this.db.all(query, params, callback);
   }
 
   addAbsence(memberId, startDate, endDate, startSlot = 'ouverture', endSlot = 'fermeture', callback) {
