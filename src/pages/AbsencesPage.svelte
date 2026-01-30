@@ -278,7 +278,6 @@
             <MemberAbsencePanel
               {member}
               absences={member.absences}
-              {formatPeriod}
               onDelete={handleDelete}
               onaddabsence={handleAddAbsence}
             />
