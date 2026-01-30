@@ -6,6 +6,7 @@
   import PageHeader from "../components/layout/PageHeader.svelte";
   import MemberAbsencePanel from "../components/absences/MemberAbsencePanel.svelte";
   import AbsenceFormModal from "../components/absences/AbsenceFormModal.svelte";
+  import AbsenceLegend from "../components/absences/AbsenceLegend.svelte";
 
   let absences = $state([]);
   let allMembers = $state([]);
@@ -152,14 +153,12 @@
   }
 
   async function handleDelete(absenceId) {
-    if (confirm("Êtes-vous sûr de vouloir supprimer cette absence ?")) {
-      try {
-        await absenceService.deleteAbsence(absenceId);
-        await loadData(); // Reload data after deletion
-        showToast("Absence supprimée avec succès", "success");
-      } catch (err) {
-        showToast("Erreur lors de la suppression de l'absence", "error");
-      }
+    try {
+      await absenceService.deleteAbsence(absenceId);
+      await loadData(); // Reload data after deletion
+      showToast("Absence supprimée avec succès", "success");
+    } catch (err) {
+      showToast("Erreur lors de la suppression de l'absence", "error");
     }
   }
 
@@ -251,6 +250,9 @@
       </button>
     </div>
 
+
+    <!-- Legend -->
+    <AbsenceLegend />
 
     <!-- Content -->
     <div class="mt-4 md:mt-8">
