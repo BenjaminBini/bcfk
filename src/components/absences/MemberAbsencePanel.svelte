@@ -6,13 +6,12 @@
    * @typedef {Object} Props
    * @property {Object} member - Member object with id, first_name, last_name
    * @property {Array} absences - List of absences for this member
-   * @property {function} formatPeriod - Function to format date periods
    * @property {function} onDelete - Delete handler function
    * @property {function} [onaddabsence] - Callback for add absence action
    */
 
   /** @type {Props} */
-  let { member, absences, formatPeriod, onDelete, onaddabsence } = $props();
+  let { member, absences, onDelete, onaddabsence } = $props();
 
   function handleAddAbsence() {
     // Create a proper event-like object
@@ -38,5 +37,5 @@
   </div>
 
   <!-- Month-based list view -->
-  <MemberAbsenceMonthList {absences} {formatPeriod} {onDelete} />
+  <MemberAbsenceMonthList {absences} {onDelete} />
 </div>
