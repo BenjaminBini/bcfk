@@ -37,5 +37,5 @@
   </div>
 
   <!-- Month-based list view -->
-  <MemberAbsenceMonthList {absences} {onDelete} />
+  <MemberAbsenceMonthList {absences} memberName="{member.first_name} {member.last_name}" {onDelete} />
 </div>

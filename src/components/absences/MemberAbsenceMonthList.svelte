@@ -1,15 +1,24 @@
 <script>
-  import DeleteButton from '../common/DeleteButton.svelte';
+  import { getIcon } from '../../lib/icons.js';
+  import DeleteAbsenceModal from '../modals/DeleteAbsenceModal.svelte';
 
   /**
    * Month-based list component showing absences as inline tags grouped by month
    * @typedef {Object} Props
    * @property {Array} absences - List of absence objects with start_date, end_date, start_slot, end_slot
+   * @property {string} memberName - Name of the member for display in modal
    * @property {function} onDelete - Delete handler function
    */
 
   /** @type {Props} */
-  let { absences = [], onDelete } = $props();
+  let { absences = [], memberName = '', onDelete } = $props();
+
+  const sunIcon = getIcon('sun');
+  const moonIcon = getIcon('moon');
+
+  // Modal state
+  let showDeleteModal = $state(false);
+  let selectedAbsence = $state(null);
 
   /**
    * Split multi-month absences into separate periods per month
@@ -74,7 +83,7 @@
   }
 
   /**
-   * Format a period as inline text (e.g., "1", "du 8 au 12", "15 (ouverture)")
+   * Format a period as inline text with icon indicators
    */
   function formatPeriodTag(period) {
     const startDay = period.displayStartDate.getDate();
@@ -82,27 +91,46 @@
     const isSameDay = period.displayStartDate.getTime() === period.displayEndDate.getTime();
 
     let text = '';
-    let slotInfo = '';
+    let showOuvertureIcon = false;
+    let showFermetureIcon = false;
 
     if (isSameDay) {
       text = `${startDay}`;
-      // For single day, show slot only if it's not a full day
+      // For single day, show icon only if it's not a full day
       if (period.start_slot === 'ouverture' && period.end_slot === 'ouverture') {
-        slotInfo = 'ouverture';
+        showOuvertureIcon = true;
       } else if (period.start_slot === 'fermeture' && period.end_slot === 'fermeture') {
-        slotInfo = 'fermeture';
+        showFermetureIcon = true;
       }
     } else {
       text = `du ${startDay} au ${endDay}`;
-      // For multi-day within same month, show slot if not full range
+      // For multi-day within same month, show icon if not full range
       if (period.start_slot === 'fermeture') {
-        slotInfo = 'début fermeture';
+        showFermetureIcon = true;
       } else if (period.end_slot === 'ouverture') {
-        slotInfo = 'fin ouverture';
+        showOuvertureIcon = true;
       }
     }
 
-    return { text, slotInfo };
+    return { text, showOuvertureIcon, showFermetureIcon };
+  }
+
+  function handleTagClick(period) {
+    selectedAbsence = period;
+    showDeleteModal = true;
+  }
+
+  function handleConfirmDelete() {
+    if (selectedAbsence) {
+      onDelete(selectedAbsence.id);
+    }
+    showDeleteModal = false;
+    selectedAbsence = null;
+  }
+
+  function handleCancelDelete() {
+    showDeleteModal = false;
+    selectedAbsence = null;
   }
 
   let groupedAbsences = $derived(groupAbsencesByMonth(absences));
@@ -126,26 +154,25 @@
           <div class="flex flex-wrap gap-2 pl-3">
             {#each monthGroup.periods as period (period.id + '-' + period.monthKey)}
               {@const formatted = formatPeriodTag(period)}
-              <div class="group relative inline-flex items-center gap-1.5 px-3 py-1.5 text-xs md:text-sm rounded-lg bg-gradient-to-br from-slate-700/60 to-slate-600/60 border border-slate-600/40 hover:border-slate-500/60 transition-all duration-200 hover:shadow-lg">
+              <button
+                onclick={() => handleTagClick(period)}
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs md:text-sm rounded-lg bg-gradient-to-br from-slate-700/60 to-slate-600/60 border border-slate-600/40 hover:border-slate-500/60 transition-all duration-200 hover:shadow-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-500/50"
+                aria-label="Cliquer pour supprimer cette absence"
+              >
                 <span class="text-slate-100 font-medium whitespace-nowrap">
                   {formatted.text}
                 </span>
-                {#if formatted.slotInfo}
-                  <span class="text-[10px] md:text-xs text-amber-300/80 whitespace-nowrap">
-                    ({formatted.slotInfo})
-                  </span>
-                {/if}
-                <!-- Delete button - visible on hover -->
-                <button
-                  onclick={() => onDelete(period.id)}
-                  class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-1 p-0.5 rounded hover:bg-red-500/20 focus:outline-none focus:ring-1 focus:ring-red-500/50"
-                  aria-label="Supprimer cette absence"
-                >
-                  <svg class="w-3.5 h-3.5 text-red-400 hover:text-red-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                {#if formatted.showOuvertureIcon}
+                  <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-400" viewBox={sunIcon.viewBox} fill={sunIcon.fill}>
+                    <path d={sunIcon.path} />
                   </svg>
-                </button>
-              </div>
+                {/if}
+                {#if formatted.showFermetureIcon}
+                  <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-indigo-400" viewBox={moonIcon.viewBox} fill={moonIcon.fill}>
+                    <path d={moonIcon.path} />
+                  </svg>
+                {/if}
+              </button>
             {/each}
           </div>
         </div>
@@ -153,3 +180,12 @@
     </div>
   {/if}
 </div>
+
+<!-- Delete confirmation modal -->
+<DeleteAbsenceModal
+  isOpen={showDeleteModal}
+  {memberName}
+  periodText={selectedAbsence ? formatPeriodTag(selectedAbsence).text : ''}
+  onConfirm={handleConfirmDelete}
+  onCancel={handleCancelDelete}
+/>
