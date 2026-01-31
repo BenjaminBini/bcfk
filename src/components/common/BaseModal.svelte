@@ -144,30 +144,30 @@
       {#if children?.icon || children?.header || children?.content || children?.actions}
         {#if children?.icon || children?.header}
           <div class="flex items-center mb-4 space-x-3">
-            {#if children?.icon}
-              {@render children.icon?.()}
+            {#if children.icon}
+              {@render children.icon()}
             {/if}
-            {#if children?.header}
+            {#if children.header}
               <div class="flex-1">
-                {@render children.header?.()}
+                {@render children.header()}
               </div>
             {/if}
           </div>
         {/if}
 
-        {#if children?.content}
+        {#if children.content}
           <div class="mb-6">
-            {@render children.content?.()}
+            {@render children.content()}
           </div>
         {/if}
 
-        {#if children?.actions}
+        {#if children.actions}
           <div class="flex justify-end space-x-3">
-            {@render children.actions?.()}
+            {@render children.actions()}
           </div>
         {/if}
-      {:else}
-        {@render children?.()}
+      {:else if children}
+        {@render children()}
       {/if}
     </div>
   </div>
