@@ -22,7 +22,7 @@
   /**
    * Format the absence period for display
    */
-  function formatPeriod(absence) {
+  function getPeriodText() {
     if (!absence || !absence.displayStartDate || !absence.displayEndDate) {
       return '';
     }
@@ -37,8 +37,6 @@
       return `du ${startDay} au ${endDay}`;
     }
   }
-
-  let periodText = $derived(formatPeriod(absence));
 
   function handleConfirm() {
     onConfirm?.();
@@ -63,12 +61,18 @@
   {/snippet}
 
   {#snippet content()}
-    <p class="text-slate-200 text-sm">
-      Êtes-vous sûr de vouloir supprimer l'absence de <span class="font-semibold text-white">{memberName}</span> pour la période <span class="font-semibold text-white">{periodText}</span> ?
-    </p>
-    <p class="text-slate-400 text-xs mt-2">
-      Cette action est irréversible.
-    </p>
+    {#if absence}
+      <p class="text-slate-200 text-sm">
+        Êtes-vous sûr de vouloir supprimer l'absence de <span class="font-semibold text-white">{memberName}</span> pour la période <span class="font-semibold text-white">{getPeriodText()}</span> ?
+      </p>
+      <p class="text-slate-400 text-xs mt-2">
+        Cette action est irréversible.
+      </p>
+    {:else}
+      <p class="text-slate-200 text-sm">
+        Chargement...
+      </p>
+    {/if}
   {/snippet}
 
   {#snippet actions()}
