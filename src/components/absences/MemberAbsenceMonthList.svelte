@@ -20,6 +20,9 @@
   let showDeleteModal = $state(false);
   let selectedAbsence = $state(null);
 
+  // Hover state for highlighting related tags
+  let hoveredAbsenceId = $state(null);
+
   /**
    * Split multi-month absences into separate periods per month
    */
@@ -88,7 +91,12 @@
   function formatPeriodTag(period) {
     const startDay = period.displayStartDate.getDate();
     const endDay = period.displayEndDate.getDate();
-    const isSameDay = period.displayStartDate.getTime() === period.displayEndDate.getTime();
+    // Compare year, month, and day explicitly to avoid timezone issues
+    // (ISO date strings are parsed as UTC, but monthEnd is created in local time)
+    const isSameDay =
+      period.displayStartDate.getFullYear() === period.displayEndDate.getFullYear() &&
+      period.displayStartDate.getMonth() === period.displayEndDate.getMonth() &&
+      startDay === endDay;
 
     let text = '';
     let showOuvertureIcon = false;
@@ -112,7 +120,23 @@
       }
     }
 
-    return { text, showOuvertureIcon, showFermetureIcon };
+    // Check if this period is part of a multi-month absence
+    const originalStart = new Date(period.start_date);
+    const originalEnd = new Date(period.end_date);
+
+    // Continues from previous month if display start is after original start
+    const continuesFromPrevious =
+      period.displayStartDate.getFullYear() > originalStart.getFullYear() ||
+      (period.displayStartDate.getFullYear() === originalStart.getFullYear() &&
+       period.displayStartDate.getMonth() > originalStart.getMonth());
+
+    // Continues to next month if display end is before original end
+    const continuesToNext =
+      period.displayEndDate.getFullYear() < originalEnd.getFullYear() ||
+      (period.displayEndDate.getFullYear() === originalEnd.getFullYear() &&
+       period.displayEndDate.getMonth() < originalEnd.getMonth());
+
+    return { text, showOuvertureIcon, showFermetureIcon, continuesFromPrevious, continuesToNext };
   }
 
   function handleTagClick(period) {
@@ -154,14 +178,23 @@
           <div class="flex flex-wrap gap-2 pl-3">
             {#each monthGroup.periods as period (period.id + '-' + period.monthKey)}
               {@const formatted = formatPeriodTag(period)}
+              {@const isHighlighted = hoveredAbsenceId === period.id}
               <button
                 onclick={() => handleTagClick(period)}
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs md:text-sm rounded-lg bg-gradient-to-br from-slate-700/60 to-slate-600/60 border border-slate-600/40 hover:border-slate-500/60 transition-all duration-200 hover:shadow-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-500/50"
+                onmouseenter={() => hoveredAbsenceId = period.id}
+                onmouseleave={() => hoveredAbsenceId = null}
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs md:text-sm rounded-lg bg-gradient-to-br from-slate-700/60 to-slate-600/60 border transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-500/50 {isHighlighted ? 'border-blue-400/70 shadow-lg shadow-blue-500/20' : 'border-slate-600/40 hover:border-slate-500/60 hover:shadow-lg'}"
                 aria-label="Cliquer pour supprimer cette absence"
               >
+                {#if formatted.continuesFromPrevious}
+                  <span class="text-slate-400">…</span>
+                {/if}
                 <span class="text-slate-100 font-medium whitespace-nowrap">
                   {formatted.text}
                 </span>
+                {#if formatted.continuesToNext}
+                  <span class="text-slate-400">…</span>
+                {/if}
                 {#if formatted.showOuvertureIcon}
                   <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-400" viewBox={sunIcon.viewBox} fill={sunIcon.fill}>
                     <path d={sunIcon.path} />

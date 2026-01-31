@@ -19,23 +19,58 @@
     onCancel
   } = $props();
 
-  /**
-   * Format the absence period for display
-   */
-  function getPeriodText() {
-    if (!absence || !absence.displayStartDate || !absence.displayEndDate) {
-      return '';
-    }
+  const monthNames = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+                      'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 
-    const startDay = absence.displayStartDate.getDate();
-    const endDay = absence.displayEndDate.getDate();
-    const isSameDay = absence.displayStartDate.getTime() === absence.displayEndDate.getTime();
+  /**
+   * Format a date range for display
+   */
+  function formatDateRange(startDate, endDate) {
+    const startDay = startDate.getDate();
+    const endDay = endDate.getDate();
+    const startMonth = startDate.getMonth();
+    const endMonth = endDate.getMonth();
+    const startYear = startDate.getFullYear();
+    const endYear = endDate.getFullYear();
+
+    const isSameDay = startYear === endYear && startMonth === endMonth && startDay === endDay;
+    const isSameMonth = startYear === endYear && startMonth === endMonth;
+    const isSameYear = startYear === endYear;
 
     if (isSameDay) {
-      return `${startDay}`;
+      return `le ${startDay} ${monthNames[startMonth]} ${startYear}`;
+    } else if (isSameMonth) {
+      return `du ${startDay} au ${endDay} ${monthNames[startMonth]} ${startYear}`;
+    } else if (isSameYear) {
+      return `du ${startDay} ${monthNames[startMonth]} au ${endDay} ${monthNames[endMonth]} ${startYear}`;
     } else {
-      return `du ${startDay} au ${endDay}`;
+      return `du ${startDay} ${monthNames[startMonth]} ${startYear} au ${endDay} ${monthNames[endMonth]} ${endYear}`;
     }
+  }
+
+  /**
+   * Get the full original period text
+   */
+  function getFullPeriodText() {
+    if (!absence || !absence.start_date || !absence.end_date) {
+      return '';
+    }
+    const originalStart = new Date(absence.start_date);
+    const originalEnd = new Date(absence.end_date);
+    return formatDateRange(originalStart, originalEnd);
+  }
+
+  /**
+   * Check if the displayed period is part of a multi-month absence
+   */
+  function isMultiMonthAbsence() {
+    if (!absence || !absence.start_date || !absence.end_date) {
+      return false;
+    }
+    const originalStart = new Date(absence.start_date);
+    const originalEnd = new Date(absence.end_date);
+    return originalStart.getMonth() !== originalEnd.getMonth() ||
+           originalStart.getFullYear() !== originalEnd.getFullYear();
   }
 
   function handleConfirm() {
@@ -47,7 +82,7 @@
   }
 </script>
 
-<BaseModal {isOpen} onClose={handleCancel} variant="danger">
+<BaseModal {isOpen} onClose={handleCancel} variant="danger" usePortal={true}>
   {#snippet icon()}
     <div class="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center">
       <svg class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -63,8 +98,13 @@
   {#snippet content()}
     {#if absence}
       <p class="text-slate-200 text-sm">
-        Êtes-vous sûr de vouloir supprimer l'absence de <span class="font-semibold text-white">{memberName}</span> pour la période <span class="font-semibold text-white">{getPeriodText()}</span> ?
+        Êtes-vous sûr de vouloir supprimer l'absence de <span class="font-semibold text-white">{memberName}</span> <span class="font-semibold text-white">{getFullPeriodText()}</span> ?
       </p>
+      {#if isMultiMonthAbsence()}
+        <p class="text-amber-400 text-xs mt-2">
+          ⚠️ Cette absence s'étend sur plusieurs mois. La période entière sera supprimée.
+        </p>
+      {/if}
       <p class="text-slate-400 text-xs mt-2">
         Cette action est irréversible.
       </p>

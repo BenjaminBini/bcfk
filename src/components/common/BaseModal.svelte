@@ -24,6 +24,10 @@
     closeOnBackdrop = true,
     usePortal = false,
     children,
+    icon,
+    header,
+    content,
+    actions,
   } = $props();
 
   // Size configurations
@@ -141,29 +145,29 @@
         </div>
       {/if}
 
-      {#if children?.icon || children?.header || children?.content || children?.actions}
-        {#if children?.icon || children?.header}
+      {#if icon || header || content || actions}
+        {#if icon || header}
           <div class="flex items-center mb-4 space-x-3">
-            {#if children.icon}
-              {@render children.icon()}
+            {#if icon}
+              {@render icon()}
             {/if}
-            {#if children.header}
+            {#if header}
               <div class="flex-1">
-                {@render children.header()}
+                {@render header()}
               </div>
             {/if}
           </div>
         {/if}
 
-        {#if children.content}
+        {#if content}
           <div class="mb-6">
-            {@render children.content()}
+            {@render content()}
           </div>
         {/if}
 
-        {#if children.actions}
+        {#if actions}
           <div class="flex justify-end space-x-3">
-            {@render children.actions()}
+            {@render actions()}
           </div>
         {/if}
       {:else if children}

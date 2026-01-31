@@ -2,11 +2,11 @@
   import { fly, fade } from 'svelte/transition';
   import FormField from '../common/FormField.svelte';
   import SelectField from '../common/SelectField.svelte';
-  import DateField from '../common/DateField.svelte';
   import SubmitButton from '../common/SubmitButton.svelte';
+  import DateRangePicker from '../calendar/DateRangePicker.svelte';
 
   /**
-   * Modal component for absence form
+   * Modal component for absence form with date range picker
    * @typedef {Object} Props
    * @property {boolean} isOpen - Whether modal is open
    * @property {Object} [member] - The member to add absence for (optional, for pre-selection)
@@ -20,12 +20,8 @@
   let { isOpen, member = null, members = [], isSubmitting = false, onsubmit, onclose } = $props();
 
   // Form state
-  const today = new Date().toISOString().split('T')[0];
   let selectedMemberId = $state(member?.id || '');
-  let startDate = $state(today);
-  let endDate = $state(today);
-  let startSlot = $state('ouverture');
-  let endSlot = $state('fermeture');
+  let selection = $state(null);
 
   // Update selectedMemberId when member prop changes
   $effect(() => {
@@ -34,31 +30,32 @@
     }
   });
 
+  function handleSelectionChange(newSelection) {
+    selection = newSelection;
+  }
+
   function handleSubmit(event) {
+    event.preventDefault();
+
     // Validate that we have the required data
     if (!selectedMemberId) {
       return;
     }
 
-    if (!startDate || !endDate) {
+    if (!selection || !selection.startDate || !selection.endDate) {
       return;
     }
-
-    event.preventDefault();
 
     onsubmit?.({
       detail: {
         selectedMember: selectedMemberId,
-        startDate,
-        endDate,
-        startSlot,
-        endSlot,
+        startDate: selection.startDate,
+        endDate: selection.endDate,
+        startSlot: selection.startSlot,
+        endSlot: selection.endSlot,
         resetForm: () => {
           selectedMemberId = member?.id || '';
-          startDate = today;
-          endDate = today;
-          startSlot = 'ouverture';
-          endSlot = 'fermeture';
+          selection = null;
         }
       }
     });
@@ -69,30 +66,26 @@
   }
 
   function handleBackdropClick(event) {
-    // Only close if clicking directly on the backdrop, not on the modal content
     if (event.target === event.currentTarget) {
       handleClose();
     }
   }
 
-  // Reset end slot when start date changes
-  $effect(() => {
-    if (startDate && endDate && startDate === endDate) {
-      // Same day - validate slot logic
-      if (startSlot === 'fermeture' && endSlot === 'ouverture') {
-        endSlot = 'fermeture'; // Can't end before starting
-      }
-    }
-  });
+  // Check if form is valid
+  let isFormValid = $derived(
+    selectedMemberId &&
+    selection?.startDate &&
+    selection?.endDate
+  );
 </script>
 
 {#if isOpen}
   <!-- Modal backdrop -->
-  <div 
+  <div
     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
     transition:fade={{ duration: 200 }}
     onclick={handleBackdropClick}
-    onkeydown={(e) => e.key === 'Enter' && handleBackdropClick(e)}
+    onkeydown={(e) => e.key === 'Escape' && handleClose()}
     role="dialog"
     aria-modal="true"
     aria-labelledby="modal-title"
@@ -101,7 +94,7 @@
     <!-- Modal content -->
     <div
       data-testid="absence-form-modal"
-      class="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-gradient-to-br rounded-2xl border shadow-2xl backdrop-blur-xl from-slate-800/95 via-slate-900/98 to-slate-800/95 border-slate-700/50"
+      class="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-gradient-to-br rounded-2xl border shadow-2xl backdrop-blur-xl from-slate-800/95 via-slate-900/98 to-slate-800/95 border-slate-700/50"
       transition:fly={{ y: 20, duration: 300 }}
       role="document"
     >
@@ -127,7 +120,7 @@
 
       <!-- Modal body -->
       <div class="p-6">
-        <form onsubmit={handleSubmit} class="space-y-4">
+        <form onsubmit={handleSubmit} class="space-y-6">
           <!-- Member Selection (if not pre-selected) -->
           {#if !member && members.length > 0}
             <FormField label="Membre" id="memberId" required>
@@ -143,60 +136,12 @@
               </SelectField>
             </FormField>
           {/if}
-          <!-- Start Date/Time Group -->
-          <div class="p-3 rounded-lg bg-slate-700/30 border border-slate-600/30">
-            <h5 class="mb-3 text-xs font-medium text-slate-300 uppercase tracking-wide">
-              Début de l'absence
-            </h5>
-            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <FormField label="Date" id="startDate" required>
-                <DateField 
-                  id="startDate" 
-                  bind:value={startDate}
-                  required
-                />
-              </FormField>
-              <FormField label="À partir du créneau" id="startSlot">
-                <SelectField 
-                  id="startSlot" 
-                  bind:value={startSlot}
-                  required
-                >
-                  <option value="ouverture">Ouverture</option>
-                  <option value="fermeture">Fermeture</option>
-                </SelectField>
-              </FormField>
-            </div>
-          </div>
 
-          <!-- End Date/Time Group -->
-          <div class="p-3 rounded-lg bg-slate-700/30 border border-slate-600/30">
-            <h5 class="mb-3 text-xs font-medium text-slate-300 uppercase tracking-wide">
-              Fin de l'absence
-            </h5>
-            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <FormField label="Date" id="endDate" required>
-                <DateField 
-                  id="endDate" 
-                  bind:value={endDate}
-                  required
-                />
-              </FormField>
-              <FormField label="Jusqu'au créneau" id="endSlot">
-                <SelectField 
-                  id="endSlot" 
-                  bind:value={endSlot}
-                  required
-                >
-                  <option value="ouverture">Ouverture</option>
-                  <option value="fermeture">Fermeture</option>
-                </SelectField>
-              </FormField>
-            </div>
-          </div>
-          
+          <!-- Date Range Picker -->
+          <DateRangePicker onSelectionChange={handleSelectionChange} />
+
           <!-- Action buttons -->
-          <div class="flex gap-3 pt-4">
+          <div class="flex gap-3 pt-4 border-t border-slate-700/50">
             <button
               type="button"
               onclick={handleClose}
@@ -204,11 +149,11 @@
             >
               Annuler
             </button>
-            <SubmitButton 
+            <SubmitButton
               text="Ajouter l'absence"
               loadingText="Ajout en cours..."
-              {isSubmitting}
-              class="flex-1"
+              isLoading={isSubmitting}
+              disabled={!isFormValid}
             />
           </div>
         </form>
