@@ -5,7 +5,7 @@
    * @typedef {Object} Props
    * @property {boolean} [isOpen] - Whether modal is open
    * @property {string} [memberName] - Name of the member
-   * @property {string} [periodText] - Text description of the absence period
+   * @property {Object} [absence] - The absence object with date information
    * @property {function} [onConfirm] - Callback for confirm action
    * @property {function} [onCancel] - Callback for cancel action
    */
@@ -14,10 +14,31 @@
   let {
     isOpen = false,
     memberName = '',
-    periodText = '',
+    absence = null,
     onConfirm,
     onCancel
   } = $props();
+
+  /**
+   * Format the absence period for display
+   */
+  function formatPeriod(absence) {
+    if (!absence || !absence.displayStartDate || !absence.displayEndDate) {
+      return '';
+    }
+
+    const startDay = absence.displayStartDate.getDate();
+    const endDay = absence.displayEndDate.getDate();
+    const isSameDay = absence.displayStartDate.getTime() === absence.displayEndDate.getTime();
+
+    if (isSameDay) {
+      return `${startDay}`;
+    } else {
+      return `du ${startDay} au ${endDay}`;
+    }
+  }
+
+  let periodText = $derived(formatPeriod(absence));
 
   function handleConfirm() {
     onConfirm?.();

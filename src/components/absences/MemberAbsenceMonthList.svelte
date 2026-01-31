@@ -185,7 +185,7 @@
 <DeleteAbsenceModal
   isOpen={showDeleteModal}
   {memberName}
-  periodText={selectedAbsence ? formatPeriodTag(selectedAbsence).text : ''}
+  absence={selectedAbsence}
   onConfirm={handleConfirmDelete}
   onCancel={handleCancelDelete}
 />
