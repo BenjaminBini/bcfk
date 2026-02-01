@@ -238,10 +238,7 @@
   <div class="px-2 mx-auto max-w-7xl sm:px-4 md:px-6 lg:px-8">
     <!-- Page header with action button -->
     <div class="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
-      <PageHeader
-        title="Absences"
-        subtitle="Gérer les périodes d'absence des membres"
-      />
+      <PageHeader title="Absences" />
       <button
         onclick={handleGlobalAddAbsence}
         class="px-4 py-3 text-sm font-medium text-white transition-all duration-200 bg-gradient-to-r rounded-lg shadow-lg from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 hover:shadow-xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500/50 whitespace-nowrap"

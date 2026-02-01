@@ -87,36 +87,36 @@
 
   /**
    * Format a period as inline text with icon indicators
+   * - Moon icon after start date when starting at fermeture
+   * - Sun icon after end date when ending at ouverture
    */
   function formatPeriodTag(period) {
     const startDay = period.displayStartDate.getDate();
     const endDay = period.displayEndDate.getDate();
     // Compare year, month, and day explicitly to avoid timezone issues
-    // (ISO date strings are parsed as UTC, but monthEnd is created in local time)
     const isSameDay =
       period.displayStartDate.getFullYear() === period.displayEndDate.getFullYear() &&
       period.displayStartDate.getMonth() === period.displayEndDate.getMonth() &&
       startDay === endDay;
 
-    let text = '';
-    let showOuvertureIcon = false;
-    let showFermetureIcon = false;
+    let showStartFermetureIcon = false; // Moon after start day
+    let showEndOuvertureIcon = false;   // Sun after end day
 
     if (isSameDay) {
-      text = `${startDay}`;
-      // For single day, show icon only if it's not a full day
+      // For single day, show icon if it's only one slot
       if (period.start_slot === 'ouverture' && period.end_slot === 'ouverture') {
-        showOuvertureIcon = true;
+        showEndOuvertureIcon = true; // Only morning
       } else if (period.start_slot === 'fermeture' && period.end_slot === 'fermeture') {
-        showFermetureIcon = true;
+        showStartFermetureIcon = true; // Only evening
       }
     } else {
-      text = `du ${startDay} au ${endDay}`;
-      // For multi-day within same month, show icon if not full range
+      // For multi-day: show moon after start if starting at fermeture
       if (period.start_slot === 'fermeture') {
-        showFermetureIcon = true;
-      } else if (period.end_slot === 'ouverture') {
-        showOuvertureIcon = true;
+        showStartFermetureIcon = true;
+      }
+      // Show sun after end if ending at ouverture
+      if (period.end_slot === 'ouverture') {
+        showEndOuvertureIcon = true;
       }
     }
 
@@ -136,7 +136,7 @@
       (period.displayEndDate.getFullYear() === originalEnd.getFullYear() &&
        period.displayEndDate.getMonth() < originalEnd.getMonth());
 
-    return { text, showOuvertureIcon, showFermetureIcon, continuesFromPrevious, continuesToNext };
+    return { startDay, endDay, isSameDay, showStartFermetureIcon, showEndOuvertureIcon, continuesFromPrevious, continuesToNext };
   }
 
   function handleTagClick(period) {
@@ -183,27 +183,40 @@
                 onclick={() => handleTagClick(period)}
                 onmouseenter={() => hoveredAbsenceId = period.id}
                 onmouseleave={() => hoveredAbsenceId = null}
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs md:text-sm rounded-lg bg-gradient-to-br from-slate-700/60 to-slate-600/60 border transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-500/50 {isHighlighted ? 'border-blue-400/70 shadow-lg shadow-blue-500/20' : 'border-slate-600/40 hover:border-slate-500/60 hover:shadow-lg'}"
+                class="inline-flex items-center gap-1 px-3 py-1.5 text-xs md:text-sm rounded-lg bg-gradient-to-br from-slate-700/60 to-slate-600/60 border transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-500/50 {isHighlighted ? 'border-blue-400/70 shadow-lg shadow-blue-500/20' : 'border-slate-600/40 hover:border-slate-500/60 hover:shadow-lg'}"
                 aria-label="Cliquer pour supprimer cette absence"
               >
                 {#if formatted.continuesFromPrevious}
                   <span class="text-slate-400">…</span>
                 {/if}
-                <span class="text-slate-100 font-medium whitespace-nowrap">
-                  {formatted.text}
-                </span>
+                {#if formatted.isSameDay}
+                  <span class="text-slate-100 font-medium">{formatted.startDay}</span>
+                  {#if formatted.showStartFermetureIcon}
+                    <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-indigo-400" viewBox={moonIcon.viewBox} fill={moonIcon.fill}>
+                      <path d={moonIcon.path} />
+                    </svg>
+                  {/if}
+                  {#if formatted.showEndOuvertureIcon}
+                    <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-400" viewBox={sunIcon.viewBox} fill={sunIcon.fill}>
+                      <path d={sunIcon.path} />
+                    </svg>
+                  {/if}
+                {:else}
+                  <span class="text-slate-100 font-medium">du {formatted.startDay}</span>
+                  {#if formatted.showStartFermetureIcon}
+                    <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-indigo-400" viewBox={moonIcon.viewBox} fill={moonIcon.fill}>
+                      <path d={moonIcon.path} />
+                    </svg>
+                  {/if}
+                  <span class="text-slate-100 font-medium">au {formatted.endDay}</span>
+                  {#if formatted.showEndOuvertureIcon}
+                    <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-400" viewBox={sunIcon.viewBox} fill={sunIcon.fill}>
+                      <path d={sunIcon.path} />
+                    </svg>
+                  {/if}
+                {/if}
                 {#if formatted.continuesToNext}
                   <span class="text-slate-400">…</span>
-                {/if}
-                {#if formatted.showOuvertureIcon}
-                  <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-400" viewBox={sunIcon.viewBox} fill={sunIcon.fill}>
-                    <path d={sunIcon.path} />
-                  </svg>
-                {/if}
-                {#if formatted.showFermetureIcon}
-                  <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-indigo-400" viewBox={moonIcon.viewBox} fill={moonIcon.fill}>
-                    <path d={moonIcon.path} />
-                  </svg>
                 {/if}
               </button>
             {/each}
