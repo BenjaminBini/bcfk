@@ -86,6 +86,13 @@
   }
 
   /**
+   * Get short French weekday name
+   */
+  function getWeekdayShort(date) {
+    return date.toLocaleDateString('fr-FR', { weekday: 'short' }).replace('.', '');
+  }
+
+  /**
    * Format a period as inline text with icon indicators
    * - Moon icon after start date when starting at fermeture
    * - Sun icon after end date when ending at ouverture
@@ -93,6 +100,8 @@
   function formatPeriodTag(period) {
     const startDay = period.displayStartDate.getDate();
     const endDay = period.displayEndDate.getDate();
+    const startWeekday = getWeekdayShort(period.displayStartDate);
+    const endWeekday = getWeekdayShort(period.displayEndDate);
     // Compare year, month, and day explicitly to avoid timezone issues
     const isSameDay =
       period.displayStartDate.getFullYear() === period.displayEndDate.getFullYear() &&
@@ -136,7 +145,7 @@
       (period.displayEndDate.getFullYear() === originalEnd.getFullYear() &&
        period.displayEndDate.getMonth() < originalEnd.getMonth());
 
-    return { startDay, endDay, isSameDay, showStartFermetureIcon, showEndOuvertureIcon, continuesFromPrevious, continuesToNext };
+    return { startDay, endDay, startWeekday, endWeekday, isSameDay, showStartFermetureIcon, showEndOuvertureIcon, continuesFromPrevious, continuesToNext };
   }
 
   function handleTagClick(period) {
@@ -183,37 +192,60 @@
                 onclick={() => handleTagClick(period)}
                 onmouseenter={() => hoveredAbsenceId = period.id}
                 onmouseleave={() => hoveredAbsenceId = null}
-                class="inline-flex items-center gap-1 px-3 py-1.5 text-xs md:text-sm rounded-lg bg-gradient-to-br from-slate-700/60 to-slate-600/60 border transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-500/50 {isHighlighted ? 'border-blue-400/70 shadow-lg shadow-blue-500/20' : 'border-slate-600/40 hover:border-slate-500/60 hover:shadow-lg'}"
+                class="inline-flex items-center gap-1 px-3 pt-1.5 pb-1 text-xs md:text-sm rounded-lg bg-gradient-to-br from-slate-700/60 to-slate-600/60 border transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-500/50 {isHighlighted ? 'border-blue-400/70 shadow-lg shadow-blue-500/20' : 'border-slate-600/40 hover:border-slate-500/60 hover:shadow-lg'}"
                 aria-label="Cliquer pour supprimer cette absence"
               >
                 {#if formatted.continuesFromPrevious}
                   <span class="text-slate-400">…</span>
                 {/if}
                 {#if formatted.isSameDay}
-                  <span class="text-slate-100 font-medium">{formatted.startDay}</span>
-                  {#if formatted.showStartFermetureIcon}
-                    <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-indigo-400" viewBox={moonIcon.viewBox} fill={moonIcon.fill}>
-                      <path d={moonIcon.path} />
-                    </svg>
-                  {/if}
-                  {#if formatted.showEndOuvertureIcon}
-                    <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-400" viewBox={sunIcon.viewBox} fill={sunIcon.fill}>
-                      <path d={sunIcon.path} />
-                    </svg>
-                  {/if}
+                  <span class="flex flex-col items-center leading-none -space-y-1">
+                    <span class="text-[10px] text-slate-400">{formatted.startWeekday}</span>
+                    <span class="flex items-center gap-0.5">
+                      <span class="text-slate-100 font-semibold text-base md:text-lg">{formatted.startDay}</span>
+                      {#if formatted.showStartFermetureIcon}
+                        <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-indigo-400" viewBox={moonIcon.viewBox} fill={moonIcon.fill}>
+                          <path d={moonIcon.path} />
+                        </svg>
+                      {/if}
+                      {#if formatted.showEndOuvertureIcon}
+                        <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-400" viewBox={sunIcon.viewBox} fill={sunIcon.fill}>
+                          <path d={sunIcon.path} />
+                        </svg>
+                      {/if}
+                    </span>
+                  </span>
                 {:else}
-                  <span class="text-slate-100 font-medium">du {formatted.startDay}</span>
-                  {#if formatted.showStartFermetureIcon}
-                    <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-indigo-400" viewBox={moonIcon.viewBox} fill={moonIcon.fill}>
-                      <path d={moonIcon.path} />
-                    </svg>
-                  {/if}
-                  <span class="text-slate-100 font-medium">au {formatted.endDay}</span>
-                  {#if formatted.showEndOuvertureIcon}
-                    <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-400" viewBox={sunIcon.viewBox} fill={sunIcon.fill}>
-                      <path d={sunIcon.path} />
-                    </svg>
-                  {/if}
+                  <span class="flex flex-col items-center leading-none -space-y-1">
+                    <span class="text-[10px] invisible">.</span>
+                    <span class="text-slate-400 text-sm">du</span>
+                  </span>
+                  <span class="flex flex-col items-center leading-none -space-y-1 mx-0.5">
+                    <span class="text-[10px] text-slate-400">{formatted.startWeekday}</span>
+                    <span class="flex items-center gap-0.5">
+                      <span class="text-slate-100 font-semibold text-base md:text-lg">{formatted.startDay}</span>
+                      {#if formatted.showStartFermetureIcon}
+                        <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-indigo-400" viewBox={moonIcon.viewBox} fill={moonIcon.fill}>
+                          <path d={moonIcon.path} />
+                        </svg>
+                      {/if}
+                    </span>
+                  </span>
+                  <span class="flex flex-col items-center leading-none -space-y-1">
+                    <span class="text-[10px] invisible">.</span>
+                    <span class="text-slate-400 text-sm">au</span>
+                  </span>
+                  <span class="flex flex-col items-center leading-none -space-y-1 mx-0.5">
+                    <span class="text-[10px] text-slate-400">{formatted.endWeekday}</span>
+                    <span class="flex items-center gap-0.5">
+                      <span class="text-slate-100 font-semibold text-base md:text-lg">{formatted.endDay}</span>
+                      {#if formatted.showEndOuvertureIcon}
+                        <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-400" viewBox={sunIcon.viewBox} fill={sunIcon.fill}>
+                          <path d={sunIcon.path} />
+                        </svg>
+                      {/if}
+                    </span>
+                  </span>
                 {/if}
                 {#if formatted.continuesToNext}
                   <span class="text-slate-400">…</span>
