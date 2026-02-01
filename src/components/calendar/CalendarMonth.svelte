@@ -68,18 +68,18 @@
   let calendarDays = $derived(getCalendarDays());
 </script>
 
-<div class="flex flex-col gap-1">
+<div class="inline-flex flex-col">
   <!-- Day of week headers -->
-  <div class="grid grid-cols-7 gap-1 mb-1">
+  <div class="grid grid-cols-7">
     {#each dayLabels as label}
-      <div class="text-xs font-medium text-center text-slate-400 py-1">
+      <div class="w-8 text-[10px] font-medium text-center text-slate-400 py-0.5">
         {label}
       </div>
     {/each}
   </div>
 
   <!-- Calendar grid -->
-  <div class="grid grid-cols-7 gap-1">
+  <div class="grid grid-cols-7 gap-y-1">
     {#each calendarDays as dayInfo (dayInfo.date)}
       <CalendarDayCell
         day={dayInfo.day}

@@ -43,19 +43,19 @@
   let isSameYear = $derived(start.year === end.year);
 
   // For single day, compute slot value ('ouverture', 'fermeture', or 'both')
-  let singleDaySlot = $derived(() => {
+  function getSingleDaySlot() {
     if (!isSingleDay) return null;
     if (startSlot === 'ouverture' && endSlot === 'fermeture') return 'both';
     if (startSlot === endSlot) return startSlot;
     return 'both';
-  });
+  }
 </script>
 
 <div class="flex flex-wrap items-center justify-center gap-2 text-sm font-medium text-slate-200">
   {#if isSingleDay}
     <!-- Single day: slot selector + date -->
     <SlotSelector
-      value={singleDaySlot()}
+      value={getSingleDaySlot()}
       allowBoth={true}
       onChange={onSingleDaySlotChange}
     />

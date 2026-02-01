@@ -125,9 +125,9 @@
 
 <div class="flex flex-col gap-4">
   <!-- Calendars with headers -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+  <div class="flex flex-col md:flex-row justify-center gap-4 md:gap-10">
     <!-- First month -->
-    <div class="flex flex-col gap-2">
+    <div class="flex flex-col items-center gap-2">
       <div class="flex items-center justify-between">
         <button
           type="button"
@@ -151,7 +151,7 @@
     </div>
 
     <!-- Second month -->
-    <div class="flex flex-col gap-2">
+    <div class="flex flex-col items-center gap-2">
       <div class="flex items-center justify-between">
         <div class="w-7"></div>
         <span class="text-sm font-medium text-slate-200">{monthNames[secondMonth]} {secondYear}</span>
@@ -175,43 +175,45 @@
     </div>
   </div>
 
-  <!-- Selection controls -->
-  {#if selection.isSelectingEnd}
-    <div class="text-center text-sm text-slate-400">
-      Sélectionnez la fin de la période
-    </div>
-  {:else if selection.startDate && selection.endDate}
-    <div class="flex flex-col items-center gap-3 pt-2">
-      <!-- Summary with inline slot selectors -->
-      <SelectionSummary
-        startDate={selection.startDate}
-        endDate={selection.endDate}
-        startSlot={selection.startSlot}
-        endSlot={selection.endSlot}
-        onStartSlotChange={handleStartSlotChange}
-        onEndSlotChange={handleEndSlotChange}
-        onSingleDaySlotChange={handleSingleDaySlotChange}
-      />
+  <!-- Selection controls - fixed height to prevent modal resizing -->
+  <div class="h-20 flex flex-col items-center justify-center">
+    {#if selection.isSelectingEnd}
+      <div class="text-center text-sm text-slate-400">
+        Sélectionnez la fin de la période
+      </div>
+    {:else if selection.startDate && selection.endDate}
+      <div class="flex flex-col items-center gap-2">
+        <!-- Summary with inline slot selectors -->
+        <SelectionSummary
+          startDate={selection.startDate}
+          endDate={selection.endDate}
+          startSlot={selection.startSlot}
+          endSlot={selection.endSlot}
+          onStartSlotChange={handleStartSlotChange}
+          onEndSlotChange={handleEndSlotChange}
+          onSingleDaySlotChange={handleSingleDaySlotChange}
+        />
 
-      <!-- Legend -->
-      <div class="flex items-center justify-center gap-4 text-xs text-slate-500">
-        <div class="flex items-center gap-1">
-          <svg class="w-3 h-3 text-amber-400" viewBox={sunIcon.viewBox} fill={sunIcon.fill}>
-            <path d={sunIcon.path} />
-          </svg>
-          <span>Ouverture</span>
-        </div>
-        <div class="flex items-center gap-1">
-          <svg class="w-3 h-3 text-indigo-400" viewBox={moonIcon.viewBox} fill={moonIcon.fill}>
-            <path d={moonIcon.path} />
-          </svg>
-          <span>Fermeture</span>
+        <!-- Legend -->
+        <div class="flex items-center justify-center gap-4 text-xs text-slate-500">
+          <div class="flex items-center gap-1">
+            <svg class="w-3 h-3 text-amber-400" viewBox={sunIcon.viewBox} fill={sunIcon.fill}>
+              <path d={sunIcon.path} />
+            </svg>
+            <span>Ouverture</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <svg class="w-3 h-3 text-indigo-400" viewBox={moonIcon.viewBox} fill={moonIcon.fill}>
+              <path d={moonIcon.path} />
+            </svg>
+            <span>Fermeture</span>
+          </div>
         </div>
       </div>
-    </div>
-  {:else}
-    <div class="text-center text-sm text-slate-400">
-      Sélectionnez le début de la période
-    </div>
-  {/if}
+    {:else}
+      <div class="text-center text-sm text-slate-400">
+        Sélectionnez le début de la période
+      </div>
+    {/if}
+  </div>
 </div>

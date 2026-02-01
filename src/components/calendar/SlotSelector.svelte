@@ -29,13 +29,9 @@
   let isFermetureSelected = $derived(value === 'fermeture' || value === 'both');
 
   // For range mode: sliding indicator
-  let indicatorStyle = $derived(() => {
-    if (value === 'ouverture') {
-      return 'left: 0; width: 50%;';
-    } else {
-      return 'left: 50%; width: 50%;';
-    }
-  });
+  let indicatorStyle = $derived(
+    value === 'ouverture' ? 'left: 0; width: 50%;' : 'left: 50%; width: 50%;'
+  );
 </script>
 
 {#if allowBoth}
@@ -100,7 +96,7 @@
     <div class="absolute top-1 bottom-1 left-1.5 right-1.5 pointer-events-none">
       <div
         class="absolute top-0 bottom-0 rounded-md bg-gradient-to-r from-blue-500/30 to-blue-600/30 transition-all duration-300 ease-out"
-        style={indicatorStyle()}
+        style={indicatorStyle}
       ></div>
     </div>
 
