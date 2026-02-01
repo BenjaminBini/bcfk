@@ -102,10 +102,9 @@
 {#if isOpen}
   <div
     use:portal
-    class="fixed z-50 flex items-center justify-center backdrop-blur-sm {variantClasses[
+    class="fixed inset-0 z-[200] flex items-center justify-center py-4 backdrop-blur-sm {variantClasses[
       variant
     ].backdrop}"
-    style="top: 0; left: 0; right: 0; bottom: 0; margin: 0;"
     onclick={handleBackdropClick}
     onkeydown={(e) => e.key === "Enter" && handleBackdropClick(e)}
     role="dialog"
@@ -114,7 +113,7 @@
     transition:fade={{ duration: 200 }}
   >
     <div
-      class="w-full mx-4 rounded-2xl p-6 shadow-2xl border backdrop-blur-xl {sizeClasses[
+      class="w-full mx-4 rounded-2xl p-6 shadow-2xl border backdrop-blur-xl max-h-full overflow-y-auto {sizeClasses[
         size
       ]} {variantClasses[variant].modal}"
       role="document"

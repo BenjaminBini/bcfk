@@ -99,8 +99,8 @@
       role="document"
     >
       <!-- Modal header -->
-      <div class="flex items-center justify-between px-6 py-4 bg-gradient-to-r border-b backdrop-blur-sm border-slate-700/50 from-slate-800/80 to-slate-900/80">
-        <h2 id="modal-title" class="text-lg font-medium text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-200">
+      <div class="flex items-center justify-between px-4 py-2 bg-gradient-to-r border-b backdrop-blur-sm border-slate-700/50 from-slate-800/80 to-slate-900/80">
+        <h2 id="modal-title" class="text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-200">
           {#if member}
             Ajouter une Absence - {member.first_name} {member.last_name}
           {:else}
